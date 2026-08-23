@@ -12,6 +12,8 @@ import {
   mockLabReports,
   mockTimeline,
 } from "./mockData";
+import { ConsultationPayload, ClinicalSummaryOutput } from "@/types/consultation";
+import { runTriageEngine } from "./triageEngine";
 
 interface AppState {
   currentRole: AppRole;
@@ -29,12 +31,17 @@ interface AppState {
   encounters: Encounter[];
   labReports: LabReport[];
   timeline: TimeLineEntry[];
+  databaseReady: boolean;
+  loadPersistedState: () => Promise<void>;
 
   activeEncounter: Encounter | null;
   setActiveEncounter: (encounter: Encounter | null) => void;
 
   selfReportVitals: Vitals | null;
-  submitSelfReport: (vitals: Vitals) => void;
+  submitSelfReport: (vitals: Vitals) => Promise<void>;
+  recordIdentityVerification: (input: { method: "otp" | "national-id"; phone?: string; nationalId?: string }) => Promise<void>;
+  registerKiosk: (input: { name: string; age?: number; complaint: string; duration?: string; language: string; transcript?: string }) => Promise<string | null>;
+  submitLab: (input: { patientId: string; testName: string; results: LabReport["results"]; files?: { name: string; type?: string; size?: number }[] }) => Promise<void>;
 
   labQueue: {
     patientId: string;
@@ -57,9 +64,16 @@ interface AppState {
 
   encounterSubmitted: boolean;
   submitEncounter: () => void;
+  savePrescription: (input: { diagnosis: string; clinicalNotes: string; prescriptions: Prescription[] }) => Promise<void>;
+  completeTreatment: (input: { diagnosis: string; clinicalNotes: string; prescriptions: Prescription[] }) => Promise<void>;
+
+  consultationPayload: ConsultationPayload | null;
+  triageOutput: ClinicalSummaryOutput | null;
+  setConsultationPayload: (payload: ConsultationPayload) => void;
+  clearTriage: () => void;
 }
 
-export const useAppStore = create<AppState>((set) => ({
+export const useAppStore = create<AppState>((set, get) => ({
   currentRole: "patient-portal",
   setRole: (role) => set({ currentRole: role }),
 
@@ -69,12 +83,30 @@ export const useAppStore = create<AppState>((set) => ({
   setVerifiedPatientId: (id) => set({ verifiedPatientId: id }),
 
   selectedPatientId: "P001",
-  setSelectedPatientId: (id) => set({ selectedPatientId: id }),
+  setSelectedPatientId: (id) =>
+    set((state) => ({
+      selectedPatientId: id,
+      activeEncounter: state.encounters.find((encounter) => encounter.patientId === id && encounter.status === "Active") ?? null,
+    })),
 
   patients: mockPatients,
   encounters: mockEncounters,
   labReports: mockLabReports,
   timeline: mockTimeline,
+  databaseReady: false,
+  loadPersistedState: async () => {
+    try {
+      const response = await fetch("/api/state", { cache: "no-store" });
+      if (!response.ok) return;
+      const state = await response.json();
+      const activeEncounter = state.encounters.find(
+        (encounter: Encounter) => encounter.patientId === get().selectedPatientId && encounter.status === "Active",
+      ) ?? null;
+      set({ ...state, activeEncounter, databaseReady: true });
+    } catch {
+      // The mock state remains available when the API is not running.
+    }
+  },
 
   activeEncounter:
     mockEncounters.find(
@@ -83,11 +115,12 @@ export const useAppStore = create<AppState>((set) => ({
   setActiveEncounter: (encounter) => set({ activeEncounter: encounter }),
 
   selfReportVitals: null,
-  submitSelfReport: (vitals) =>
+  submitSelfReport: async (vitals) => {
+    const patientId = get().selectedPatientId;
     set((state) => {
       const newEntry: TimeLineEntry = {
         id: `TL-${Date.now()}`,
-        patientId: state.selectedPatientId,
+        patientId,
         date: new Date().toISOString().split("T")[0],
         type: "Self-Report",
         title: "Home Vitals Report",
@@ -97,7 +130,46 @@ export const useAppStore = create<AppState>((set) => ({
         selfReportVitals: vitals,
         timeline: [newEntry, ...state.timeline],
       };
-    }),
+    });
+    try {
+      await fetch("/api/self-report", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ patientId, vitals }),
+      });
+      await get().loadPersistedState();
+    } catch { /* retain the optimistic entry */ }
+  },
+
+  recordIdentityVerification: async (input) => {
+    const patientId = get().selectedPatientId;
+    try {
+      await fetch("/api/identity/verify", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...input, patientId }),
+      });
+    } catch { /* verification UI remains usable offline */ }
+  },
+
+  registerKiosk: async (input) => {
+    try {
+      const response = await fetch("/api/kiosk/register", {
+        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(input),
+      });
+      if (!response.ok) return null;
+      const result = await response.json();
+      await get().loadPersistedState();
+      return result.patientId as string;
+    } catch {
+      return null;
+    }
+  },
+  submitLab: async (input) => {
+    const response = await fetch("/api/labs", {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(input),
+    });
+    if (!response.ok) throw new Error((await response.json()).error ?? "Unable to save lab report");
+    await get().loadPersistedState();
+  },
 
   labQueue: [
     {
@@ -155,4 +227,31 @@ export const useAppStore = create<AppState>((set) => ({
 
   encounterSubmitted: false,
   submitEncounter: () => set({ encounterSubmitted: true }),
+  savePrescription: async (input) => {
+    const patientId = get().selectedPatientId;
+    const response = await fetch("/api/prescriptions/commit", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...input, patientId }),
+    });
+    if (!response.ok) throw new Error((await response.json()).error ?? "Unable to save prescription");
+    await get().loadPersistedState();
+  },
+  completeTreatment: async (input) => {
+    const patientId = get().selectedPatientId;
+    const response = await fetch("/api/treatments/complete", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...input, patientId }),
+    });
+    if (!response.ok) throw new Error((await response.json()).error ?? "Unable to complete treatment");
+    set({ encounterSubmitted: true });
+    await get().loadPersistedState();
+  },
+
+  consultationPayload: null,
+  triageOutput: null,
+  setConsultationPayload: (payload) => {
+    const output = runTriageEngine(payload);
+    set({ consultationPayload: payload, triageOutput: output });
+  },
+  clearTriage: () => set({ consultationPayload: null, triageOutput: null }),
 }));

@@ -3,22 +3,10 @@
 import { useState, useRef } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAppStore } from "@/lib/store";
 import { useToast } from "@/hooks/use-toast";
@@ -33,9 +21,6 @@ import {
   FileImage,
   X,
   Activity,
-  Play,
-  CheckCircle2,
-  RotateCcw,
 } from "lucide-react";
 
 const testTypes = [
@@ -66,27 +51,22 @@ const testTypes = [
   },
   {
     name: "X-Ray",
-    parameters: [{ name: "Finding", unit: "text", refRange: "N/A" }],
+    parameters: [
+      { name: "Finding", unit: "text", refRange: "N/A" },
+    ],
   },
 ];
 
 function getStatusColor(status: string) {
   switch (status) {
-    case "Waiting":
-      return "bg-amber-100 text-amber-700 border-amber-300";
-    case "In Progress":
-      return "bg-cyan-100 text-cyan-700 border-cyan-300";
-    case "Completed":
-      return "bg-emerald-100 text-emerald-700 border-emerald-300";
-    default:
-      return "bg-slate-100 text-slate-700 border-slate-300";
+    case "Waiting": return "bg-amber-100 text-amber-700 border-amber-300";
+    case "In Progress": return "bg-cyan-100 text-cyan-700 border-cyan-300";
+    case "Completed": return "bg-emerald-100 text-emerald-700 border-emerald-300";
+    default: return "bg-slate-100 text-slate-700 border-slate-300";
   }
 }
 
-function getResultStatus(
-  value: number,
-  refRange: string,
-): "Normal" | "High" | "Low" | "Critical" {
+function getResultStatus(value: number, refRange: string): "Normal" | "High" | "Low" | "Critical" {
   const cleaned = refRange.replace(/[<>\s]/g, "");
   if (cleaned === "N/A" || cleaned === "text") return "Normal";
   if (refRange.startsWith("<")) {
@@ -107,73 +87,31 @@ function getResultStatus(
 
 function getStatusBadge(status: string) {
   switch (status) {
-    case "High":
-      return (
-        <Badge className="bg-red-100 text-red-700 border-red-300 text-xs">
-          High
-        </Badge>
-      );
-    case "Low":
-      return (
-        <Badge className="bg-amber-100 text-amber-700 border-amber-300 text-xs">
-          Low
-        </Badge>
-      );
-    case "Critical":
-      return <Badge className="bg-red-600 text-white text-xs">Critical</Badge>;
-    default:
-      return (
-        <Badge className="bg-emerald-100 text-emerald-700 border-emerald-300 text-xs">
-          Normal
-        </Badge>
-      );
+    case "High": return <Badge className="bg-red-100 text-red-700 border-red-300 text-xs">High</Badge>;
+    case "Low": return <Badge className="bg-amber-100 text-amber-700 border-amber-300 text-xs">Low</Badge>;
+    case "Critical": return <Badge className="bg-red-600 text-white text-xs">Critical</Badge>;
+    default: return <Badge className="bg-emerald-100 text-emerald-700 border-emerald-300 text-xs">Normal</Badge>;
   }
 }
 
 export default function LabPortal() {
-  const {
-    labQueue,
-    selectedPatientId,
-    setSelectedPatientId,
-    updateLabQueueStatus,
-  } = useAppStore();
+  const { labQueue, selectedPatientId, setSelectedPatientId, submitLab } = useAppStore();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTest, setSelectedTest] = useState("");
-  const [parameterValues, setParameterValues] = useState<
-    Record<string, string>
-  >({});
-  const [uploadedFiles, setUploadedFiles] = useState<
-    { name: string; size: string; preview: string }[]
-  >([]);
+  const [parameterValues, setParameterValues] = useState<Record<string, string>>({});
+  const [uploadedFiles, setUploadedFiles] = useState<{ name: string; size: string; preview: string; type: string; bytes: number }[]>([]);
   const [submitting, setSubmitting] = useState(false);
 
   const filteredQueue = labQueue.filter(
     (q) =>
       q.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      q.hid.toLowerCase().includes(searchQuery.toLowerCase()),
+      q.hid.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const currentTest = testTypes.find((t) => t.name === selectedTest);
-  const waitingCount = labQueue.filter(
-    (item) => item.status === "Waiting",
-  ).length;
-  const inProgressCount = labQueue.filter(
-    (item) => item.status === "In Progress",
-  ).length;
-  const completedCount = labQueue.filter(
-    (item) => item.status === "Completed",
-  ).length;
-
-  const handleQueueStatus = (patientId: string, status: string) => {
-    updateLabQueueStatus(patientId, status);
-    toast({
-      title: "Queue Updated",
-      description: `Patient moved to ${status}.`,
-    });
-  };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -182,34 +120,38 @@ export default function LabPortal() {
       name: f.name,
       size: (f.size / 1024).toFixed(1) + " KB",
       preview: URL.createObjectURL(f),
+      type: f.type,
+      bytes: f.size,
     }));
     setUploadedFiles((prev) => [...prev, ...newFiles]);
-    toast({
-      title: "Files Uploaded",
-      description: `${files.length} file(s) ready for submission.`,
-    });
+    toast({ title: "Files Uploaded", description: `${files.length} file(s) ready for submission.` });
   };
 
   const removeFile = (index: number) => {
     setUploadedFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!selectedTest) {
       toast({ title: "Select Test Type", variant: "destructive" });
       return;
     }
     setSubmitting(true);
-    setTimeout(() => {
-      setSubmitting(false);
-      toast({
-        title: "Results Submitted ✓",
-        description: "Lab results sent to active doctor session.",
+    try {
+      const results = (currentTest?.parameters ?? []).filter((param) => parameterValues[param.name]).map((param) => {
+        const value = Number(parameterValues[param.name]);
+        return { testName: param.name, value, unit: param.unit, referenceRange: param.refRange, status: getResultStatus(value, param.refRange) };
       });
+      await submitLab({ patientId: selectedPatientId, testName: selectedTest, results, files: uploadedFiles.map((file) => ({ name: file.name, type: file.type, size: file.bytes })) });
+      setSubmitting(false);
+      toast({ title: "Results Submitted ✓", description: "Lab results sent to active doctor session." });
       setSelectedTest("");
       setParameterValues({});
       setUploadedFiles([]);
-    }, 1500);
+    } catch (error) {
+      setSubmitting(false);
+      toast({ title: "Submission failed", description: error instanceof Error ? error.message : "Unable to save lab results.", variant: "destructive" });
+    }
   };
 
   return (
@@ -234,42 +176,9 @@ export default function LabPortal() {
                 <Activity className="h-4 w-4 text-cyan-600" />
                 Active Patient Queue
               </CardTitle>
-              <CardDescription>
-                Search patients by name or Unique Health ID
-              </CardDescription>
+              <CardDescription>Search patients by name or Unique Health ID</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="mb-4 grid grid-cols-3 gap-2">
-                {[
-                  {
-                    label: "Waiting",
-                    value: waitingCount,
-                    tone: "border-amber-300 bg-amber-50 text-amber-800",
-                  },
-                  {
-                    label: "In Progress",
-                    value: inProgressCount,
-                    tone: "border-cyan-300 bg-cyan-50 text-cyan-800",
-                  },
-                  {
-                    label: "Completed",
-                    value: completedCount,
-                    tone: "border-emerald-300 bg-emerald-50 text-emerald-800",
-                  },
-                ].map((summary) => (
-                  <div
-                    key={summary.label}
-                    className={`border p-2.5 ${summary.tone}`}
-                  >
-                    <div className="text-lg font-bold leading-none">
-                      {summary.value}
-                    </div>
-                    <div className="mt-1 text-[10px] font-semibold uppercase tracking-wide">
-                      {summary.label}
-                    </div>
-                  </div>
-                ))}
-              </div>
               <div className="relative mb-4">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                 <Input
@@ -284,7 +193,7 @@ export default function LabPortal() {
                 {filteredQueue.map((patient) => (
                   <div
                     key={patient.patientId}
-                    className={`data-strip flex items-center justify-between rounded-sm p-3 cursor-pointer ${
+                    className={`flex items-center justify-between rounded-lg border p-3 transition-colors cursor-pointer ${
                       selectedPatientId === patient.patientId
                         ? "border-cyan-300 bg-cyan-50"
                         : "border-slate-100 hover:border-slate-200 hover:bg-slate-50"
@@ -292,16 +201,12 @@ export default function LabPortal() {
                     onClick={() => setSelectedPatientId(patient.patientId)}
                   >
                     <div className="flex items-center gap-3">
-                      <div className="icon-mark h-10 w-10 bg-[#dceff2] text-sm font-bold text-[#0f766e]">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-sm font-bold text-slate-600">
                         {patient.name.charAt(0)}
                       </div>
                       <div>
-                        <div className="text-sm font-medium text-slate-800">
-                          {patient.name}
-                        </div>
-                        <div className="text-xs text-slate-400 font-mono">
-                          {patient.hid}
-                        </div>
+                        <div className="text-sm font-medium text-slate-800">{patient.name}</div>
+                        <div className="text-xs text-slate-400 font-mono">{patient.hid}</div>
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
@@ -309,59 +214,9 @@ export default function LabPortal() {
                         <Clock className="h-3 w-3" />
                         {patient.waitTime}
                       </div>
-                      <Badge
-                        variant="outline"
-                        className={`text-xs ${getStatusColor(patient.status)}`}
-                      >
+                      <Badge variant="outline" className={`text-xs ${getStatusColor(patient.status)}`}>
                         {patient.status}
                       </Badge>
-                      <div
-                        className="flex gap-1"
-                        onClick={(event) => event.stopPropagation()}
-                      >
-                        {patient.status === "Waiting" && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="h-8 px-2 text-cyan-700"
-                            aria-label={`Start processing ${patient.name}`}
-                            onClick={() =>
-                              handleQueueStatus(
-                                patient.patientId,
-                                "In Progress",
-                              )
-                            }
-                          >
-                            <Play className="h-3.5 w-3.5" />
-                          </Button>
-                        )}
-                        {patient.status === "In Progress" && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="h-8 px-2 text-emerald-700"
-                            aria-label={`Mark ${patient.name} complete`}
-                            onClick={() =>
-                              handleQueueStatus(patient.patientId, "Completed")
-                            }
-                          >
-                            <CheckCircle2 className="h-3.5 w-3.5" />
-                          </Button>
-                        )}
-                        {patient.status === "Completed" && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="h-8 px-2 text-amber-700"
-                            aria-label={`Return ${patient.name} to waiting`}
-                            onClick={() =>
-                              handleQueueStatus(patient.patientId, "Waiting")
-                            }
-                          >
-                            <RotateCcw className="h-3.5 w-3.5" />
-                          </Button>
-                        )}
-                      </div>
                     </div>
                   </div>
                 ))}
@@ -378,29 +233,19 @@ export default function LabPortal() {
                 <FlaskConical className="h-4 w-4 text-violet-600" />
                 Test Entry
               </CardTitle>
-              <CardDescription>
-                Select test type and enter numeric parameters
-              </CardDescription>
+              <CardDescription>Select test type and enter numeric parameters</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               {/* Test Type Selector */}
               <div className="space-y-1.5">
                 <Label className="text-xs">Test Type</Label>
-                <Select
-                  value={selectedTest}
-                  onValueChange={(val) => {
-                    setSelectedTest(val);
-                    setParameterValues({});
-                  }}
-                >
+                <Select value={selectedTest} onValueChange={(val) => { setSelectedTest(val); setParameterValues({}); }}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select a test type..." />
                   </SelectTrigger>
                   <SelectContent>
                     {testTypes.map((test) => (
-                      <SelectItem key={test.name} value={test.name}>
-                        {test.name}
-                      </SelectItem>
+                      <SelectItem key={test.name} value={test.name}>{test.name}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -408,38 +253,28 @@ export default function LabPortal() {
 
               {/* Parameter Inputs */}
               {currentTest && (
-                <div className="rounded-sm border border-slate-300 bg-slate-50 p-4 space-y-3">
+                <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 space-y-3">
                   <div className="flex items-center gap-2 text-xs font-semibold text-slate-600 mb-2">
                     <AlertTriangle className="h-3.5 w-3.5 text-amber-500" />
                     Reference ranges shown for guidance
                   </div>
                   {currentTest.parameters.map((param) => {
                     const val = parseFloat(parameterValues[param.name] || "0");
-                    const status =
-                      val > 0 ? getResultStatus(val, param.refRange) : "Normal";
+                    const status = val > 0 ? getResultStatus(val, param.refRange) : "Normal";
                     return (
                       <div key={param.name} className="flex items-center gap-3">
                         <div className="flex-1">
-                          <Label className="text-xs text-slate-500">
-                            {param.name}
-                          </Label>
+                          <Label className="text-xs text-slate-500">{param.name}</Label>
                           <div className="flex items-center gap-1 mt-0.5">
                             <Input
                               type="number"
                               step="0.1"
                               placeholder="0"
                               value={parameterValues[param.name] || ""}
-                              onChange={(e) =>
-                                setParameterValues((prev) => ({
-                                  ...prev,
-                                  [param.name]: e.target.value,
-                                }))
-                              }
+                              onChange={(e) => setParameterValues((prev) => ({ ...prev, [param.name]: e.target.value }))}
                               className="h-9"
                             />
-                            <span className="text-xs text-slate-400 whitespace-nowrap">
-                              {param.unit}
-                            </span>
+                            <span className="text-xs text-slate-400 whitespace-nowrap">{param.unit}</span>
                           </div>
                         </div>
                         <div className="text-xs text-slate-400 whitespace-nowrap">
@@ -456,16 +291,12 @@ export default function LabPortal() {
               <div className="space-y-1.5">
                 <Label className="text-xs">Diagnostic Files (PDF/Images)</Label>
                 <div
-                  className="flex flex-col items-center justify-center rounded-sm border-2 border-dashed border-slate-300 bg-slate-50 p-8 text-center hover:border-cyan-500 hover:bg-cyan-50 transition-colors cursor-pointer"
+                  className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-slate-300 bg-slate-50 p-8 text-center hover:border-cyan-400 hover:bg-cyan-50/50 transition-colors cursor-pointer"
                   onClick={() => fileInputRef.current?.click()}
                 >
                   <Upload className="h-8 w-8 text-slate-400 mb-2" />
-                  <p className="text-sm text-slate-500">
-                    Drop files here or click to upload
-                  </p>
-                  <p className="text-xs text-slate-400 mt-1">
-                    PDF, JPG, PNG up to 10MB
-                  </p>
+                  <p className="text-sm text-slate-500">Drop files here or click to upload</p>
+                  <p className="text-xs text-slate-400 mt-1">PDF, JPG, PNG up to 10MB</p>
                 </div>
                 <input
                   ref={fileInputRef}
@@ -481,24 +312,13 @@ export default function LabPortal() {
               {uploadedFiles.length > 0 && (
                 <div className="space-y-2">
                   {uploadedFiles.map((file, i) => (
-                    <div
-                      key={i}
-                      className="flex items-center justify-between rounded-sm border border-slate-300 bg-white p-2"
-                    >
+                    <div key={i} className="flex items-center justify-between rounded-lg border border-slate-200 bg-white p-2">
                       <div className="flex items-center gap-2">
                         <FileImage className="h-4 w-4 text-cyan-600" />
-                        <span className="text-sm text-slate-700">
-                          {file.name}
-                        </span>
-                        <span className="text-xs text-slate-400">
-                          {file.size}
-                        </span>
+                        <span className="text-sm text-slate-700">{file.name}</span>
+                        <span className="text-xs text-slate-400">{file.size}</span>
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => removeFile(i)}
-                      >
+                      <Button variant="ghost" size="sm" onClick={() => removeFile(i)}>
                         <X className="h-3.5 w-3.5 text-slate-400" />
                       </Button>
                     </div>

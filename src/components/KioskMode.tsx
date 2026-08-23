@@ -9,7 +9,15 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { kioskTranslations } from "@/lib/mockData";
-import { Mic, MicOff, Globe, User, CheckCircle2, Volume2 } from "lucide-react";
+import { useAppStore } from "@/lib/store";
+import {
+  Mic,
+  MicOff,
+  Globe,
+  User,
+  CheckCircle2,
+  Volume2,
+} from "lucide-react";
 
 const languages = [
   { code: "en", label: "English", flag: "🇬🇧" },
@@ -19,6 +27,7 @@ const languages = [
 
 export default function KioskMode() {
   const { toast } = useToast();
+  const registerKiosk = useAppStore((state) => state.registerKiosk);
   const [language, setLanguage] = useState("en");
   const [isRecording, setIsRecording] = useState(false);
   const [transcript, setTranscript] = useState("");
@@ -36,8 +45,8 @@ export default function KioskMode() {
       language === "hi"
         ? "मेरा नाम राजेश कुमार है। मैं 58 वर्ष का हूँ। मुझे पिछले तीन दिनों से सिरदर्द हो रहा है।"
         : language === "bn"
-          ? "আমার নাম রাজেশ কুমার। আমি ৫৮ বছর বয়সী। গত তিন দিন ধরে মাথাব্যথা হচ্ছে।"
-          : "My name is Rajesh Kumar. I am 58 years old. I have been having headaches for the past three days.",
+        ? "আমার নাম রাজেশ কুমার। আমি ৫৮ বছর বয়সী। গত তিন দিন ধরে মাথাব্যথা হচ্ছে।"
+        : "My name is Rajesh Kumar. I am 58 years old. I have been having headaches for the past three days.",
     ];
     return sampleTexts[0];
   }, [language]);
@@ -57,36 +66,17 @@ export default function KioskMode() {
         currentIndex++;
 
         // Auto-populate form fields based on transcript keywords
-        const accumulated = words
-          .slice(0, currentIndex)
-          .join(" ")
-          .toLowerCase();
-        if (
-          accumulated.includes("name") ||
-          accumulated.includes("नाम") ||
-          accumulated.includes("নাম")
-        ) {
+        const accumulated = words.slice(0, currentIndex).join(" ").toLowerCase();
+        if (accumulated.includes("name") || accumulated.includes("नाम") || accumulated.includes("নাম")) {
           if (accumulated.includes("rajesh")) setFormName("Rajesh Kumar");
         }
-        if (
-          accumulated.includes("58") ||
-          accumulated.includes("वर्ष") ||
-          accumulated.includes("বছর")
-        ) {
+        if (accumulated.includes("58") || accumulated.includes("वर्ष") || accumulated.includes("বছর")) {
           setFormAge("58");
         }
-        if (
-          accumulated.includes("headache") ||
-          accumulated.includes("सिरदर्द") ||
-          accumulated.includes("মাথাব্যথা")
-        ) {
+        if (accumulated.includes("headache") || accumulated.includes("सिरदर्द") || accumulated.includes("মাথাব্যথা")) {
           setFormComplaint("Recurring Headache");
         }
-        if (
-          accumulated.includes("three days") ||
-          accumulated.includes("तीन दिन") ||
-          accumulated.includes("তিন দিন")
-        ) {
+        if (accumulated.includes("three days") || accumulated.includes("तीन दिन") || accumulated.includes("তিন দিন")) {
           setFormDuration("3 Days");
         }
       } else {
@@ -106,59 +96,42 @@ export default function KioskMode() {
     setIsRecording(false);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!formName || !formComplaint) {
       toast({ title: "Please fill required fields", variant: "destructive" });
       return;
     }
-    setSubmitted(true);
-    toast({
-      title: "Registration Complete ✓",
-      description: `${formName} has been registered successfully.`,
+    const patientId = await registerKiosk({
+      name: formName, age: formAge ? Number(formAge) : undefined, complaint: formComplaint,
+      duration: formDuration, language, transcript,
     });
+    if (!patientId) {
+      toast({ title: "Registration failed", description: "The registration could not be saved.", variant: "destructive" });
+      return;
+    }
+    setSubmitted(true);
+    toast({ title: "Registration Complete ✓", description: `${formName} has been registered successfully.` });
   };
 
   if (submitted) {
     return (
-      <div className="flex min-h-[calc(100vh-56px)] items-center justify-center bg-background p-8">
+      <div className="flex min-h-[calc(100vh-56px)] items-center justify-center bg-gradient-to-br from-emerald-50 via-white to-cyan-50 p-8">
         <div className="text-center space-y-6">
           <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-emerald-100">
             <CheckCircle2 className="h-12 w-12 text-emerald-600" />
           </div>
           <div>
-            <h2 className="text-3xl font-bold text-slate-800">
-              {language === "hi"
-                ? "पंजीकरण सफल!"
-                : language === "bn"
-                  ? "নিবন্ধন সফল!"
-                  : "Registration Successful!"}
-            </h2>
+            <h2 className="text-3xl font-bold text-slate-800">{language === "hi" ? "पंजीकरण सफल!" : language === "bn" ? "নিবন্ধন সফল!" : "Registration Successful!"}</h2>
             <p className="mt-2 text-lg text-slate-500">
-              {language === "hi"
-                ? "कृपया प्रतीक्षा कक्ष में प्रतीक्षा करें"
-                : language === "bn"
-                  ? "অনুগ্রহ করে অপেক্ষা কক্ষে অপেক্ষা করুন"
-                  : "Please wait in the waiting area"}
+              {language === "hi" ? "कृपया प्रतीक्षा कक्ष में प्रतीक्षा करें" : language === "bn" ? "অনুগ্রহ করে অপেক্ষা কক্ষে অপেক্ষা করুন" : "Please wait in the waiting area"}
             </p>
           </div>
-          <div className="rounded-md border border-slate-300 bg-white p-6 text-left shadow-sm">
+          <div className="rounded-xl border border-slate-200 bg-white p-6 text-left shadow-sm">
             <div className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-slate-400">Name:</span>
-                <span className="font-medium">{formName}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-400">Age:</span>
-                <span className="font-medium">{formAge}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-400">Complaint:</span>
-                <span className="font-medium">{formComplaint}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-400">Duration:</span>
-                <span className="font-medium">{formDuration}</span>
-              </div>
+              <div className="flex justify-between"><span className="text-slate-400">Name:</span><span className="font-medium">{formName}</span></div>
+              <div className="flex justify-between"><span className="text-slate-400">Age:</span><span className="font-medium">{formAge}</span></div>
+              <div className="flex justify-between"><span className="text-slate-400">Complaint:</span><span className="font-medium">{formComplaint}</span></div>
+              <div className="flex justify-between"><span className="text-slate-400">Duration:</span><span className="font-medium">{formDuration}</span></div>
             </div>
           </div>
           <Button
@@ -166,11 +139,7 @@ export default function KioskMode() {
             size="lg"
             onClick={() => {
               setSubmitted(false);
-              setFormName("");
-              setFormAge("");
-              setFormComplaint("");
-              setFormDuration("");
-              setTranscript("");
+              setFormName(""); setFormAge(""); setFormComplaint(""); setFormDuration(""); setTranscript("");
             }}
           >
             Register Another Patient
@@ -181,15 +150,13 @@ export default function KioskMode() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-56px)] bg-background">
+    <div className="min-h-[calc(100vh-56px)] bg-gradient-to-br from-slate-50 via-white to-cyan-50">
       <div className="mx-auto max-w-6xl p-6">
         {/* Language Selector */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2">
             <Globe className="h-5 w-5 text-cyan-600" />
-            <span className="text-sm font-medium text-slate-600">
-              {t.selectLanguage}
-            </span>
+            <span className="text-sm font-medium text-slate-600">{t.selectLanguage}</span>
           </div>
           <div className="flex gap-2">
             {languages.map((lang) => (
@@ -222,10 +189,7 @@ export default function KioskMode() {
                 {isRecording && (
                   <>
                     <div className="absolute inset-0 rounded-full bg-emerald-400 animate-pulse-ring" />
-                    <div
-                      className="absolute inset-0 rounded-full bg-emerald-400 animate-pulse-ring"
-                      style={{ animationDelay: "0.5s" }}
-                    />
+                    <div className="absolute inset-0 rounded-full bg-emerald-400 animate-pulse-ring" style={{ animationDelay: "0.5s" }} />
                   </>
                 )}
                 <button
@@ -244,9 +208,7 @@ export default function KioskMode() {
                 </button>
               </div>
 
-              <p
-                className={`text-xl font-semibold ${isRecording ? "text-red-500" : "text-emerald-600"}`}
-              >
+              <p className={`text-xl font-semibold ${isRecording ? "text-red-500" : "text-emerald-600"}`}>
                 {isRecording ? t.recording : t.tapToSpeak}
               </p>
 
@@ -272,22 +234,14 @@ export default function KioskMode() {
               <div className="w-full">
                 <div className="flex items-center gap-2 mb-2">
                   <Volume2 className="h-4 w-4 text-slate-400" />
-                  <span className="text-sm font-medium text-slate-500">
-                    {t.liveTranscription}
-                  </span>
+                  <span className="text-sm font-medium text-slate-500">{t.liveTranscription}</span>
                 </div>
                 <div className="min-h-[120px] w-full rounded-lg border border-slate-200 bg-slate-50 p-4">
                   {transcript ? (
-                    <p className="text-base text-slate-700 leading-relaxed">
-                      {transcript}
-                    </p>
+                    <p className="text-base text-slate-700 leading-relaxed">{transcript}</p>
                   ) : (
                     <p className="text-sm text-slate-400 italic">
-                      {language === "hi"
-                        ? "बोलना शुरू करने के लिए माइक्रोफ़ोन पर टैप करें..."
-                        : language === "bn"
-                          ? "কথা বলা শুরু করতে মাইক্রোফোনে ট্যাপ করুন..."
-                          : "Tap the microphone to start speaking..."}
+                      {language === "hi" ? "बोलना शुरू करने के लिए माइक्रोफ़ोन पर टैप करें..." : language === "bn" ? "কথা বলা শুরু করতে মাইক্রোফোনে ট্যাপ করুন..." : "Tap the microphone to start speaking..."}
                     </p>
                   )}
                 </div>
@@ -300,87 +254,50 @@ export default function KioskMode() {
             <CardContent className="p-8">
               <div className="flex items-center gap-2 mb-6">
                 <User className="h-5 w-5 text-cyan-600" />
-                <h2 className="text-lg font-semibold text-slate-800">
-                  {t.patientInfo}
-                </h2>
-                <Badge
-                  variant="outline"
-                  className="ml-auto border-emerald-300 bg-emerald-50 text-emerald-700 text-xs"
-                >
+                <h2 className="text-lg font-semibold text-slate-800">{t.patientInfo}</h2>
+                <Badge variant="outline" className="ml-auto border-emerald-300 bg-emerald-50 text-emerald-700 text-xs">
                   Auto-filled
                 </Badge>
               </div>
 
               <div className="space-y-5">
                 <div className="space-y-1.5">
-                  <Label className="text-sm font-medium text-slate-600">
-                    {t.name}
-                  </Label>
+                  <Label className="text-sm font-medium text-slate-600">{t.name}</Label>
                   <Input
                     value={formName}
                     onChange={(e) => setFormName(e.target.value)}
-                    placeholder={
-                      language === "hi"
-                        ? "पूरा नाम"
-                        : language === "bn"
-                          ? "পুরো নাম"
-                          : "Full Name"
-                    }
+                    placeholder={language === "hi" ? "पूरा नाम" : language === "bn" ? "পুরো নাম" : "Full Name"}
                     className="h-12 text-base"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label className="text-sm font-medium text-slate-600">
-                    {t.age}
-                  </Label>
+                  <Label className="text-sm font-medium text-slate-600">{t.age}</Label>
                   <Input
                     value={formAge}
                     onChange={(e) => setFormAge(e.target.value)}
-                    placeholder={
-                      language === "hi"
-                        ? "आयु"
-                        : language === "bn"
-                          ? "বয়স"
-                          : "Age"
-                    }
+                    placeholder={language === "hi" ? "आयु" : language === "bn" ? "বয়স" : "Age"}
                     type="number"
                     className="h-12 text-base"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label className="text-sm font-medium text-slate-600">
-                    {t.primaryComplaint}
-                  </Label>
+                  <Label className="text-sm font-medium text-slate-600">{t.primaryComplaint}</Label>
                   <Input
                     value={formComplaint}
                     onChange={(e) => setFormComplaint(e.target.value)}
-                    placeholder={
-                      language === "hi"
-                        ? "मुख्य शिकायत"
-                        : language === "bn"
-                          ? "প্রাথমিক অভিযোগ"
-                          : "Primary Complaint"
-                    }
+                    placeholder={language === "hi" ? "मुख्य शिकायत" : language === "bn" ? "প্রাথমিক অভিযোগ" : "Primary Complaint"}
                     className="h-12 text-base"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label className="text-sm font-medium text-slate-600">
-                    {t.duration}
-                  </Label>
+                  <Label className="text-sm font-medium text-slate-600">{t.duration}</Label>
                   <Input
                     value={formDuration}
                     onChange={(e) => setFormDuration(e.target.value)}
-                    placeholder={
-                      language === "hi"
-                        ? "कितने दिनों से?"
-                        : language === "bn"
-                          ? "কতদিন ধরে?"
-                          : "e.g., 3 Days"
-                    }
+                    placeholder={language === "hi" ? "कितने दिनों से?" : language === "bn" ? "কতদিন ধরে?" : "e.g., 3 Days"}
                     className="h-12 text-base"
                   />
                 </div>

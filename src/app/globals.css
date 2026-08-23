@@ -175,3 +175,27 @@
 ::-webkit-scrollbar-thumb:hover {
   background: hsl(var(--muted-foreground) / 0.5);
 }
+
+/* Print styles for clinical summary export */
+@media print {
+  body {
+    background: white !important;
+  }
+  header, nav, .print\:hidden, [data-state="closed"] {
+    display: none !important;
+  }
+  main {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  #clinical-summary-panel {
+    max-width: 100% !important;
+    padding: 0 !important;
+  }
+  #clinical-summary-panel .rounded-lg.border {
+    break-inside: avoid;
+  }
+  .no-print {
+    display: none !important;
+  }
+}
