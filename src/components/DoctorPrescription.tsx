@@ -3,7 +3,13 @@
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useAppStore } from "@/lib/store";
@@ -30,9 +36,22 @@ interface Medication {
 }
 
 export default function DoctorPrescription() {
-  const { patients, selectedPatientId, activeEncounter, addPrescription, prescriptions, clinicalNotes, setClinicalNotes, diagnosis, setDiagnosis, submitEncounter, encounterSubmitted } = useAppStore();
+  const {
+    patients,
+    selectedPatientId,
+    activeEncounter,
+    addPrescription,
+    prescriptions,
+    clinicalNotes,
+    setClinicalNotes,
+    diagnosis,
+    setDiagnosis,
+    submitEncounter,
+    encounterSubmitted,
+  } = useAppStore();
   const { toast } = useToast();
-  const patient = patients.find((p) => p.id === selectedPatientId) ?? patients[0];
+  const patient =
+    patients.find((p) => p.id === selectedPatientId) ?? patients[0];
 
   const [isDictating, setIsDictating] = useState(false);
   const [dictationText, setDictationText] = useState("");
@@ -62,9 +81,24 @@ export default function DoctorPrescription() {
         setIsDictating(false);
         // Auto-add medications from dictation
         setMedications([
-          { medicineName: "Paracetamol", dosage: "650mg", frequency: "TDS", duration: "5 days" },
-          { medicineName: "Metformin", dosage: "500mg", frequency: "BD", duration: "Continue" },
-          { medicineName: "Amlodipine", dosage: "5mg", frequency: "OD", duration: "Continue" },
+          {
+            medicineName: "Paracetamol",
+            dosage: "650mg",
+            frequency: "TDS",
+            duration: "5 days",
+          },
+          {
+            medicineName: "Metformin",
+            dosage: "500mg",
+            frequency: "BD",
+            duration: "Continue",
+          },
+          {
+            medicineName: "Amlodipine",
+            dosage: "5mg",
+            frequency: "OD",
+            duration: "Continue",
+          },
         ]);
         setDiagnosis("Poorly controlled Type 2 Diabetes with Hypertension");
       }
@@ -75,9 +109,24 @@ export default function DoctorPrescription() {
       if (idx < words.length) {
         setDictationText(fullText);
         setMedications([
-          { medicineName: "Paracetamol", dosage: "650mg", frequency: "TDS", duration: "5 days" },
-          { medicineName: "Metformin", dosage: "500mg", frequency: "BD", duration: "Continue" },
-          { medicineName: "Amlodipine", dosage: "5mg", frequency: "OD", duration: "Continue" },
+          {
+            medicineName: "Paracetamol",
+            dosage: "650mg",
+            frequency: "TDS",
+            duration: "5 days",
+          },
+          {
+            medicineName: "Metformin",
+            dosage: "500mg",
+            frequency: "BD",
+            duration: "Continue",
+          },
+          {
+            medicineName: "Amlodipine",
+            dosage: "5mg",
+            frequency: "OD",
+            duration: "Continue",
+          },
         ]);
         setDiagnosis("Poorly controlled Type 2 Diabetes with Hypertension");
       }
@@ -85,7 +134,10 @@ export default function DoctorPrescription() {
   };
 
   const addMedRow = () => {
-    setMedications((prev) => [...prev, { medicineName: "", dosage: "", frequency: "", duration: "" }]);
+    setMedications((prev) => [
+      ...prev,
+      { medicineName: "", dosage: "", frequency: "", duration: "" },
+    ]);
   };
 
   const removeMedRow = (index: number) => {
@@ -94,13 +146,19 @@ export default function DoctorPrescription() {
   };
 
   const updateMed = (index: number, field: keyof Medication, value: string) => {
-    setMedications((prev) => prev.map((m, i) => (i === index ? { ...m, [field]: value } : m)));
+    setMedications((prev) =>
+      prev.map((m, i) => (i === index ? { ...m, [field]: value } : m)),
+    );
   };
 
   const handleCommit = () => {
     const validMeds = medications.filter((m) => m.medicineName.trim());
     if (validMeds.length === 0) {
-      toast({ title: "Add Medications", description: "Please add at least one medication.", variant: "destructive" });
+      toast({
+        title: "Add Medications",
+        description: "Please add at least one medication.",
+        variant: "destructive",
+      });
       return;
     }
     setCommitting(true);
@@ -110,42 +168,47 @@ export default function DoctorPrescription() {
       setCommitting(false);
       toast({
         title: "Prescription Committed ✓",
-        description: "Visit marked complete. Records updated in patient's lifetime health record.",
+        description:
+          "Visit marked complete. Records updated in patient's lifetime health record.",
       });
     }, 2000);
   };
 
   if (encounterSubmitted) {
     return (
-      <div className="flex min-h-[calc(100vh-56px)] items-center justify-center bg-gradient-to-br from-emerald-50 via-white to-cyan-50 p-8">
+      <div className="flex min-h-[calc(100vh-56px)] items-center justify-center bg-background p-8">
         <div className="text-center space-y-6 max-w-md">
           <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-emerald-100">
             <CheckCircle2 className="h-10 w-10 text-emerald-600" />
           </div>
           <div>
-            <h2 className="text-2xl font-bold text-slate-800">Visit Completed</h2>
+            <h2 className="text-2xl font-bold text-slate-800">
+              Visit Completed
+            </h2>
             <p className="mt-2 text-sm text-slate-500">
-              Prescription signed and committed to {patient.name}&apos;s lifetime health record.
+              Prescription signed and committed to {patient.name}&apos;s
+              lifetime health record.
             </p>
           </div>
-          <div className="rounded-xl border border-slate-200 bg-white p-4 text-left text-sm space-y-2">
+          <div className="rounded-md border border-slate-300 bg-white p-4 text-left text-sm space-y-2">
             <div className="flex justify-between">
               <span className="text-slate-400">Patient:</span>
               <span className="font-medium">{patient.name}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-slate-400">HID:</span>
-              <span className="font-mono text-xs">{patient.uniqueHealthId}</span>
+              <span className="font-mono text-xs">
+                {patient.uniqueHealthId}
+              </span>
             </div>
             <div className="flex justify-between">
               <span className="text-slate-400">Medications:</span>
-              <span className="font-medium">{prescriptions.length} prescribed</span>
+              <span className="font-medium">
+                {prescriptions.length} prescribed
+              </span>
             </div>
           </div>
-          <Button
-            variant="outline"
-            onClick={() => window.location.reload()}
-          >
+          <Button variant="outline" onClick={() => window.location.reload()}>
             Start New Consultation
           </Button>
         </div>
@@ -164,12 +227,18 @@ export default function DoctorPrescription() {
                 <Stethoscope className="h-5 w-5" />
               </div>
               <div>
-                <h3 className="text-sm font-bold text-slate-800">{patient.name}</h3>
-                <div className="text-xs text-slate-400 font-mono">{patient.uniqueHealthId}</div>
+                <h3 className="text-sm font-bold text-slate-800">
+                  {patient.name}
+                </h3>
+                <div className="text-xs text-slate-400 font-mono">
+                  {patient.uniqueHealthId}
+                </div>
               </div>
             </div>
             {activeEncounter && (
-              <Badge className="bg-emerald-100 text-emerald-700 text-xs">Active Session</Badge>
+              <Badge className="bg-emerald-100 text-emerald-700 text-xs">
+                Active Session
+              </Badge>
             )}
           </div>
         </CardContent>
@@ -183,7 +252,8 @@ export default function DoctorPrescription() {
             Voice Dictation
           </CardTitle>
           <CardDescription className="text-xs">
-            Dictate prescriptions naturally (e.g., &quot;Paracetamol 650mg TDS for 5 days&quot;)
+            Dictate prescriptions naturally (e.g., &quot;Paracetamol 650mg TDS
+            for 5 days&quot;)
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
@@ -195,12 +265,20 @@ export default function DoctorPrescription() {
                   ? "bg-red-500 hover:bg-red-600 animate-pulse"
                   : "bg-cyan-600 hover:bg-cyan-700"
               }`}
-              onClick={isDictating ? () => setIsDictating(false) : simulateDictation}
+              onClick={
+                isDictating ? () => setIsDictating(false) : simulateDictation
+              }
             >
-              {isDictating ? <MicOff className="h-6 w-6 text-white" /> : <Mic className="h-6 w-6 text-white" />}
+              {isDictating ? (
+                <MicOff className="h-6 w-6 text-white" />
+              ) : (
+                <Mic className="h-6 w-6 text-white" />
+              )}
             </Button>
             <div className="flex-1">
-              <div className={`text-sm font-medium ${isDictating ? "text-red-500" : "text-cyan-600"}`}>
+              <div
+                className={`text-sm font-medium ${isDictating ? "text-red-500" : "text-cyan-600"}`}
+              >
                 {isDictating ? "Listening..." : "Tap to start dictation"}
               </div>
               {isDictating && (
@@ -217,7 +295,7 @@ export default function DoctorPrescription() {
             </div>
           </div>
           {dictationText && (
-            <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-600">
+            <div className="rounded-sm border border-slate-300 bg-slate-50 p-3 text-sm text-slate-600">
               <div className="flex items-center gap-1.5 text-xs text-slate-400 mb-1">
                 <Mic className="h-3 w-3" />
                 Transcription
@@ -268,7 +346,10 @@ export default function DoctorPrescription() {
           </div>
 
           {medications.map((med, i) => (
-            <div key={i} className="grid grid-cols-1 sm:grid-cols-12 gap-2 items-center">
+            <div
+              key={i}
+              className="grid grid-cols-1 sm:grid-cols-12 gap-2 items-center"
+            >
               <div className="sm:col-span-4">
                 <Input
                   placeholder="Medicine name"
@@ -315,7 +396,12 @@ export default function DoctorPrescription() {
             </div>
           ))}
 
-          <Button variant="outline" size="sm" onClick={addMedRow} className="gap-1.5">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={addMedRow}
+            className="gap-1.5"
+          >
             <Plus className="h-3.5 w-3.5" />
             Add Medication
           </Button>

@@ -1,7 +1,13 @@
 "use client";
 
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { useAppStore } from "@/lib/store";
 import { aiSummary } from "@/lib/mockData";
 import {
@@ -21,39 +27,59 @@ import {
 } from "lucide-react";
 
 export default function DoctorClinical() {
-  const { patients, selectedPatientId, timeline, labReports, encounters } = useAppStore();
-  const patient = patients.find((p) => p.id === selectedPatientId) ?? patients[0];
-  const patientTimeline = timeline.filter((t) => t.patientId === patient.id).slice(0, 6);
-  const patientLabReports = labReports.filter((l) => l.patientId === patient.id);
-  const activeEncounter = encounters.find((e) => e.patientId === patient.id && e.status === "Active");
+  const { patients, selectedPatientId, timeline, labReports, encounters } =
+    useAppStore();
+  const patient =
+    patients.find((p) => p.id === selectedPatientId) ?? patients[0];
+  const patientTimeline = timeline
+    .filter((t) => t.patientId === patient.id)
+    .slice(0, 6);
+  const patientLabReports = labReports.filter(
+    (l) => l.patientId === patient.id,
+  );
+  const activeEncounter = encounters.find(
+    (e) => e.patientId === patient.id && e.status === "Active",
+  );
 
   const getTimelineIcon = (type: string) => {
     switch (type) {
-      case "Visit": return <Stethoscope className="h-3.5 w-3.5" />;
-      case "Lab": return <FlaskConical className="h-3.5 w-3.5" />;
-      case "Prescription": return <Pill className="h-3.5 w-3.5" />;
-      case "Self-Report": return <ClipboardList className="h-3.5 w-3.5" />;
-      default: return <FileText className="h-3.5 w-3.5" />;
+      case "Visit":
+        return <Stethoscope className="h-3.5 w-3.5" />;
+      case "Lab":
+        return <FlaskConical className="h-3.5 w-3.5" />;
+      case "Prescription":
+        return <Pill className="h-3.5 w-3.5" />;
+      case "Self-Report":
+        return <ClipboardList className="h-3.5 w-3.5" />;
+      default:
+        return <FileText className="h-3.5 w-3.5" />;
     }
   };
 
   return (
     <div className="mx-auto max-w-screen-2xl p-4 sm:p-6">
       {/* AI Summary Banner */}
-      <Card className="mb-6 border-cyan-200 bg-gradient-to-r from-cyan-50 via-white to-emerald-50">
+      <Card className="mb-6 border-cyan-400 bg-cyan-50/60">
         <CardContent className="p-5">
           <div className="flex items-start gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-cyan-600 text-white">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-sm bg-cyan-700 text-white">
               <Brain className="h-5 w-5" />
             </div>
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-2">
-                <h2 className="text-sm font-bold text-cyan-800">AI Pre-Consultation Summary</h2>
-                <Badge variant="outline" className="border-cyan-300 bg-cyan-50 text-cyan-700 text-[10px]">
+                <h2 className="text-sm font-bold text-cyan-800">
+                  AI Pre-Consultation Summary
+                </h2>
+                <Badge
+                  variant="outline"
+                  className="border-cyan-300 bg-cyan-50 text-cyan-700 text-[10px]"
+                >
                   Auto-generated
                 </Badge>
               </div>
-              <p className="text-sm text-slate-600 leading-relaxed">{aiSummary.clinicalBrief}</p>
+              <p className="text-sm text-slate-600 leading-relaxed">
+                {aiSummary.clinicalBrief}
+              </p>
 
               {/* Risk Badges */}
               <div className="mt-3 flex flex-wrap gap-1.5">
@@ -75,10 +101,15 @@ export default function DoctorClinical() {
 
               {/* Focus Areas */}
               <div className="mt-3">
-                <div className="text-xs font-semibold text-slate-500 mb-1.5">Key Focus Areas:</div>
+                <div className="text-xs font-semibold text-slate-500 mb-1.5">
+                  Key Focus Areas:
+                </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
                   {aiSummary.focusAreas.map((area, i) => (
-                    <div key={i} className="flex items-center gap-1.5 text-xs text-slate-600">
+                    <div
+                      key={i}
+                      className="flex items-center gap-1.5 text-xs text-slate-600"
+                    >
                       <CheckCircle2 className="h-3 w-3 text-emerald-500 shrink-0" />
                       {area}
                     </div>
@@ -103,11 +134,17 @@ export default function DoctorClinical() {
                     <Heart className="h-5 w-5" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-bold text-slate-800">{patient.name}</h3>
+                    <h3 className="text-sm font-bold text-slate-800">
+                      {patient.name}
+                    </h3>
                     <div className="flex items-center gap-2 text-xs text-slate-400">
-                      <span>{patient.gender}, {patient.age} yrs</span>
+                      <span>
+                        {patient.gender}, {patient.age} yrs
+                      </span>
                       <span>|</span>
-                      <span className="font-mono">{patient.uniqueHealthId}</span>
+                      <span className="font-mono">
+                        {patient.uniqueHealthId}
+                      </span>
                       <span>|</span>
                       <span>{patient.bloodGroup}</span>
                     </div>
@@ -140,13 +177,19 @@ export default function DoctorClinical() {
                       <div className="relative z-10 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white border border-slate-200 text-slate-500">
                         {getTimelineIcon(entry.type)}
                       </div>
-                      <div className="flex-1 rounded-md border border-slate-100 bg-white p-2.5">
+                      <div className="data-strip flex-1 rounded-sm p-2.5">
                         <div className="flex items-start justify-between">
                           <div>
-                            <h4 className="text-xs font-semibold text-slate-700">{entry.title}</h4>
-                            <p className="text-[11px] text-slate-400 mt-0.5">{entry.description}</p>
+                            <h4 className="text-xs font-semibold text-slate-700">
+                              {entry.title}
+                            </h4>
+                            <p className="text-[11px] text-slate-400 mt-0.5">
+                              {entry.description}
+                            </p>
                           </div>
-                          <span className="text-[10px] text-slate-300 shrink-0 ml-2">{entry.date}</span>
+                          <span className="text-[10px] text-slate-300 shrink-0 ml-2">
+                            {entry.date}
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -171,25 +214,36 @@ export default function DoctorClinical() {
             </CardHeader>
             <CardContent className="space-y-4">
               {patientLabReports.map((report) => (
-                <div key={report.id} className="rounded-lg border border-slate-100 p-3">
+                <div key={report.id} className="data-strip rounded-sm p-3">
                   <div className="flex items-center justify-between mb-2">
-                    <h4 className="text-xs font-semibold text-slate-700">{report.testName}</h4>
-                    <span className="text-[10px] text-slate-400">{report.date}</span>
+                    <h4 className="text-xs font-semibold text-slate-700">
+                      {report.testName}
+                    </h4>
+                    <span className="text-[10px] text-slate-400">
+                      {report.date}
+                    </span>
                   </div>
                   <div className="space-y-1.5">
                     {report.results.map((result) => (
-                      <div key={result.testName} className="flex items-center justify-between text-xs">
-                        <span className="text-slate-500">{result.testName}</span>
+                      <div
+                        key={result.testName}
+                        className="flex items-center justify-between text-xs"
+                      >
+                        <span className="text-slate-500">
+                          {result.testName}
+                        </span>
                         <div className="flex items-center gap-2">
-                          <span className={`font-mono font-medium ${
-                            result.status === "Normal"
-                              ? "text-slate-700"
-                              : result.status === "Critical"
-                              ? "text-red-600 font-bold"
-                              : result.status === "High"
-                              ? "text-red-500"
-                              : "text-amber-500"
-                          }`}>
+                          <span
+                            className={`font-mono font-medium ${
+                              result.status === "Normal"
+                                ? "text-slate-700"
+                                : result.status === "Critical"
+                                  ? "text-red-600 font-bold"
+                                  : result.status === "High"
+                                    ? "text-red-500"
+                                    : "text-amber-500"
+                            }`}
+                          >
                             {result.value} {result.unit}
                           </span>
                           {result.status !== "Normal" && (
@@ -199,8 +253,8 @@ export default function DoctorClinical() {
                                 result.status === "Critical"
                                   ? "border-red-400 bg-red-50 text-red-700"
                                   : result.status === "High"
-                                  ? "border-red-300 bg-red-50 text-red-600"
-                                  : "border-amber-300 bg-amber-50 text-amber-600"
+                                    ? "border-red-300 bg-red-50 text-red-600"
+                                    : "border-amber-300 bg-amber-50 text-amber-600"
                               }`}
                             >
                               {result.status}
@@ -226,14 +280,24 @@ export default function DoctorClinical() {
             <CardContent className="p-4">
               <div className="flex items-center gap-2 mb-2">
                 <Shield className="h-4 w-4 text-amber-600" />
-                <span className="text-xs font-bold text-amber-800">Quick Reference</span>
+                <span className="text-xs font-bold text-amber-800">
+                  Quick Reference
+                </span>
               </div>
               <div className="space-y-1.5">
                 <div className="text-[11px] text-slate-600">
-                  <span className="font-semibold text-slate-500">Allergies:</span>{" "}
+                  <span className="font-semibold text-slate-500">
+                    Allergies:
+                  </span>{" "}
                   {patient.allergies.length > 0 ? (
                     patient.allergies.map((a) => (
-                      <Badge key={a} variant="outline" className="mr-1 border-red-300 bg-red-50 text-red-600 text-[10px]">{a}</Badge>
+                      <Badge
+                        key={a}
+                        variant="outline"
+                        className="mr-1 border-red-300 bg-red-50 text-red-600 text-[10px]"
+                      >
+                        {a}
+                      </Badge>
                     ))
                   ) : (
                     <span className="text-slate-400">None recorded</span>
@@ -242,7 +306,13 @@ export default function DoctorClinical() {
                 <div className="text-[11px] text-slate-600">
                   <span className="font-semibold text-slate-500">Chronic:</span>{" "}
                   {patient.chronicConditions.map((c) => (
-                    <Badge key={c} variant="outline" className="mr-1 border-amber-300 bg-amber-50 text-amber-600 text-[10px]">{c}</Badge>
+                    <Badge
+                      key={c}
+                      variant="outline"
+                      className="mr-1 border-amber-300 bg-amber-50 text-amber-600 text-[10px]"
+                    >
+                      {c}
+                    </Badge>
                   ))}
                 </div>
               </div>
@@ -254,8 +324,12 @@ export default function DoctorClinical() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="text-xs font-bold text-emerald-800">Ready to prescribe?</div>
-                  <div className="text-[11px] text-emerald-600 mt-0.5">Continue to the prescription builder</div>
+                  <div className="text-xs font-bold text-emerald-800">
+                    Ready to prescribe?
+                  </div>
+                  <div className="text-[11px] text-emerald-600 mt-0.5">
+                    Continue to the prescription builder
+                  </div>
                 </div>
                 <ChevronRight className="h-5 w-5 text-emerald-500" />
               </div>

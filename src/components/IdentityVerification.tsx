@@ -27,8 +27,12 @@ import {
 type VerificationStep = "method" | "otp" | "success";
 
 export default function IdentityVerification() {
-  const { isVerificationOpen, setVerificationOpen, patients, setVerifiedPatientId } =
-    useAppStore();
+  const {
+    isVerificationOpen,
+    setVerificationOpen,
+    patients,
+    setVerifiedPatientId,
+  } = useAppStore();
   const { toast } = useToast();
   const [step, setStep] = useState<VerificationStep>("method");
   const [method, setMethod] = useState<"otp" | "national-id">("otp");
@@ -44,7 +48,10 @@ export default function IdentityVerification() {
     setTimeout(() => {
       setLoading(false);
       setStep("otp");
-      toast({ title: "OTP Sent", description: `6-digit code sent to +91-${phoneNumber.replace(/(\d{2})(\d{0,4})/, "$1****$2")}` });
+      toast({
+        title: "OTP Sent",
+        description: `6-digit code sent to +91-${phoneNumber.replace(/(\d{2})(\d{0,4})/, "$1****$2")}`,
+      });
     }, 1200);
   };
 
@@ -56,7 +63,10 @@ export default function IdentityVerification() {
       setLoading(false);
       setStep("success");
       setVerifiedPatientId(selectedPatient.id);
-      toast({ title: "Identity Verified ✓", description: `Patient ${selectedPatient.name} (${selectedPatient.uniqueHealthId}) verified.` });
+      toast({
+        title: "Identity Verified ✓",
+        description: `Patient ${selectedPatient.name} (${selectedPatient.uniqueHealthId}) verified.`,
+      });
     }, 1500);
   };
 
@@ -67,7 +77,10 @@ export default function IdentityVerification() {
       setLoading(false);
       setStep("success");
       setVerifiedPatientId(selectedPatient.id);
-      toast({ title: "Identity Verified ✓", description: `Patient ${selectedPatient.name} (${selectedPatient.uniqueHealthId}) verified via National ID.` });
+      toast({
+        title: "Identity Verified ✓",
+        description: `Patient ${selectedPatient.name} (${selectedPatient.uniqueHealthId}) verified via National ID.`,
+      });
     }, 1500);
   };
 
@@ -88,7 +101,8 @@ export default function IdentityVerification() {
             Patient Identity Verification
           </DialogTitle>
           <DialogDescription className="text-slate-500">
-            {step === "method" && "Select verification method to onboard patient"}
+            {step === "method" &&
+              "Select verification method to onboard patient"}
             {step === "otp" && "Enter the 6-digit OTP sent to your mobile"}
             {step === "success" && "Verification complete"}
           </DialogDescription>
@@ -104,25 +118,29 @@ export default function IdentityVerification() {
                   <button
                     key={p.id}
                     onClick={() => setSelectedPatient(p)}
-                    className={`rounded-lg border p-3 text-left text-sm transition-colors ${
+                    className={`rounded-sm border border-slate-300 p-3 text-left text-sm transition-colors ${
                       selectedPatient.id === p.id
                         ? "border-emerald-400 bg-emerald-50 text-emerald-700"
                         : "border-slate-200 hover:border-slate-300"
                     }`}
                   >
                     <div className="font-medium">{p.name}</div>
-                    <div className="text-xs text-slate-400">{p.uniqueHealthId}</div>
+                    <div className="text-xs text-slate-400">
+                      {p.uniqueHealthId}
+                    </div>
                   </button>
                 ))}
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label className="text-xs text-slate-500">Verification Method</Label>
+              <Label className="text-xs text-slate-500">
+                Verification Method
+              </Label>
               <div className="grid grid-cols-2 gap-2">
                 <button
                   onClick={() => setMethod("otp")}
-                  className={`flex items-center gap-2 rounded-lg border p-3 text-sm transition-colors ${
+                  className={`flex items-center gap-2 rounded-sm border border-slate-300 p-3 text-sm transition-colors ${
                     method === "otp"
                       ? "border-cyan-400 bg-cyan-50 text-cyan-700"
                       : "border-slate-200 hover:border-slate-300"
@@ -136,7 +154,7 @@ export default function IdentityVerification() {
                 </button>
                 <button
                   onClick={() => setMethod("national-id")}
-                  className={`flex items-center gap-2 rounded-lg border p-3 text-sm transition-colors ${
+                  className={`flex items-center gap-2 rounded-sm border border-slate-300 p-3 text-sm transition-colors ${
                     method === "national-id"
                       ? "border-cyan-400 bg-cyan-50 text-cyan-700"
                       : "border-slate-200 hover:border-slate-300"
@@ -165,7 +183,11 @@ export default function IdentityVerification() {
                     type="tel"
                     placeholder="98765 43210"
                     value={phoneNumber}
-                    onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, "").slice(0, 10))}
+                    onChange={(e) =>
+                      setPhoneNumber(
+                        e.target.value.replace(/\D/g, "").slice(0, 10),
+                      )
+                    }
                     className="flex-1"
                   />
                 </div>
@@ -174,7 +196,11 @@ export default function IdentityVerification() {
                   onClick={handleSendOtp}
                   disabled={phoneNumber.length < 10 || loading}
                 >
-                  {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Phone className="mr-2 h-4 w-4" />}
+                  {loading ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Phone className="mr-2 h-4 w-4" />
+                  )}
                   Send OTP
                 </Button>
               </div>
@@ -188,7 +214,11 @@ export default function IdentityVerification() {
                   type="password"
                   placeholder="XXXX XXXX XXXX"
                   value={nationalId}
-                  onChange={(e) => setNationalId(e.target.value.replace(/\D/g, "").slice(0, 12))}
+                  onChange={(e) =>
+                    setNationalId(
+                      e.target.value.replace(/\D/g, "").slice(0, 12),
+                    )
+                  }
                   autoComplete="off"
                 />
                 <Button
@@ -196,7 +226,11 @@ export default function IdentityVerification() {
                   onClick={handleVerifyNationalId}
                   disabled={nationalId.length < 4 || loading}
                 >
-                  {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Fingerprint className="mr-2 h-4 w-4" />}
+                  {loading ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Fingerprint className="mr-2 h-4 w-4" />
+                  )}
                   Verify with National ID
                 </Button>
               </div>
@@ -207,9 +241,10 @@ export default function IdentityVerification() {
         {/* OTP Entry */}
         {step === "otp" && (
           <div className="space-y-4">
-            <div className="rounded-lg border bg-cyan-50 p-3 text-center">
+            <div className="rounded-sm border border-cyan-300 bg-cyan-50 p-3 text-center">
               <p className="text-sm text-cyan-700">
-                Code sent to +91-{phoneNumber.replace(/(\d{2})(\d{0,4})/, "$1****$2")}
+                Code sent to +91-
+                {phoneNumber.replace(/(\d{2})(\d{0,4})/, "$1****$2")}
               </p>
             </div>
             <div className="flex justify-center gap-2">
@@ -230,8 +265,15 @@ export default function IdentityVerification() {
                     }
                   }}
                   onKeyDown={(e) => {
-                    if (e.key === "Backspace" && !otpInput[i] && e.currentTarget.previousElementSibling) {
-                      (e.currentTarget.previousElementSibling as HTMLInputElement).focus();
+                    if (
+                      e.key === "Backspace" &&
+                      !otpInput[i] &&
+                      e.currentTarget.previousElementSibling
+                    ) {
+                      (
+                        e.currentTarget
+                          .previousElementSibling as HTMLInputElement
+                      ).focus();
                     }
                   }}
                 />
@@ -242,7 +284,11 @@ export default function IdentityVerification() {
               onClick={handleVerifyOtp}
               disabled={otpInput.join("").length !== 6 || loading}
             >
-              {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ShieldCheck className="mr-2 h-4 w-4" />}
+              {loading ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <ShieldCheck className="mr-2 h-4 w-4" />
+              )}
               Verify OTP
             </Button>
             <button
@@ -264,15 +310,23 @@ export default function IdentityVerification() {
               <CheckCircle2 className="h-8 w-8 text-emerald-600" />
             </div>
             <div>
-              <p className="text-lg font-semibold text-slate-800">{selectedPatient.name}</p>
-              <Badge variant="outline" className="mt-1 border-emerald-300 bg-emerald-50 text-emerald-700">
+              <p className="text-lg font-semibold text-slate-800">
+                {selectedPatient.name}
+              </p>
+              <Badge
+                variant="outline"
+                className="mt-1 border-emerald-300 bg-emerald-50 text-emerald-700"
+              >
                 {selectedPatient.uniqueHealthId}
               </Badge>
             </div>
             <p className="text-sm text-slate-500">
               Identity verified. Patient record loaded.
             </p>
-            <Button className="w-full bg-emerald-600 hover:bg-emerald-700" onClick={handleClose}>
+            <Button
+              className="w-full bg-emerald-600 hover:bg-emerald-700"
+              onClick={handleClose}
+            >
               Continue
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
