@@ -12,6 +12,8 @@ import {
   mockLabReports,
   mockTimeline,
 } from "./mockData";
+import { ConsultationPayload, ClinicalSummaryOutput } from "@/types/consultation";
+import { runTriageEngine } from "./triageEngine";
 
 interface AppState {
   currentRole: AppRole;
@@ -57,6 +59,11 @@ interface AppState {
   submitEncounter: () => void;
   savePrescription: (input: { diagnosis: string; clinicalNotes: string; prescriptions: Prescription[] }) => Promise<void>;
   completeTreatment: (input: { diagnosis: string; clinicalNotes: string; prescriptions: Prescription[] }) => Promise<void>;
+
+  consultationPayload: ConsultationPayload | null;
+  triageOutput: ClinicalSummaryOutput | null;
+  setConsultationPayload: (payload: ConsultationPayload) => void;
+  clearTriage: () => void;
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
@@ -198,4 +205,12 @@ export const useAppStore = create<AppState>((set, get) => ({
     set({ encounterSubmitted: true });
     await get().loadPersistedState();
   },
+
+  consultationPayload: null,
+  triageOutput: null,
+  setConsultationPayload: (payload) => {
+    const output = runTriageEngine(payload);
+    set({ consultationPayload: payload, triageOutput: output });
+  },
+  clearTriage: () => set({ consultationPayload: null, triageOutput: null }),
 }));

@@ -83,7 +83,8 @@ export type AppRole =
   | "kiosk-mode"
   | "lab-portal"
   | "doctor-clinical"
-  | "doctor-prescription";
+  | "doctor-prescription"
+  | "intake-registration";
 
 // Mock Patients
 export const mockPatients: Patient[] = [
