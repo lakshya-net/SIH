@@ -12,6 +12,8 @@ import {
   mockLabReports,
   mockTimeline,
 } from "./mockData";
+import { ConsultationPayload, ClinicalSummaryOutput } from "@/types/consultation";
+import { runTriageEngine } from "./triageEngine";
 
 interface AppState {
   currentRole: AppRole;
@@ -50,6 +52,11 @@ interface AppState {
 
   encounterSubmitted: boolean;
   submitEncounter: () => void;
+
+  consultationPayload: ConsultationPayload | null;
+  triageOutput: ClinicalSummaryOutput | null;
+  setConsultationPayload: (payload: ConsultationPayload) => void;
+  clearTriage: () => void;
 }
 
 export const useAppStore = create<AppState>((set) => ({
@@ -114,4 +121,12 @@ export const useAppStore = create<AppState>((set) => ({
 
   encounterSubmitted: false,
   submitEncounter: () => set({ encounterSubmitted: true }),
+
+  consultationPayload: null,
+  triageOutput: null,
+  setConsultationPayload: (payload) => {
+    const output = runTriageEngine(payload);
+    set({ consultationPayload: payload, triageOutput: output });
+  },
+  clearTriage: () => set({ consultationPayload: null, triageOutput: null }),
 }));
