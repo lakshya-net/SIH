@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { kioskTranslations } from "@/lib/mockData";
+import { useAppStore } from "@/lib/store";
 import {
   Mic,
   MicOff,
@@ -26,6 +27,7 @@ const languages = [
 
 export default function KioskMode() {
   const { toast } = useToast();
+  const registerKiosk = useAppStore((state) => state.registerKiosk);
   const [language, setLanguage] = useState("en");
   const [isRecording, setIsRecording] = useState(false);
   const [transcript, setTranscript] = useState("");
@@ -94,9 +96,17 @@ export default function KioskMode() {
     setIsRecording(false);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!formName || !formComplaint) {
       toast({ title: "Please fill required fields", variant: "destructive" });
+      return;
+    }
+    const patientId = await registerKiosk({
+      name: formName, age: formAge ? Number(formAge) : undefined, complaint: formComplaint,
+      duration: formDuration, language, transcript,
+    });
+    if (!patientId) {
+      toast({ title: "Registration failed", description: "The registration could not be saved.", variant: "destructive" });
       return;
     }
     setSubmitted(true);

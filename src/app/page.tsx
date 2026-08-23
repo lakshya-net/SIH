@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { useAppStore } from "@/lib/store";
 import TopNav from "@/components/TopNav";
 import IdentityVerification from "@/components/IdentityVerification";
@@ -10,7 +11,11 @@ import DoctorClinical from "@/components/DoctorClinical";
 import DoctorPrescription from "@/components/DoctorPrescription";
 
 export default function Home() {
-  const { currentRole } = useAppStore();
+  const { currentRole, loadPersistedState } = useAppStore();
+
+  useEffect(() => {
+    void loadPersistedState();
+  }, [loadPersistedState]);
 
   const renderView = () => {
     switch (currentRole) {

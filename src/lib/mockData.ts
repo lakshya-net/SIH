@@ -72,7 +72,7 @@ export interface TimeLineEntry {
   id: string;
   patientId: string;
   date: string;
-  type: "Visit" | "Lab" | "Prescription" | "Self-Report";
+  type: "Visit" | "Lab" | "Prescription" | "Self-Report" | "Treatment Summary";
   title: string;
   description: string;
   doctorName?: string;
