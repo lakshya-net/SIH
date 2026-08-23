@@ -51,6 +51,55 @@ Return ONLY a JSON object (no markdown, no commentary) in exactly this shape:
 }
 If no medications are identifiable, return an empty "medications" array.`;
 
+/**
+ * Strict JSON Schema constraining the model output to exactly the OCRResponse
+ * shape ({rawText, medications[]}). Without this schema, Gemini JSON mode only
+ * guarantees valid JSON syntax and may not produce the exact keys/structure
+ * the OCR route parses — which manifested as the "malformed output" failure.
+ */
+const OCR_RESPONSE_SCHEMA = {
+  type: "OBJECT",
+  properties: {
+    rawText: {
+      type: "STRING",
+      description:
+        "Full plain-text transcription of everything legible on the prescription, preserving uncertainty where handwriting is unclear.",
+    },
+    medications: {
+      type: "ARRAY",
+      description: "Structured medication list extracted from the prescription. May be empty.",
+      items: {
+        type: "OBJECT",
+        properties: {
+          medicineName: {
+            type: "STRING",
+            description: "Name of the medicine, or '[unclear]' if not reliably readable.",
+          },
+          dosage: {
+            type: "STRING",
+            description: "Dosage label (e.g. 500mg), or '[unclear]' if unknown.",
+          },
+          frequency: {
+            type: "STRING",
+            description: "Frequency (e.g. BD/TDS/OD), or '[unclear]' if unknown.",
+          },
+          duration: {
+            type: "STRING",
+            description: "Duration (e.g. 5 days), or '[unclear]' if unknown.",
+          },
+          confidence: {
+            type: "STRING",
+            enum: ["high", "medium", "low"],
+            description: "Confidence in the extracted medication fields.",
+          },
+        },
+        required: ["medicineName", "dosage", "frequency", "duration", "confidence"],
+      },
+    },
+  },
+  required: ["rawText", "medications"],
+};
+
 function jsonError(error: string, status: number, details?: unknown) {
   return NextResponse.json({ success: false, error, details }, { status });
 }
@@ -112,6 +161,7 @@ export async function POST(request: Request) {
       ],
       temperature: 0.1,
       maxOutputTokens: 2048,
+      responseSchema: OCR_RESPONSE_SCHEMA,
     });
 
     const parsed = parseModelJson<{
