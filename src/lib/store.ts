@@ -50,6 +50,9 @@ interface AppState {
 
   encounterSubmitted: boolean;
   submitEncounter: () => void;
+
+  ocrText: string;
+  setOcrText: (text: string) => void;
 }
 
 export const useAppStore = create<AppState>((set) => ({
@@ -114,4 +117,7 @@ export const useAppStore = create<AppState>((set) => ({
 
   encounterSubmitted: false,
   submitEncounter: () => set({ encounterSubmitted: true }),
+
+  ocrText: "",
+  setOcrText: (text) => set({ ocrText: text }),
 }));
