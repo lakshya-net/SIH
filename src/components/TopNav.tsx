@@ -9,6 +9,7 @@ import {
   ShieldCheck,
   ChevronDown,
   Heart,
+  FileText,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,6 +29,7 @@ const roles: { id: AppRole; label: string; icon: React.ElementType; description:
   { id: "lab-portal", label: "Hospital Lab", icon: FlaskConical, description: "Diagnostic Desk" },
   { id: "doctor-clinical", label: "Doctor Clinical", icon: Stethoscope, description: "AI-Assisted View" },
   { id: "doctor-prescription", label: "Doctor Rx", icon: ClipboardList, description: "Prescription Builder" },
+  { id: "intake-registration", label: "Patient Intake", icon: FileText, description: "Lifetime Registration" },
 ];
 
 export default function TopNav() {
