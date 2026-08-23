@@ -1,1 +1,32 @@
 # SIH
+#Sanjeevni 
+
+#ALL IN ONE CENTRALIZED PLATFORM FOR GOVT. HOSPITALS TO RECORD AND TRACK PATIENT HISTORY/DATA.
+---------------------------------------------------------------------------------------------------
+#COMPONENT-1:INITIAL INPUT
+
+SIDE- PATIENT
+
+USES ADVANCED SST TO GET INFORMATION FROM PATIENT FROM MULTILINGUAL ABLED UI.
+GETS PREVIOUS MEDICAL HISTORY FROM DOCUMENTS AND SPEECH
+GETS AADHAR AUTHENTICATION
+GETS DOCUMENTS FROM DIGILOCKER API
+GENERATES A UNIQUE ID REPRESENTING THE PATIENT
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+#COMPONENT-2:RECURRING INPUT
+
+TWO SIDES -1. HOSPITAL
+           2. DOCTOR
+
+1.HOSPITALS LOGIN FROM THEIR PORTAL AND ENTER THE PATIENT UID TO UPLOAD THE REPORTS LIKE - MRI,XRAY,CT SCAN.....WHICH GETS FETCHED FROM THEIR OWN EXISTING SOFTWARES LIKE DCOM.
+2.DOCTOR GETS AN ENDPOINT DEVICE WHERE THEY ENTER PATIENTS UID AND WHERE THEY SCANS THE PRESCRIPTION ....... OUR DATA FECTHING MODEL EXCTRACTS IT AND ADDS IT AS AN CHAINED INSTANCE TO THE PATIENTS DATA
+
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+#COMPONENT-3:DATA STORING SYSTEM (USP)
+
+DATA OF EACH PATIENT GETS STORED AS AN INDIVDUAL INSTANCE IN THE INITIAL INPUT , 
+
