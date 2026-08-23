@@ -27,7 +27,7 @@ import {
 type VerificationStep = "method" | "otp" | "success";
 
 export default function IdentityVerification() {
-  const { isVerificationOpen, setVerificationOpen, patients, setVerifiedPatientId } =
+  const { isVerificationOpen, setVerificationOpen, patients, setVerifiedPatientId, recordIdentityVerification } =
     useAppStore();
   const { toast } = useToast();
   const [step, setStep] = useState<VerificationStep>("method");
@@ -56,6 +56,7 @@ export default function IdentityVerification() {
       setLoading(false);
       setStep("success");
       setVerifiedPatientId(selectedPatient.id);
+      void recordIdentityVerification({ method: "otp", phone: phoneNumber });
       toast({ title: "Identity Verified ✓", description: `Patient ${selectedPatient.name} (${selectedPatient.uniqueHealthId}) verified.` });
     }, 1500);
   };
@@ -67,6 +68,7 @@ export default function IdentityVerification() {
       setLoading(false);
       setStep("success");
       setVerifiedPatientId(selectedPatient.id);
+      void recordIdentityVerification({ method: "national-id", nationalId });
       toast({ title: "Identity Verified ✓", description: `Patient ${selectedPatient.name} (${selectedPatient.uniqueHealthId}) verified via National ID.` });
     }, 1500);
   };

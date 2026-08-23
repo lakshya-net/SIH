@@ -95,14 +95,14 @@ function getStatusBadge(status: string) {
 }
 
 export default function LabPortal() {
-  const { labQueue, selectedPatientId, setSelectedPatientId } = useAppStore();
+  const { labQueue, selectedPatientId, setSelectedPatientId, submitLab } = useAppStore();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTest, setSelectedTest] = useState("");
   const [parameterValues, setParameterValues] = useState<Record<string, string>>({});
-  const [uploadedFiles, setUploadedFiles] = useState<{ name: string; size: string; preview: string }[]>([]);
+  const [uploadedFiles, setUploadedFiles] = useState<{ name: string; size: string; preview: string; type: string; bytes: number }[]>([]);
   const [submitting, setSubmitting] = useState(false);
 
   const filteredQueue = labQueue.filter(
@@ -120,6 +120,8 @@ export default function LabPortal() {
       name: f.name,
       size: (f.size / 1024).toFixed(1) + " KB",
       preview: URL.createObjectURL(f),
+      type: f.type,
+      bytes: f.size,
     }));
     setUploadedFiles((prev) => [...prev, ...newFiles]);
     toast({ title: "Files Uploaded", description: `${files.length} file(s) ready for submission.` });
@@ -129,19 +131,27 @@ export default function LabPortal() {
     setUploadedFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!selectedTest) {
       toast({ title: "Select Test Type", variant: "destructive" });
       return;
     }
     setSubmitting(true);
-    setTimeout(() => {
+    try {
+      const results = (currentTest?.parameters ?? []).filter((param) => parameterValues[param.name]).map((param) => {
+        const value = Number(parameterValues[param.name]);
+        return { testName: param.name, value, unit: param.unit, referenceRange: param.refRange, status: getResultStatus(value, param.refRange) };
+      });
+      await submitLab({ patientId: selectedPatientId, testName: selectedTest, results, files: uploadedFiles.map((file) => ({ name: file.name, type: file.type, size: file.bytes })) });
       setSubmitting(false);
       toast({ title: "Results Submitted ✓", description: "Lab results sent to active doctor session." });
       setSelectedTest("");
       setParameterValues({});
       setUploadedFiles([]);
-    }, 1500);
+    } catch (error) {
+      setSubmitting(false);
+      toast({ title: "Submission failed", description: error instanceof Error ? error.message : "Unable to save lab results.", variant: "destructive" });
+    }
   };
 
   return (

@@ -32,13 +32,29 @@ interface Medication {
 }
 
 export default function DoctorPrescription() {
-  const { patients, selectedPatientId, activeEncounter, addPrescription, prescriptions, clinicalNotes, setClinicalNotes, diagnosis, setDiagnosis, submitEncounter, encounterSubmitted, ocrText, setOcrText } = useAppStore();
+  const {
+    patients,
+    selectedPatientId,
+    activeEncounter,
+    prescriptions,
+    clinicalNotes,
+    setClinicalNotes,
+    diagnosis,
+    setDiagnosis,
+    savePrescription,
+    completeTreatment,
+    encounterSubmitted,
+    ocrText,
+    setOcrText,
+  } = useAppStore();
   const { toast } = useToast();
   const patient = patients.find((p) => p.id === selectedPatientId) ?? patients[0];
 
   const [isDictating, setIsDictating] = useState(false);
   const [dictationText, setDictationText] = useState("");
   const [committing, setCommitting] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [committedMedicationCount, setCommittedMedicationCount] = useState(0);
   const [medications, setMedications] = useState<Medication[]>([
     { medicineName: "", dosage: "", frequency: "", duration: "" },
   ]);
@@ -155,22 +171,43 @@ export default function DoctorPrescription() {
     setMedications((prev) => prev.map((m, i) => (i === index ? { ...m, [field]: value } : m)));
   };
 
-  const handleCommit = () => {
+  const getValidMedications = () => {
     const validMeds = medications.filter((m) => m.medicineName.trim());
     if (validMeds.length === 0) {
       toast({ title: "Add Medications", description: "Please add at least one medication.", variant: "destructive" });
-      return;
+      return null;
     }
+    return validMeds;
+  };
+
+  const handleSave = () => {
+    const validMeds = getValidMedications();
+    if (!validMeds) return;
+    setSaving(true);
+    void savePrescription({ diagnosis, clinicalNotes, prescriptions: validMeds }).then(() => {
+      setSaving(false);
+      toast({ title: "Prescription Saved", description: "The treatment remains active. No clinical data was deleted." });
+    }).catch((error) => {
+      setSaving(false);
+      toast({ title: "Save failed", description: error instanceof Error ? error.message : "Unable to save prescription.", variant: "destructive" });
+    });
+  };
+
+  const handleComplete = () => {
+    const validMeds = getValidMedications();
+    if (!validMeds || !window.confirm("Declare this treatment complete? Detailed treatment data will be deleted and replaced by a summary node.")) return;
     setCommitting(true);
-    setTimeout(() => {
-      validMeds.forEach((med) => addPrescription(med));
-      submitEncounter();
+    void completeTreatment({ diagnosis, clinicalNotes, prescriptions: validMeds }).then(() => {
+      setCommittedMedicationCount(validMeds.length);
       setCommitting(false);
       toast({
-        title: "Prescription Committed ✓",
-        description: "Visit marked complete. Records updated in patient's lifetime health record.",
+        title: "Treatment Completed ✓",
+        description: "A summary node was created and the detailed treatment chain was deleted.",
       });
-    }, 2000);
+    }).catch((error) => {
+      setCommitting(false);
+      toast({ title: "Commit failed", description: error instanceof Error ? error.message : "Unable to commit treatment.", variant: "destructive" });
+    });
   };
 
   if (encounterSubmitted) {
@@ -197,7 +234,7 @@ export default function DoctorPrescription() {
             </div>
             <div className="flex justify-between">
               <span className="text-slate-400">Medications:</span>
-              <span className="font-medium">{prescriptions.length} prescribed</span>
+              <span className="font-medium">{committedMedicationCount || prescriptions.length} prescribed</span>
             </div>
           </div>
           <Button
@@ -467,24 +504,45 @@ export default function DoctorPrescription() {
       </Card>
 
       {/* Commit Button */}
-      <Button
-        size="lg"
-        className="w-full h-14 text-base bg-emerald-600 hover:bg-emerald-700"
-        onClick={handleCommit}
-        disabled={committing}
-      >
-        {committing ? (
+      <div className="space-y-3">
+        <Button
+          size="lg"
+          variant="outline"
+          className="w-full h-12 text-base border-cyan-300 text-cyan-700 hover:bg-cyan-50"
+          onClick={handleSave}
+          disabled={saving || committing}
+        >
+          {saving ? (
+            <span className="flex items-center gap-2">
+              <Loader2 className="h-5 w-5 animate-spin" />
+              Saving Prescription...
+            </span>
+          ) : (
+            <>Save Prescription (Treatment Continues)</>
+          )}
+        </Button>
+        <Button
+          size="lg"
+          className="w-full h-14 text-base bg-emerald-600 hover:bg-emerald-700"
+          onClick={handleComplete}
+          disabled={committing || saving}
+        >
+          {committing ? (
           <span className="flex items-center gap-2">
             <Loader2 className="h-5 w-5 animate-spin" />
-            Committing to Lifetime Record...
+            Completing Treatment...
           </span>
         ) : (
           <>
             <CheckCircle2 className="mr-2 h-5 w-5" />
-            Approve, Sign &amp; Commit to Lifetime Record
+            Declare Treatment Ended &amp; Create Summary
           </>
         )}
-      </Button>
+        </Button>
+        <p className="text-center text-xs text-slate-400">
+          Detailed treatment data is deleted only after the completion action is confirmed.
+        </p>
+      </div>
     </div>
   );
 }

@@ -1,221 +1,300 @@
-"use client";
+﻿"use client";
 
-import { useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Textarea } from "@/components/ui/textarea";
 import { useAppStore } from "@/lib/store";
-import type { SummaryInput, SummaryOutput } from "@/lib/aiTypes";
+import { runTriageEngine } from "@/lib/triageEngine";
+import { ClinicalSummaryOutput, type ConsultationPayload } from "@/types/consultation";
+import type { LabReport, Patient, Prescription, Vitals } from "@/lib/mockData";
+import ClinicalSummaryPanel from "@/components/ClinicalSummaryPanel";
 import {
   Brain,
-  AlertTriangle,
   Calendar,
   FlaskConical,
   Pill,
   FileText,
   ClipboardList,
   Stethoscope,
-  CheckCircle2,
   Shield,
   Activity,
   Heart,
   ChevronRight,
   Loader2,
+  Sparkles,
+  Users,
+  UserCheck,
 } from "lucide-react";
 
+// ΓöÇΓöÇΓöÇ ConsultationPayload built from live application state ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+// Builds the triage-engine input from LIVE data only:
+//  - patient demographics/allergies/chronic conditions: store (hydrated from
+//    the Neon database via /api/state -> loadPersistedState)
+//  - vitals: patient's self-reported vitals (persisted via /api/self-report)
+//  - lab reports: persisted reports filtered to this patient (/api/labs)
+//  - medications: prescriptions committed via /api/prescriptions/commit
+// No hardcoded demo patient is used anywhere in this flow.
+function buildConsultationPayload(
+  patient: Patient,
+  selfReport: Vitals | null,
+  chiefComplaint: string,
+  patientLabs: LabReport[],
+  committedPrescriptions: Prescription[]
+): ConsultationPayload {
+  return {
+    patient: {
+      healthId: patient.uniqueHealthId,
+      fullName: patient.name,
+      age: patient.age,
+      gender: patient.gender,
+      bloodGroup: patient.bloodGroup,
+      chronicConditions: patient.chronicConditions.map((c) => ({
+        conditionName: c,
+        diagnosedYear: "not recorded",
+        status: "active",
+      })),
+      allergies: patient.allergies.map((a) => ({
+        allergen: a,
+        allergyType: "unspecified",
+        severity: "per record",
+      })),
+      surgeries: [],
+      vaccinations: [],
+      activeMedications: committedPrescriptions.map((rx) => ({
+        drugName: rx.medicineName || "[unclear]",
+        dosage: rx.dosage || "not specified",
+        frequency: rx.frequency || "not specified",
+        prescribedFor: rx.duration
+          ? `duration: ${rx.duration}`
+          : "indication not recorded",
+      })),
+    },
+    currentVisit: {
+      chiefComplaint,
+      vitals: selfReport
+        ? {
+            bp: `${selfReport.bloodPressureSystolic}/${selfReport.bloodPressureDiastolic}`,
+            temp:
+              selfReport.temperature !== undefined
+                ? `${selfReport.temperature}`
+                : undefined,
+          }
+        : {},
+      todayLabReports: patientLabs.map((report) => {
+        let hasCritical = false;
+        let hasAbnormal = false;
+        const keyMetrics: Record<string, string> = {};
+        for (const result of report.results) {
+          if (result.status === "Critical") hasCritical = true;
+          else if (result.status !== "Normal") hasAbnormal = true;
+          keyMetrics[`${result.testName} (${result.status})`] =
+            `${result.value}${result.unit ? ` ${result.unit}` : ""}${
+              result.referenceRange ? ` [ref: ${result.referenceRange}]` : ""
+            }`;
+        }
+        return {
+          testName: report.testName,
+          keyMetrics,
+          status: hasCritical
+            ? ("critical" as const)
+            : hasAbnormal
+            ? ("abnormal" as const)
+            : ("normal" as const),
+        };
+      }),
+    },
+  };
+}
 export default function DoctorClinical() {
-  const { patients, selectedPatientId, timeline, labReports, encounters, selfReportVitals, prescriptions, ocrText } = useAppStore();
+  const {
+    patients,
+    selectedPatientId,
+    setSelectedPatientId,
+    timeline,
+    labReports,
+    encounters,
+    selfReportVitals,
+    prescriptions,
+  } = useAppStore();
   const patient = patients.find((p) => p.id === selectedPatientId) ?? patients[0];
   const patientTimeline = timeline.filter((t) => t.patientId === patient.id).slice(0, 6);
-  const patientFullTimeline = timeline.filter((t) => t.patientId === patient.id);
   const patientLabReports = labReports.filter((l) => l.patientId === patient.id);
-  const activeEncounter = encounters.find((e) => e.patientId === patient.id && e.status === "Active");
+  const activeEncounter = encounters.find(
+    (e) => e.patientId === patient.id && e.status === "Active"
+  );
 
-  const [generatedSummary, setGeneratedSummary] = useState<SummaryOutput & { patientId: string } | null>(null);
-  const [generatingSummary, setGeneratingSummary] = useState(false);
-  const [summaryError, setSummaryError] = useState("");
+  const [triageOutput, setTriageOutput] = useState<ClinicalSummaryOutput | null>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(true);
+  const [chiefComplaint, setChiefComplaint] = useState(
+    activeEncounter?.diagnosis || "Follow-up for chronic conditions"
+  );
 
-  // Only show a generated summary if it belongs to the currently selected patient.
-  const displaySummary =
-    generatedSummary && generatedSummary.patientId === patient.id ? generatedSummary : null;
+  // Run the triage engine on LIVE state: the store is hydrated from the Neon
+  // database (/api/state), vitals come from the patient self-report, labs from
+  // persisted lab reports, and medications from prescriptions committed via
+  // /api/prescriptions/commit. The old hardcoded mock payload is gone.
+  useEffect(() => {
+    setIsAnalyzing(true);
+    const patientSelfReport =
+      selfReportVitals && selectedPatientId === patient.id ? selfReportVitals : null;
+    const payload = buildConsultationPayload(
+      patient,
+      patientSelfReport,
+      chiefComplaint,
+      patientLabReports,
+      prescriptions
+    );
+    // Brief delay preserves the existing "AI analyzing" UX
+    const timer = setTimeout(() => {
+      const output = runTriageEngine(payload);
+      setTriageOutput(output);
+      setIsAnalyzing(false);
+    }, 1200);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [patient.id, selfReportVitals, prescriptions]);
 
-  const handleGenerateSummary = async () => {
-    setGeneratingSummary(true);
-    setSummaryError("");
-    try {
-      const payload: SummaryInput = {
-        patient,
-        selfReportVitals,
-        prescriptionText: ocrText?.trim() ? ocrText : null,
-        prescriptions: prescriptions.length > 0 ? prescriptions : null,
-        labReports: patientLabReports.length > 0 ? patientLabReports : null,
-        activeEncounter,
-        timeline: patientFullTimeline.length > 0 ? patientFullTimeline : null,
-      };
-      const res = await fetch("/api/summarize", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      const data = await res.json();
-      if (!res.ok || !data.success) {
-        setSummaryError(data?.error || "Summarization failed. Please try again.");
-        return;
-      }
-      setGeneratedSummary({
-        patientId: patient.id,
-        clinicalBrief: typeof data.clinicalBrief === "string" ? data.clinicalBrief : "",
-        riskBadges: Array.isArray(data.riskBadges) ? data.riskBadges : [],
-        focusAreas: Array.isArray(data.focusAreas) ? data.focusAreas : [],
-      });
-      if (!data.clinicalBrief) {
-        setSummaryError("The summary came back empty. Please try again.");
-      }
-    } catch {
-      setSummaryError("Could not reach the summarization service. Please try again.");
-    } finally {
-      setGeneratingSummary(false);
-    }
-  };
+  const handlePatientSwitch = useCallback((newPatientId: string) => {
+    if (newPatientId === patient.id) return;
+    setSelectedPatientId(newPatientId);
+  }, [patient.id, setSelectedPatientId]);
 
   const getTimelineIcon = (type: string) => {
     switch (type) {
-      case "Visit": return <Stethoscope className="h-3.5 w-3.5" />;
-      case "Lab": return <FlaskConical className="h-3.5 w-3.5" />;
-      case "Prescription": return <Pill className="h-3.5 w-3.5" />;
-      case "Self-Report": return <ClipboardList className="h-3.5 w-3.5" />;
-      default: return <FileText className="h-3.5 w-3.5" />;
+      case "Visit":
+        return <Stethoscope className="h-3.5 w-3.5" />;
+      case "Lab":
+        return <FlaskConical className="h-3.5 w-3.5" />;
+      case "Prescription":
+        return <Pill className="h-3.5 w-3.5" />;
+      case "Self-Report":
+        return <ClipboardList className="h-3.5 w-3.5" />;
+      default:
+        return <FileText className="h-3.5 w-3.5" />;
     }
   };
 
   return (
-    <div className="mx-auto max-w-screen-2xl p-4 sm:p-6">
-      {/* AI Summary Banner */}
-      <Card className="mb-6 border-cyan-200 bg-gradient-to-r from-cyan-50 via-white to-emerald-50">
-        <CardContent className="p-5">
-          <div className="flex items-start gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-cyan-600 text-white">
-              <Brain className="h-5 w-5" />
-            </div>
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-2 flex-wrap">
-                <h2 className="text-sm font-bold text-cyan-800">AI Pre-Consultation Summary</h2>
-                <Badge variant="outline" className="border-cyan-300 bg-cyan-50 text-cyan-700 text-[10px]">
-                  AI-generated
-                </Badge>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleGenerateSummary}
-                  disabled={generatingSummary}
-                  className="h-7 text-xs gap-1.5 bg-cyan-600 hover:bg-cyan-700 text-white"
-                >
-                  {generatingSummary ? (
-                    <Loader2 className="h-3 w-3 animate-spin" />
-                  ) : (
-                    <Activity className="h-3 w-3" />
-                  )}
-                  {generatingSummary ? "Generating..." : "Generate AI Summary"}
-                </Button>
+    <div className="mx-auto max-w-screen-2xl p-4 sm:p-6 space-y-6">
+      {/* ΓöÇΓöÇΓöÇ Patient Selector + Header ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */}
+      <Card className="border-slate-200">
+        <CardContent className="p-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
+                <Heart className="h-5 w-5" />
               </div>
-
-              {summaryError && (
-                <div className="mt-1 rounded-lg border border-red-200 bg-red-50 p-2.5 text-xs text-red-700 flex items-center gap-1.5">
-                  <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
-                  {summaryError}
+              <div>
+                <h3 className="text-sm font-bold text-slate-800">{patient.name}</h3>
+                <div className="flex items-center gap-2 text-xs text-slate-400">
+                  <span>
+                    {patient.gender}, {patient.age} yrs
+                  </span>
+                  <span>|</span>
+                  <span className="font-mono">{patient.uniqueHealthId}</span>
+                  <span>|</span>
+                  <span>{patient.bloodGroup}</span>
                 </div>
-              )}
-
-              {generatingSummary ? (
-                <div className="flex items-center gap-2 text-sm text-slate-500">
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Building summary from history, reports, vitals and prescription...
-                </div>
-              ) : displaySummary ? (
-                <>
-                  <p className="text-sm text-slate-600 leading-relaxed">{displaySummary.clinicalBrief}</p>
-
-                  {displaySummary.riskBadges.length > 0 && (
-                    <div className="mt-3 flex flex-wrap gap-1.5">
-                      {displaySummary.riskBadges.map((badge) => (
-                        <Badge
-                          key={badge.label}
-                          variant="outline"
-                          className={`text-xs ${
-                            badge.color === "red"
-                              ? "border-red-300 bg-red-50 text-red-700"
-                              : "border-amber-300 bg-amber-50 text-amber-700"
-                          }`}
-                        >
-                          <AlertTriangle className="mr-1 h-3 w-3" />
-                          {badge.label}
-                        </Badge>
-                      ))}
-                    </div>
-                  )}
-
-                  {displaySummary.focusAreas.length > 0 && (
-                    <div className="mt-3">
-                      <div className="text-xs font-semibold text-slate-500 mb-1.5">Key Focus Areas:</div>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
-                        {displaySummary.focusAreas.map((area, i) => (
-                          <div key={i} className="flex items-center gap-1.5 text-xs text-slate-600">
-                            <CheckCircle2 className="h-3 w-3 text-emerald-500 shrink-0" />
-                            {area}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </>
-              ) : (
-                <p className="text-sm text-slate-500">
-                  Generate an AI pre-consultation summary from the patient&apos;s history, reports, vitals and prescription.
-                </p>
-              )}
-
-              <p className="mt-2 text-[10px] text-slate-400 italic">
-                AI-generated for pre-consultation reference only — not a diagnosis.
-              </p>
+              </div>
             </div>
+            <div className="flex items-center gap-2">
+              {activeEncounter && (
+                <Badge className="bg-emerald-100 text-emerald-700 border-emerald-300 text-xs">
+                  <Activity className="mr-1 h-3 w-3" />
+                  Active Session
+                </Badge>
+              )}
+              <Badge variant="outline" className="border-cyan-200 bg-cyan-50 text-cyan-700 text-xs">
+                <Brain className="mr-1 h-3 w-3" />
+                AI Triage Active
+              </Badge>
+            </div>
+          </div>
+
+          {/* Patient Switcher */}
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <Users className="h-3.5 w-3.5 text-slate-400" />
+            <span className="text-[10px] font-medium text-slate-400 uppercase">Switch Patient:</span>
+            {patients.map((p) => (
+              <button
+                key={p.id}
+                onClick={() => handlePatientSwitch(p.id)}
+                className={`flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition-all ${
+                  p.id === patient.id
+                    ? "border-emerald-300 bg-emerald-50 text-emerald-700 shadow-sm"
+                    : "border-slate-200 bg-white text-slate-500 hover:border-slate-300 hover:bg-slate-50"
+                }`}
+              >
+                {p.id === patient.id && <UserCheck className="h-3 w-3" />}
+                {p.name}
+                <span className="font-mono text-[9px] opacity-60">({p.id})</span>
+              </button>
+            ))}
           </div>
         </CardContent>
       </Card>
 
-      {/* Split Screen Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-        {/* Left Panel: Timeline + Lab Results */}
-        <div className="lg:col-span-3 space-y-4">
-          {/* Patient Info Strip */}
-          <Card className="border-slate-200">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
-                    <Heart className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-bold text-slate-800">{patient.name}</h3>
-                    <div className="flex items-center gap-2 text-xs text-slate-400">
-                      <span>{patient.gender}, {patient.age} yrs</span>
-                      <span>|</span>
-                      <span className="font-mono">{patient.uniqueHealthId}</span>
-                      <span>|</span>
-                      <span>{patient.bloodGroup}</span>
-                    </div>
-                  </div>
-                </div>
-                {activeEncounter && (
-                  <Badge className="bg-emerald-100 text-emerald-700 border-emerald-300 text-xs">
-                    <Activity className="mr-1 h-3 w-3" />
-                    Active Session
-                  </Badge>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+      {/* ΓöÇΓöÇΓöÇ Chief Complaint Input ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */}
+      <Card className="border-slate-200">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm flex items-center gap-2">
+            <ClipboardList className="h-4 w-4 text-cyan-600" />
+            Chief Complaint
+          </CardTitle>
+          <CardDescription className="text-xs">
+            Patient&apos;s primary reason for today&apos;s visit
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Textarea
+            value={chiefComplaint}
+            onChange={(e) => setChiefComplaint(e.target.value)}
+            placeholder="Enter chief complaint..."
+            rows={2}
+            className="text-sm"
+          />
+        </CardContent>
+      </Card>
 
-          {/* Timeline */}
+      {/* ΓöÇΓöÇΓöÇ AI Clinical Summary ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */}
+      {isAnalyzing ? (
+        <Card className="border-cyan-200 bg-gradient-to-r from-cyan-50 via-white to-emerald-50">
+          <CardContent className="p-8 text-center">
+            <div className="flex flex-col items-center gap-3">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-cyan-100">
+                <Loader2 className="h-6 w-6 text-cyan-600 animate-spin" />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-cyan-800">
+                  AI Triage Engine Processing...
+                </h3>
+                <p className="text-xs text-slate-500 mt-1">
+                  Analyzing patient history, medications, lab results, and generating clinical summary
+                </p>
+              </div>
+              <div className="flex items-center gap-1.5 text-xs text-cyan-600">
+                <Sparkles className="h-3.5 w-3.5 animate-pulse" />
+                Analyzing drug interactions, risk factors, and care gaps
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      ) : triageOutput ? (
+        <ClinicalSummaryPanel
+          output={triageOutput}
+          patientName={patient.name}
+          healthId={patient.uniqueHealthId}
+        />
+      ) : null}
+
+      <Separator />
+
+      {/* ΓöÇΓöÇΓöÇ Split Screen: Timeline + Lab Results ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */}
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+        {/* Left Panel: Timeline */}
+        <div className="lg:col-span-3 space-y-4">
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-sm flex items-center gap-2">
@@ -235,10 +314,16 @@ export default function DoctorClinical() {
                       <div className="flex-1 rounded-md border border-slate-100 bg-white p-2.5">
                         <div className="flex items-start justify-between">
                           <div>
-                            <h4 className="text-xs font-semibold text-slate-700">{entry.title}</h4>
-                            <p className="text-[11px] text-slate-400 mt-0.5">{entry.description}</p>
+                            <h4 className="text-xs font-semibold text-slate-700">
+                              {entry.title}
+                            </h4>
+                            <p className="text-[11px] text-slate-400 mt-0.5">
+                              {entry.description}
+                            </p>
                           </div>
-                          <span className="text-[10px] text-slate-300 shrink-0 ml-2">{entry.date}</span>
+                          <span className="text-[10px] text-slate-300 shrink-0 ml-2">
+                            {entry.date}
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -270,18 +355,23 @@ export default function DoctorClinical() {
                   </div>
                   <div className="space-y-1.5">
                     {report.results.map((result) => (
-                      <div key={result.testName} className="flex items-center justify-between text-xs">
+                      <div
+                        key={result.testName}
+                        className="flex items-center justify-between text-xs"
+                      >
                         <span className="text-slate-500">{result.testName}</span>
                         <div className="flex items-center gap-2">
-                          <span className={`font-mono font-medium ${
-                            result.status === "Normal"
-                              ? "text-slate-700"
-                              : result.status === "Critical"
-                              ? "text-red-600 font-bold"
-                              : result.status === "High"
-                              ? "text-red-500"
-                              : "text-amber-500"
-                          }`}>
+                          <span
+                            className={`font-mono font-medium ${
+                              result.status === "Normal"
+                                ? "text-slate-700"
+                                : result.status === "Critical"
+                                ? "text-red-600 font-bold"
+                                : result.status === "High"
+                                ? "text-red-500"
+                                : "text-amber-500"
+                            }`}
+                          >
                             {result.value} {result.unit}
                           </span>
                           {result.status !== "Normal" && (
@@ -325,7 +415,13 @@ export default function DoctorClinical() {
                   <span className="font-semibold text-slate-500">Allergies:</span>{" "}
                   {patient.allergies.length > 0 ? (
                     patient.allergies.map((a) => (
-                      <Badge key={a} variant="outline" className="mr-1 border-red-300 bg-red-50 text-red-600 text-[10px]">{a}</Badge>
+                      <Badge
+                        key={a}
+                        variant="outline"
+                        className="mr-1 border-red-300 bg-red-50 text-red-600 text-[10px]"
+                      >
+                        {a}
+                      </Badge>
                     ))
                   ) : (
                     <span className="text-slate-400">None recorded</span>
@@ -334,7 +430,13 @@ export default function DoctorClinical() {
                 <div className="text-[11px] text-slate-600">
                   <span className="font-semibold text-slate-500">Chronic:</span>{" "}
                   {patient.chronicConditions.map((c) => (
-                    <Badge key={c} variant="outline" className="mr-1 border-amber-300 bg-amber-50 text-amber-600 text-[10px]">{c}</Badge>
+                    <Badge
+                      key={c}
+                      variant="outline"
+                      className="mr-1 border-amber-300 bg-amber-50 text-amber-600 text-[10px]"
+                    >
+                      {c}
+                    </Badge>
                   ))}
                 </div>
               </div>
@@ -347,7 +449,9 @@ export default function DoctorClinical() {
               <div className="flex items-center justify-between">
                 <div>
                   <div className="text-xs font-bold text-emerald-800">Ready to prescribe?</div>
-                  <div className="text-[11px] text-emerald-600 mt-0.5">Continue to the prescription builder</div>
+                  <div className="text-[11px] text-emerald-600 mt-0.5">
+                    Continue to the prescription builder
+                  </div>
                 </div>
                 <ChevronRight className="h-5 w-5 text-emerald-500" />
               </div>
@@ -358,3 +462,4 @@ export default function DoctorClinical() {
     </div>
   );
 }
+
