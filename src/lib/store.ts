@@ -86,6 +86,13 @@ interface AppState {
 
   encounterSubmitted: boolean;
   submitEncounter: () => void;
+
+  // OCR temporary UI state: holds the raw text extracted from the prescription
+  // image so the doctor can review/edit it before committing. This is NOT used
+  // as persistent medical storage — committed prescriptions go to the DB.
+  ocrText: string;
+  setOcrText: (text: string) => void;
+
   savePrescription: (input: { diagnosis: string; clinicalNotes: string; prescriptions: Prescription[] }) => Promise<void>;
   completeTreatment: (input: { diagnosis: string; clinicalNotes: string; prescriptions: Prescription[] }) => Promise<void>;
 
@@ -277,6 +284,10 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   encounterSubmitted: false,
   submitEncounter: () => set({ encounterSubmitted: true }),
+
+  ocrText: "",
+  setOcrText: (text) => set({ ocrText: text }),
+
   savePrescription: async (input) => {
     const patientId = get().selectedPatientId;
     const response = await fetch("/api/prescriptions/commit", {

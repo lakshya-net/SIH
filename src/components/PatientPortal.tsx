@@ -1,6 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> 19b1ffbfc4ff01a7e3541f6ab47e89d41fedef89
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -109,6 +114,10 @@ export default function PatientPortal() {
   const { toast } = useToast();
   const patient =
     patients.find((p) => p.id === selectedPatientId) ?? patients[0];
+<<<<<<< HEAD
+=======
+
+>>>>>>> 19b1ffbfc4ff01a7e3541f6ab47e89d41fedef89
 
   const [bpSystolic, setBpSystolic] = useState("");
   const [bpDiastolic, setBpDiastolic] = useState("");

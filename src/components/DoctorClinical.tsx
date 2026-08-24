@@ -1,6 +1,6 @@
-"use client";
-import { useEffect, useState, useCallback } from "react";
+﻿"use client";
 
+import { useEffect, useState, useCallback } from "react";
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
@@ -13,7 +13,8 @@ import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { useAppStore } from "@/lib/store";
 import { runTriageEngine } from "@/lib/triageEngine";
-import { ClinicalSummaryOutput } from "@/types/consultation";
+import { ClinicalSummaryOutput, type ConsultationPayload } from "@/types/consultation";
+import type { LabReport, Patient, Prescription, Vitals } from "@/lib/mockData";
 import ClinicalSummaryPanel from "@/components/ClinicalSummaryPanel";
 import {
   Brain,
@@ -33,11 +34,19 @@ import {
   UserCheck,
 } from "lucide-react";
 
-// ─── Mock ConsultationPayload for demonstration ───────────────────
-function buildMockPayload(
-  patientId: string,
-  vitals: { bp?: string; pulse?: string; temp?: string; spo2?: string },
+// ─── ConsultationPayload built from live application state ─────────
+// Builds the triage-engine input from LIVE data only:
+//  - patient demographics/allergies/chronic conditions: store (hydrated from
+//    the Neon database via /api/state -> loadPersistedState)
+//  - vitals: patient's self-reported vitals (persisted via /api/self-report)
+//  - lab reports: persisted reports filtered to this patient (/api/labs)
+//  - medications: prescriptions committed via /api/prescriptions/commit
+// No hardcoded demo patient is used anywhere in this flow.
+function buildConsultationPayload(
+  patient: Patient,
+  selfReport: Vitals | null,
   chiefComplaint: string,
+<<<<<<< HEAD
 ): import("@/types/consultation").ConsultationPayload {
   // Patient P001 — Rajesh Kumar
   const patients: Record<
@@ -173,39 +182,76 @@ function buildMockPayload(
 
   const p = patients[patientId] || patients["P001"];
 
+=======
+  patientLabs: LabReport[],
+  committedPrescriptions: Prescription[]
+): ConsultationPayload {
+>>>>>>> 19b1ffbfc4ff01a7e3541f6ab47e89d41fedef89
   return {
-    patient: p,
+    patient: {
+      healthId: patient.uniqueHealthId,
+      fullName: patient.name,
+      age: patient.age,
+      gender: patient.gender,
+      bloodGroup: patient.bloodGroup,
+      chronicConditions: patient.chronicConditions.map((c) => ({
+        conditionName: c,
+        diagnosedYear: "not recorded",
+        status: "active",
+      })),
+      allergies: patient.allergies.map((a) => ({
+        allergen: a,
+        allergyType: "unspecified",
+        severity: "per record",
+      })),
+      surgeries: [],
+      vaccinations: [],
+      activeMedications: committedPrescriptions.map((rx) => ({
+        drugName: rx.medicineName || "[unclear]",
+        dosage: rx.dosage || "not specified",
+        frequency: rx.frequency || "not specified",
+        prescribedFor: rx.duration
+          ? `duration: ${rx.duration}`
+          : "indication not recorded",
+      })),
+    },
     currentVisit: {
       chiefComplaint,
-      vitals,
-      todayLabReports: [
-        {
-          testName: "Comprehensive Metabolic Panel",
-          keyMetrics: {
-            "Glucose (Fasting)": 145,
-            HbA1c: 8.2,
-            "Total Cholesterol": 228,
-            "HDL Cholesterol": 38,
-            "LDL Cholesterol": 152,
-            Creatinine: 1.1,
-            BUN: 18,
-          },
-          status: "abnormal" as const,
-        },
-        {
-          testName: "CBC (Complete Blood Count)",
-          keyMetrics: {
-            Hemoglobin: 13.2,
-            "WBC Count": 7800,
-            "Platelet Count": 245000,
-            "RBC Count": 4.5,
-          },
-          status: "abnormal" as const,
-        },
-      ],
+      vitals: selfReport
+        ? {
+            bp: `${selfReport.bloodPressureSystolic}/${selfReport.bloodPressureDiastolic}`,
+            temp:
+              selfReport.temperature !== undefined
+                ? `${selfReport.temperature}`
+                : undefined,
+          }
+        : {},
+      todayLabReports: patientLabs.map((report) => {
+        let hasCritical = false;
+        let hasAbnormal = false;
+        const keyMetrics: Record<string, string> = {};
+        for (const result of report.results) {
+          if (result.status === "Critical") hasCritical = true;
+          else if (result.status !== "Normal") hasAbnormal = true;
+          keyMetrics[`${result.testName} (${result.status})`] =
+            `${result.value}${result.unit ? ` ${result.unit}` : ""}${
+              result.referenceRange ? ` [ref: ${result.referenceRange}]` : ""
+            }`;
+        }
+        return {
+          testName: report.testName,
+          keyMetrics,
+          status: hasCritical
+            ? ("critical" as const)
+            : hasAbnormal
+            ? ("abnormal" as const)
+            : ("normal" as const),
+        };
+      }),
     },
   };
 }
+
 export default function DoctorClinical() {
   const {
     patients,
@@ -214,6 +260,7 @@ export default function DoctorClinical() {
     timeline,
     labReports,
     encounters,
+<<<<<<< HEAD
     healthUpdates,
     medicalDocuments,
   } = useAppStore();
@@ -225,6 +272,16 @@ export default function DoctorClinical() {
   const patientLabReports = labReports.filter(
     (l) => l.patientId === patient.id,
   );
+=======
+    selfReportVitals,
+    prescriptions,
+    healthUpdates,
+    medicalDocuments,
+  } = useAppStore();
+  const patient = patients.find((p) => p.id === selectedPatientId) ?? patients[0];
+  const patientTimeline = timeline.filter((t) => t.patientId === patient.id).slice(0, 6);
+  const patientLabReports = labReports.filter((l) => l.patientId === patient.id);
+>>>>>>> 19b1ffbfc4ff01a7e3541f6ab47e89d41fedef89
   const patientHealthUpdates = healthUpdates.filter((update) => update.patientId === patient.id);
   const patientDocuments = medicalDocuments.filter((document) => document.patientId === patient.id);
   const activeEncounter = encounters.find(
@@ -238,27 +295,30 @@ export default function DoctorClinical() {
     activeEncounter?.diagnosis || "Follow-up for chronic conditions",
   );
 
-  // Run triage engine when patient changes
+  // Run the triage engine on LIVE state: the store is hydrated from the Neon
+  // database (/api/state), vitals come from the patient self-report, labs from
+  // persisted lab reports, and medications from prescriptions committed via
+  // /api/prescriptions/commit. The old hardcoded mock payload is gone.
   useEffect(() => {
     setIsAnalyzing(true);
-    const payload = buildMockPayload(
-      patient.id,
-      {
-        bp: "148/92",
-        pulse: "82",
-        temp: "98.4",
-        spo2: "96",
-      },
+    const patientSelfReport =
+      selfReportVitals && selectedPatientId === patient.id ? selfReportVitals : null;
+    const payload = buildConsultationPayload(
+      patient,
+      patientSelfReport,
       chiefComplaint,
+      patientLabReports,
+      prescriptions,
     );
-    // Simulate AI processing delay
+    // Brief delay preserves the existing "AI analyzing" UX
     const timer = setTimeout(() => {
       const output = runTriageEngine(payload);
       setTriageOutput(output);
       setIsAnalyzing(false);
     }, 1200);
     return () => clearTimeout(timer);
-  }, [patient.id, chiefComplaint]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [patient.id, selfReportVitals, prescriptions]);
 
   const handlePatientSwitch = useCallback(
     (newPatientId: string) => {
@@ -285,7 +345,7 @@ export default function DoctorClinical() {
 
   return (
     <div className="mx-auto max-w-screen-2xl p-4 sm:p-6 space-y-6">
-      {/* ─── Patient Selector + Header ────────────────────────────── */}
+      {/* ─── Patient Selector + Header ─────────────────────────────────── */}
       <Card className="border-slate-200">
         <CardContent className="p-4">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
@@ -352,7 +412,7 @@ export default function DoctorClinical() {
         </CardContent>
       </Card>
 
-      {/* ─── Chief Complaint Input ───────────────────────────────── */}
+      {/* ─── Chief Complaint Input ──────────────────────────────────────── */}
       <Card className="border-slate-200">
         <CardHeader className="pb-2">
           <CardTitle className="text-sm flex items-center gap-2">
@@ -374,7 +434,7 @@ export default function DoctorClinical() {
         </CardContent>
       </Card>
 
-      {/* ─── AI Clinical Summary ─────────────────────────────────── */}
+      {/* ─── AI Clinical Summary ────────────────────────────────────────── */}
       {isAnalyzing ? (
         <Card className="border-cyan-200 bg-gradient-to-r from-cyan-50 via-white to-emerald-50">
           <CardContent className="p-8 text-center">
@@ -475,7 +535,7 @@ export default function DoctorClinical() {
 
       <Separator />
 
-      {/* ─── Split Screen: Timeline + Lab Results ────────────────── */}
+      {/* ─── Split Screen: Timeline + Lab Results ──────────────────────── */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
         {/* Left Panel: Timeline */}
         <div className="lg:col-span-3 space-y-4">

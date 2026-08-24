@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,6 +20,8 @@ import {
   Loader2,
   Volume2,
   Stethoscope,
+  FileImage,
+  AlertTriangle,
 } from "lucide-react";
 
 interface Medication {
@@ -30,7 +32,21 @@ interface Medication {
 }
 
 export default function DoctorPrescription() {
-  const { patients, selectedPatientId, activeEncounter, prescriptions, clinicalNotes, setClinicalNotes, diagnosis, setDiagnosis, savePrescription, completeTreatment, encounterSubmitted } = useAppStore();
+  const {
+    patients,
+    selectedPatientId,
+    activeEncounter,
+    prescriptions,
+    clinicalNotes,
+    setClinicalNotes,
+    diagnosis,
+    setDiagnosis,
+    savePrescription,
+    completeTreatment,
+    encounterSubmitted,
+    ocrText,
+    setOcrText,
+  } = useAppStore();
   const { toast } = useToast();
   const patient = patients.find((p) => p.id === selectedPatientId) ?? patients[0];
 
@@ -42,6 +58,62 @@ export default function DoctorPrescription() {
   const [medications, setMedications] = useState<Medication[]>([
     { medicineName: "", dosage: "", frequency: "", duration: "" },
   ]);
+
+  const [ocrLoading, setOcrLoading] = useState(false);
+  const [ocrError, setOcrError] = useState("");
+  const [ocrFileName, setOcrFileName] = useState("");
+  const ocrInputRef = useRef<HTMLInputElement>(null);
+
+  const ALLOWED_OCR_MIME_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+
+  const handleOcrFile = async (file: File | undefined) => {
+    if (!file) return;
+    if (!ALLOWED_OCR_MIME_TYPES.includes(file.type)) {
+      setOcrError("Unsupported file type. Please upload a JPEG, PNG, or WEBP image.");
+      toast({ title: "Unsupported Image", description: "Please upload a JPEG, PNG, or WEBP prescription image.", variant: "destructive" });
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      setOcrError("Image is larger than the 10 MB limit.");
+      toast({ title: "Image Too Large", description: "Please upload an image under 10 MB.", variant: "destructive" });
+      return;
+    }
+    setOcrLoading(true);
+    setOcrError("");
+    setOcrFileName(file.name);
+    try {
+      const formData = new FormData();
+      formData.append("image", file);
+      const res = await fetch("/api/ocr", { method: "POST", body: formData });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        setOcrError(data?.error || "OCR failed. Please try again.");
+        return;
+      }
+      setOcrText(typeof data.rawText === "string" ? data.rawText : "");
+      const meds: Array<{
+        medicineName?: string;
+        dosage?: string;
+        frequency?: string;
+        duration?: string;
+      }> = Array.isArray(data.medications) ? data.medications : [];
+      if (meds.length > 0) {
+        setMedications(
+          meds.map((m) => ({
+            medicineName: m.medicineName ?? "[unclear]",
+            dosage: m.dosage ?? "[unclear]",
+            frequency: m.frequency ?? "[unclear]",
+            duration: m.duration ?? "[unclear]",
+          }))
+        );
+      }
+      toast({ title: "OCR Complete", description: `Extracted ${data.medications?.length ?? 0} medication(s). Review before committing.` });
+    } catch {
+      setOcrError("Could not reach the OCR service. Please try again.");
+    } finally {
+      setOcrLoading(false);
+    }
+  };
 
   const simulateDictation = () => {
     setIsDictating(true);
@@ -248,6 +320,73 @@ export default function DoctorPrescription() {
               {dictationText}
             </div>
           )}
+        </CardContent>
+      </Card>
+
+      {/* Scan Prescription (OCR) */}
+      <Card className="border-cyan-200">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-sm flex items-center gap-2">
+            <FileImage className="h-4 w-4 text-cyan-600" />
+            Scan Prescription
+          </CardTitle>
+          <CardDescription className="text-xs">
+            Upload a photo/scan of a handwritten or printed prescription to extract text and medications
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              size="lg"
+              onClick={() => ocrInputRef.current?.click()}
+              disabled={ocrLoading}
+            >
+              {ocrLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileImage className="h-4 w-4" />}
+              {ocrLoading ? "Extracting..." : "Choose Prescription Image"}
+            </Button>
+            <input
+              ref={ocrInputRef}
+              type="file"
+              accept="image/jpeg,image/jpg,image/png,image/webp"
+              className="hidden"
+              onChange={(e) => handleOcrFile(e.target.files?.[0])}
+              disabled={ocrLoading}
+            />
+            {!ocrLoading && ocrFileName && (
+              <span className="text-xs text-slate-500 truncate">{ocrFileName}</span>
+            )}
+          </div>
+
+          {ocrLoading && (
+            <div className="flex items-center gap-2 text-xs text-slate-500">
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              Extracting text and medications with AI...
+            </div>
+          )}
+
+          {ocrError && (
+            <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-xs text-red-700 flex items-center gap-1.5">
+              <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+              {ocrError}
+            </div>
+          )}
+
+          {ocrText.trim().length > 0 ? (
+            <div>
+              <div className="flex items-center gap-1.5 text-xs text-slate-400 mb-1">
+                <FileText className="h-3 w-3" />
+                Extracted text (editable — review and correct uncertain fields)
+              </div>
+              <Textarea
+                value={ocrText}
+                onChange={(e) => setOcrText(e.target.value)}
+                rows={4}
+                className="text-sm"
+                placeholder="Extracted prescription text appears here..."
+              />
+            </div>
+          ) : null}
         </CardContent>
       </Card>
 
