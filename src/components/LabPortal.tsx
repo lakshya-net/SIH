@@ -101,6 +101,7 @@ export default function LabPortal() {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTest, setSelectedTest] = useState("");
+  const [activeTab, setActiveTab] = useState("queue");
   const [parameterValues, setParameterValues] = useState<Record<string, string>>({});
   const [uploadedFiles, setUploadedFiles] = useState<{ name: string; size: string; preview: string; type: string; bytes: number }[]>([]);
   const [submitting, setSubmitting] = useState(false);
@@ -156,7 +157,11 @@ export default function LabPortal() {
 
   return (
     <div className="mx-auto max-w-6xl p-4 sm:p-6 space-y-6">
-      <Tabs defaultValue="queue" className="w-full">
+      <Tabs
+  value={activeTab}
+  onValueChange={setActiveTab}
+  className="w-full"
+>
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="queue" className="gap-1.5">
             <Users className="h-3.5 w-3.5" />
@@ -198,7 +203,10 @@ export default function LabPortal() {
                         ? "border-cyan-300 bg-cyan-50"
                         : "border-slate-100 hover:border-slate-200 hover:bg-slate-50"
                     }`}
-                    onClick={() => setSelectedPatientId(patient.patientId)}
+                    onClick={() => {
+  setSelectedPatientId(patient.patientId);
+  setActiveTab("test-entry");
+}}
                   >
                     <div className="flex items-center gap-3">
                       <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-sm font-bold text-slate-600">
