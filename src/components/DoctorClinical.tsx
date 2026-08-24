@@ -2,7 +2,13 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { useAppStore } from "@/lib/store";
@@ -28,7 +34,7 @@ import {
   UserCheck,
 } from "lucide-react";
 
-// ΓöÇΓöÇΓöÇ ConsultationPayload built from live application state ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+// ─── ConsultationPayload built from live application state ─────────
 // Builds the triage-engine input from LIVE data only:
 //  - patient demographics/allergies/chronic conditions: store (hydrated from
 //    the Neon database via /api/state -> loadPersistedState)
@@ -107,6 +113,7 @@ function buildConsultationPayload(
     },
   };
 }
+
 export default function DoctorClinical() {
   const {
     patients,
@@ -126,13 +133,14 @@ export default function DoctorClinical() {
   const patientHealthUpdates = healthUpdates.filter((update) => update.patientId === patient.id);
   const patientDocuments = medicalDocuments.filter((document) => document.patientId === patient.id);
   const activeEncounter = encounters.find(
-    (e) => e.patientId === patient.id && e.status === "Active"
+    (e) => e.patientId === patient.id && e.status === "Active",
   );
 
-  const [triageOutput, setTriageOutput] = useState<ClinicalSummaryOutput | null>(null);
+  const [triageOutput, setTriageOutput] =
+    useState<ClinicalSummaryOutput | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(true);
   const [chiefComplaint, setChiefComplaint] = useState(
-    activeEncounter?.diagnosis || "Follow-up for chronic conditions"
+    activeEncounter?.diagnosis || "Follow-up for chronic conditions",
   );
 
   // Run the triage engine on LIVE state: the store is hydrated from the Neon
@@ -148,7 +156,7 @@ export default function DoctorClinical() {
       patientSelfReport,
       chiefComplaint,
       patientLabReports,
-      prescriptions
+      prescriptions,
     );
     // Brief delay preserves the existing "AI analyzing" UX
     const timer = setTimeout(() => {
@@ -160,10 +168,13 @@ export default function DoctorClinical() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [patient.id, selfReportVitals, prescriptions]);
 
-  const handlePatientSwitch = useCallback((newPatientId: string) => {
-    if (newPatientId === patient.id) return;
-    setSelectedPatientId(newPatientId);
-  }, [patient.id, setSelectedPatientId]);
+  const handlePatientSwitch = useCallback(
+    (newPatientId: string) => {
+      if (newPatientId === patient.id) return;
+      setSelectedPatientId(newPatientId);
+    },
+    [patient.id, setSelectedPatientId],
+  );
 
   const getTimelineIcon = (type: string) => {
     switch (type) {
@@ -182,7 +193,7 @@ export default function DoctorClinical() {
 
   return (
     <div className="mx-auto max-w-screen-2xl p-4 sm:p-6 space-y-6">
-      {/* ΓöÇΓöÇΓöÇ Patient Selector + Header ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */}
+      {/* ─── Patient Selector + Header ─────────────────────────────────── */}
       <Card className="border-slate-200">
         <CardContent className="p-4">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
@@ -191,7 +202,9 @@ export default function DoctorClinical() {
                 <Heart className="h-5 w-5" />
               </div>
               <div>
-                <h3 className="text-sm font-bold text-slate-800">{patient.name}</h3>
+                <h3 className="text-sm font-bold text-slate-800">
+                  {patient.name}
+                </h3>
                 <div className="flex items-center gap-2 text-xs text-slate-400">
                   <span>
                     {patient.gender}, {patient.age} yrs
@@ -210,7 +223,10 @@ export default function DoctorClinical() {
                   Active Session
                 </Badge>
               )}
-              <Badge variant="outline" className="border-cyan-200 bg-cyan-50 text-cyan-700 text-xs">
+              <Badge
+                variant="outline"
+                className="border-cyan-200 bg-cyan-50 text-cyan-700 text-xs"
+              >
                 <Brain className="mr-1 h-3 w-3" />
                 AI Triage Active
               </Badge>
@@ -220,7 +236,9 @@ export default function DoctorClinical() {
           {/* Patient Switcher */}
           <div className="mt-3 flex flex-wrap items-center gap-2">
             <Users className="h-3.5 w-3.5 text-slate-400" />
-            <span className="text-[10px] font-medium text-slate-400 uppercase">Switch Patient:</span>
+            <span className="text-[10px] font-medium text-slate-400 uppercase">
+              Switch Patient:
+            </span>
             {patients.map((p) => (
               <button
                 key={p.id}
@@ -233,14 +251,16 @@ export default function DoctorClinical() {
               >
                 {p.id === patient.id && <UserCheck className="h-3 w-3" />}
                 {p.name}
-                <span className="font-mono text-[9px] opacity-60">({p.id})</span>
+                <span className="font-mono text-[9px] opacity-60">
+                  ({p.id})
+                </span>
               </button>
             ))}
           </div>
         </CardContent>
       </Card>
 
-      {/* ΓöÇΓöÇΓöÇ Chief Complaint Input ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */}
+      {/* ─── Chief Complaint Input ──────────────────────────────────────── */}
       <Card className="border-slate-200">
         <CardHeader className="pb-2">
           <CardTitle className="text-sm flex items-center gap-2">
@@ -262,7 +282,7 @@ export default function DoctorClinical() {
         </CardContent>
       </Card>
 
-      {/* ΓöÇΓöÇΓöÇ AI Clinical Summary ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */}
+      {/* ─── AI Clinical Summary ────────────────────────────────────────── */}
       {isAnalyzing ? (
         <Card className="border-cyan-200 bg-gradient-to-r from-cyan-50 via-white to-emerald-50">
           <CardContent className="p-8 text-center">
@@ -275,7 +295,8 @@ export default function DoctorClinical() {
                   AI Triage Engine Processing...
                 </h3>
                 <p className="text-xs text-slate-500 mt-1">
-                  Analyzing patient history, medications, lab results, and generating clinical summary
+                  Analyzing patient history, medications, lab results, and
+                  generating clinical summary
                 </p>
               </div>
               <div className="flex items-center gap-1.5 text-xs text-cyan-600">
@@ -362,7 +383,7 @@ export default function DoctorClinical() {
 
       <Separator />
 
-      {/* ΓöÇΓöÇΓöÇ Split Screen: Timeline + Lab Results ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */}
+      {/* ─── Split Screen: Timeline + Lab Results ──────────────────────── */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
         {/* Left Panel: Timeline */}
         <div className="lg:col-span-3 space-y-4">
@@ -419,10 +440,17 @@ export default function DoctorClinical() {
             </CardHeader>
             <CardContent className="space-y-4">
               {patientLabReports.map((report) => (
-                <div key={report.id} className="rounded-lg border border-slate-100 p-3">
+                <div
+                  key={report.id}
+                  className="rounded-lg border border-slate-100 p-3"
+                >
                   <div className="flex items-center justify-between mb-2">
-                    <h4 className="text-xs font-semibold text-slate-700">{report.testName}</h4>
-                    <span className="text-[10px] text-slate-400">{report.date}</span>
+                    <h4 className="text-xs font-semibold text-slate-700">
+                      {report.testName}
+                    </h4>
+                    <span className="text-[10px] text-slate-400">
+                      {report.date}
+                    </span>
                   </div>
                   <div className="space-y-1.5">
                     {report.results.map((result) => (
@@ -430,17 +458,19 @@ export default function DoctorClinical() {
                         key={result.testName}
                         className="flex items-center justify-between text-xs"
                       >
-                        <span className="text-slate-500">{result.testName}</span>
+                        <span className="text-slate-500">
+                          {result.testName}
+                        </span>
                         <div className="flex items-center gap-2">
                           <span
                             className={`font-mono font-medium ${
                               result.status === "Normal"
                                 ? "text-slate-700"
                                 : result.status === "Critical"
-                                ? "text-red-600 font-bold"
-                                : result.status === "High"
-                                ? "text-red-500"
-                                : "text-amber-500"
+                                  ? "text-red-600 font-bold"
+                                  : result.status === "High"
+                                    ? "text-red-500"
+                                    : "text-amber-500"
                             }`}
                           >
                             {result.value} {result.unit}
@@ -452,8 +482,8 @@ export default function DoctorClinical() {
                                 result.status === "Critical"
                                   ? "border-red-400 bg-red-50 text-red-700"
                                   : result.status === "High"
-                                  ? "border-red-300 bg-red-50 text-red-600"
-                                  : "border-amber-300 bg-amber-50 text-amber-600"
+                                    ? "border-red-300 bg-red-50 text-red-600"
+                                    : "border-amber-300 bg-amber-50 text-amber-600"
                               }`}
                             >
                               {result.status}
@@ -479,11 +509,15 @@ export default function DoctorClinical() {
             <CardContent className="p-4">
               <div className="flex items-center gap-2 mb-2">
                 <Shield className="h-4 w-4 text-amber-600" />
-                <span className="text-xs font-bold text-amber-800">Quick Reference</span>
+                <span className="text-xs font-bold text-amber-800">
+                  Quick Reference
+                </span>
               </div>
               <div className="space-y-1.5">
                 <div className="text-[11px] text-slate-600">
-                  <span className="font-semibold text-slate-500">Allergies:</span>{" "}
+                  <span className="font-semibold text-slate-500">
+                    Allergies:
+                  </span>{" "}
                   {patient.allergies.length > 0 ? (
                     patient.allergies.map((a) => (
                       <Badge
@@ -519,7 +553,9 @@ export default function DoctorClinical() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="text-xs font-bold text-emerald-800">Ready to prescribe?</div>
+                  <div className="text-xs font-bold text-emerald-800">
+                    Ready to prescribe?
+                  </div>
                   <div className="text-[11px] text-emerald-600 mt-0.5">
                     Continue to the prescription builder
                   </div>
