@@ -98,17 +98,15 @@ function TimelineStrip({
     </div>
   );
 }
-
 export default function PatientPortal() {
   const {
-    patients,
-    selectedPatientId,
-    timeline,
-    submitSelfReport,
-  } = useAppStore();
+  patients,
+  selectedPatientId,
+  timeline,
+  submitSelfReport,
+} = useAppStore();
   const { toast } = useToast();
-  const patient =
-    patients.find((p) => p.id === selectedPatientId) ?? patients[0];
+  const patient = patients.find((p) => p.id === selectedPatientId) ?? patients[0];
 
   const [bpSystolic, setBpSystolic] = useState("");
   const [bpDiastolic, setBpDiastolic] = useState("");
