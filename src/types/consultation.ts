@@ -46,7 +46,7 @@ export interface ConsultationPayload {
     };
     todayLabReports: Array<{
       testName: string;
-      keyMetrics: Record<string, any>;
+      keyMetrics: Record<string, number | string>;
       status: "normal" | "abnormal" | "critical";
     }>;
   };
