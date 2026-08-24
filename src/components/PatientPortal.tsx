@@ -18,6 +18,8 @@ import { useAppStore } from "@/lib/store";
 import { useToast } from "@/hooks/use-toast";
 import type { TimeLineEntry } from "@/lib/mockData";
 import { LanguageDropdown } from "@/components/LanguageSwitcher";
+import PatientInput from "@/components/PatientInput";
+import MedicalDocumentUpload from "@/components/MedicalDocumentUpload";
 import {
   Droplets,
   Phone,
@@ -34,6 +36,8 @@ import {
   Stethoscope,
   MapPin,
   UserRound,
+  ClipboardPen,
+  Upload,
 } from "lucide-react";
 
 function displayPatientLabel(value: unknown, field: "allergen" | "conditionName") {
@@ -299,14 +303,22 @@ export default function PatientPortal() {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="timeline" className="gap-1.5">
             <Calendar className="h-3.5 w-3.5" />
-            Lifetime History
+            History
           </TabsTrigger>
           <TabsTrigger value="self-report" className="gap-1.5">
             <Activity className="h-3.5 w-3.5" />
-            Self-Report Vitals
+            Vitals
+          </TabsTrigger>
+          <TabsTrigger value="health-update" className="gap-1.5">
+            <ClipboardPen className="h-3.5 w-3.5" />
+            Health Update
+          </TabsTrigger>
+          <TabsTrigger value="documents" className="gap-1.5">
+            <Upload className="h-3.5 w-3.5" />
+            Documents
           </TabsTrigger>
         </TabsList>
 
@@ -339,6 +351,34 @@ export default function PatientPortal() {
                   ))}
                 </div>
               </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="health-update" className="mt-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Health Update</CardTitle>
+              <CardDescription>
+                Enter your current symptoms and medical history before your consultation
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <PatientInput />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="documents" className="mt-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Medical Documents</CardTitle>
+              <CardDescription>
+                Upload prescriptions, lab reports, discharge summaries, or other medical records
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <MedicalDocumentUpload />
             </CardContent>
           </Card>
         </TabsContent>
