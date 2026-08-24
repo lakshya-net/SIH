@@ -16,22 +16,22 @@ import { uploadDocument } from "./storage";
 import type { FullPatientProfile, AllergyRecord, ChronicCondition } from "@/types/patientHistory";
 
 const globalForDb = globalThis as unknown as {
-  govehrPool?: Pool;
-  govehrInitialization?: Promise<void>;
+  sanjeevaniPool?: Pool;
+  sanjeevaniInitialization?: Promise<void>;
 };
 
 function getPool() {
-  if (globalForDb.govehrPool) return globalForDb.govehrPool;
+  if (globalForDb.sanjeevaniPool) return globalForDb.sanjeevaniPool;
   const databaseUrl = process.env.DATABASE_URL;
   if (!databaseUrl) {
     throw new Error("DATABASE_URL is required to connect to the Neon PostgreSQL database");
   }
-  globalForDb.govehrPool = new Pool({
+  globalForDb.sanjeevaniPool = new Pool({
     connectionString: databaseUrl,
     max: 10,
     idleTimeoutMillis: 30_000,
   });
-  return globalForDb.govehrPool;
+  return globalForDb.sanjeevaniPool;
 }
 
 const now = () => new Date().toISOString();
@@ -122,13 +122,13 @@ async function initializeDatabase() {
 }
 
 async function ensureDatabase() {
-  if (!globalForDb.govehrInitialization) {
-    globalForDb.govehrInitialization = initializeDatabase().catch((error) => {
-      globalForDb.govehrInitialization = undefined;
+  if (!globalForDb.sanjeevaniInitialization) {
+    globalForDb.sanjeevaniInitialization = initializeDatabase().catch((error) => {
+      globalForDb.sanjeevaniInitialization = undefined;
       throw error;
     });
   }
-  await globalForDb.govehrInitialization;
+  await globalForDb.sanjeevaniInitialization;
 }
 
 async function withTransaction<T>(callback: (client: PoolClient) => Promise<T>) {

@@ -51,7 +51,7 @@ export default function LandingPage() {
               <HeartPulse className="h-6 w-6 text-orange-500" />
             </div>
             <div>
-              <div className="text-lg font-bold tracking-tight">GovEHR</div>
+              <div className="text-lg font-bold tracking-tight">Sanjeevani</div>
               <div className="text-xs text-[#5b6476]">Connected care, one record</div>
             </div>
           </div>
@@ -106,7 +106,7 @@ export default function LandingPage() {
 
         <footer className="flex flex-col gap-2 border-t border-[#1f3963]/10 pt-5 text-xs text-[#5b6476] sm:flex-row sm:items-center sm:justify-between">
           <span>Designed for trusted, inclusive care delivery.</span>
-          <span className="text-[#1f3963]/60">GovEHR · v1.0</span>
+          <span className="text-[#1f3963]/60">Sanjeevani · v1.0</span>
         </footer>
       </div>
     </div>

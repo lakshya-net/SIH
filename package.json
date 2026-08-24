@@ -1,6 +1,7 @@
 {
-  "name": "ehr-system",
+  "name": "sanjeevani",
   "version": "0.1.0",
+  "description": "Sanjeevani — Centralized Government Electronic Health Record & Hospital Management System",
   "private": true,
   "scripts": {
     "dev": "next dev",

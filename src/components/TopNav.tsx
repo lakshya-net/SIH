@@ -56,7 +56,7 @@ export default function TopNav() {
             <Heart className="h-4 w-4 text-white" fill="currentColor" />
           </div>
           <div className="hidden sm:block">
-            <span className="text-sm font-bold tracking-tight text-slate-800">GovEHR</span>
+            <span className="text-sm font-bold tracking-tight text-slate-800">Sanjeevani</span>
             <span className="ml-1.5 text-xs text-slate-400">v1.0</span>
           </div>
         </div>
