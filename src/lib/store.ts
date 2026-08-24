@@ -7,13 +7,10 @@ import {
   Prescription,
   TimeLineEntry,
   Vitals,
-  mockPatients,
-  mockEncounters,
-  mockLabReports,
-  mockTimeline,
 } from "./mockData";
 import { ConsultationPayload, ClinicalSummaryOutput } from "@/types/consultation";
 import { runTriageEngine } from "./triageEngine";
+import type { FullPatientProfile } from "@/types/patientHistory";
 
 export interface HealthUpdate {
   id: string;
@@ -96,6 +93,8 @@ interface AppState {
   savePrescription: (input: { diagnosis: string; clinicalNotes: string; prescriptions: Prescription[] }) => Promise<void>;
   completeTreatment: (input: { diagnosis: string; clinicalNotes: string; prescriptions: Prescription[] }) => Promise<void>;
 
+  registerPatient: (profile: FullPatientProfile) => Promise<{ patientId: string; healthId: string; name: string }>;
+
   consultationPayload: ConsultationPayload | null;
   triageOutput: ClinicalSummaryOutput | null;
   setConsultationPayload: (payload: ConsultationPayload) => void;
@@ -103,7 +102,7 @@ interface AppState {
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
-  currentRole: "patient-portal",
+  currentRole: "landing",
   setRole: (role) => set({ currentRole: role }),
 
   isVerificationOpen: false,
@@ -111,17 +110,17 @@ export const useAppStore = create<AppState>((set, get) => ({
   verifiedPatientId: null,
   setVerifiedPatientId: (id) => set({ verifiedPatientId: id }),
 
-  selectedPatientId: "P001",
+  selectedPatientId: "",
   setSelectedPatientId: (id) =>
     set((state) => ({
       selectedPatientId: id,
       activeEncounter: state.encounters.find((encounter) => encounter.patientId === id && encounter.status === "Active") ?? null,
     })),
 
-  patients: mockPatients,
-  encounters: mockEncounters,
-  labReports: mockLabReports,
-  timeline: mockTimeline,
+  patients: [],
+  encounters: [],
+  labReports: [],
+  timeline: [],
   healthUpdates: [],
   medicalDocuments: [],
   databaseReady: false,
@@ -135,14 +134,12 @@ export const useAppStore = create<AppState>((set, get) => ({
       ) ?? null;
       set({ ...state, activeEncounter, databaseReady: true });
     } catch {
-      // The mock state remains available when the API is not running.
+      // Fallback to empty state when database is not available
+      console.warn("Database not available, using empty state");
     }
   },
 
-  activeEncounter:
-    mockEncounters.find(
-      (e) => e.status === "Active" && e.patientId === "P001",
-    ) ?? null,
+  activeEncounter: null,
   setActiveEncounter: (encounter) => set({ activeEncounter: encounter }),
 
   selfReportVitals: null,
@@ -306,6 +303,27 @@ export const useAppStore = create<AppState>((set, get) => ({
     if (!response.ok) throw new Error((await response.json()).error ?? "Unable to complete treatment");
     set({ encounterSubmitted: true });
     await get().loadPersistedState();
+  },
+
+  registerPatient: async (profile) => {
+    const response = await fetch("/api/patients/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(profile),
+    });
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error ?? "Unable to register patient");
+    }
+    const result = await response.json();
+    // Update store with newly registered patient
+    set({
+      selectedPatientId: result.patientId,
+    });
+    // Load the patient's data from database
+    await get().loadPersistedState();
+    set({ currentRole: "patient-portal" });
+    return result;
   },
 
   consultationPayload: null,

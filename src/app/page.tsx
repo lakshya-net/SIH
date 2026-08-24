@@ -10,6 +10,8 @@ import LabPortal from "@/components/LabPortal";
 import DoctorClinical from "@/components/DoctorClinical";
 import DoctorPrescription from "@/components/DoctorPrescription";
 import PatientIntakeWizard from "@/components/PatientIntakeWizard";
+import LandingPage from "@/components/LandingPage";
+import PatientAccess from "@/components/PatientAccess";
 
 export default function Home() {
   const { currentRole, loadPersistedState } = useAppStore();
@@ -20,6 +22,10 @@ export default function Home() {
 
   const renderView = () => {
     switch (currentRole) {
+      case "landing":
+        return <LandingPage />;
+      case "patient-access":
+        return <PatientAccess />;
       case "patient-portal":
         return <PatientPortal />;
       case "kiosk-mode":
@@ -33,15 +39,15 @@ export default function Home() {
       case "intake-registration":
         return <PatientIntakeWizard />;
       default:
-        return <PatientPortal />;
+        return <LandingPage />;
     }
   };
 
   return (
     <div className="min-h-screen bg-background">
-      <TopNav />
+      {currentRole !== "landing" && currentRole !== "patient-access" && currentRole !== "intake-registration" && <TopNav />}
       <main>{renderView()}</main>
-      <IdentityVerification />
+      {currentRole !== "landing" && currentRole !== "patient-access" && currentRole !== "intake-registration" && <IdentityVerification />}
     </div>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,6 +28,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useToast } from "@/hooks/use-toast";
+import { useAppStore } from "@/lib/store";
 import {
   FullPatientProfile,
   INITIAL_PATIENT_PROFILE,
@@ -72,6 +73,128 @@ import {
   Loader2,
   Search,
 } from "lucide-react";
+
+function DateOfBirthPicker({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  const today = new Date();
+  const currentYear = today.getFullYear();
+  const [year, month, day] = value
+    ? value.split("-").map(Number)
+    : [0, 0, 0];
+  const [selectedYear, setSelectedYear] = useState(year);
+  const [selectedMonth, setSelectedMonth] = useState(month);
+  const [selectedDay, setSelectedDay] = useState(day);
+
+  useEffect(() => {
+    setSelectedYear(year);
+    setSelectedMonth(month);
+    setSelectedDay(day);
+  }, [value, year, month, day]);
+
+  const years = Array.from({ length: 121 }, (_, index) => currentYear - index);
+  const months = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
+  const daysInMonth =
+    selectedYear && selectedMonth
+      ? new Date(selectedYear, selectedMonth, 0).getDate()
+      : 31;
+  const days = Array.from({ length: daysInMonth }, (_, index) => index + 1);
+
+  const updateDate = (part: "year" | "month" | "day", rawValue: string) => {
+    const nextYear = part === "year" ? Number(rawValue) : selectedYear;
+    const nextMonth = part === "month" ? Number(rawValue) : selectedMonth;
+    const requestedDay = part === "day" ? Number(rawValue) : selectedDay;
+    const nextDay =
+      nextYear && nextMonth
+        ? requestedDay
+          ? Math.min(requestedDay, new Date(nextYear, nextMonth, 0).getDate())
+          : 0
+        : requestedDay;
+
+    setSelectedYear(nextYear);
+    setSelectedMonth(nextMonth);
+    setSelectedDay(nextDay);
+    if (!nextYear || !nextMonth || !nextDay) return;
+
+    onChange(
+      `${nextYear.toString().padStart(4, "0")}-${nextMonth
+        .toString()
+        .padStart(2, "0")}-${nextDay.toString().padStart(2, "0")}`,
+    );
+  };
+
+  return (
+    <div className="space-y-2">
+      <div className="grid grid-cols-[0.8fr_1.4fr_1fr] gap-2">
+        <Select
+          value={selectedDay ? String(selectedDay) : undefined}
+          onValueChange={(nextDay) => updateDate("day", nextDay)}
+        >
+          <SelectTrigger aria-label="Day of birth">
+            <SelectValue placeholder="Day" />
+          </SelectTrigger>
+          <SelectContent>
+            {days.map((item) => (
+              <SelectItem key={item} value={String(item)}>
+                {item}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select
+          value={selectedMonth ? String(selectedMonth) : undefined}
+          onValueChange={(nextMonth) => updateDate("month", nextMonth)}
+        >
+          <SelectTrigger aria-label="Month of birth">
+            <SelectValue placeholder="Month" />
+          </SelectTrigger>
+          <SelectContent>
+            {months.map((item, index) => (
+              <SelectItem key={item} value={String(index + 1)}>
+                {item}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select
+          value={selectedYear ? String(selectedYear) : undefined}
+          onValueChange={(nextYear) => updateDate("year", nextYear)}
+        >
+          <SelectTrigger aria-label="Year of birth">
+            <SelectValue placeholder="Year" />
+          </SelectTrigger>
+          <SelectContent>
+            {years.map((item) => (
+              <SelectItem key={item} value={String(item)}>
+                {item}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      <p className="text-[11px] text-slate-400">
+        Choose day, month, and year separately. This is faster for older birth dates.
+      </p>
+    </div>
+  );
+}
 
 // ─── Step Definitions ──────────────────────────────────────────────
 const STEPS = [
@@ -275,10 +398,14 @@ function StepBasicInfo({
           <Label className="text-xs font-semibold">
             Date of Birth <span className="text-red-500">*</span>
           </Label>
-          <Input
-            type="date"
+          <DateOfBirthPicker
             value={profile.basicInfo.dob}
-            onChange={(e) => update("dob", e.target.value)}
+            onChange={(value) =>
+              onChange({
+                ...profile,
+                basicInfo: { ...profile.basicInfo, dob: value },
+              })
+            }
           />
           {errors.dob && <p className="text-xs text-red-500">{errors.dob}</p>}
         </div>
@@ -2071,6 +2198,7 @@ function StepReview({
 // ─── Main Wizard Component ────────────────────────────────────────
 export default function PatientIntakeWizard() {
   const { toast } = useToast();
+  const { registerPatient, setRole } = useAppStore();
   const [currentStep, setCurrentStep] = useState(1);
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
   const [profile, setProfile] = useState<FullPatientProfile>({
@@ -2130,19 +2258,33 @@ export default function PatientIntakeWizard() {
   };
 
   // ─── Submit ───────────────────────────────────────────────────
-  const handleSubmit = () => {
-    if (!profile.healthId) {
-      setProfile({ ...profile, healthId: generateHealthId() });
+  const handleSubmit = async () => {
+    const profileToSubmit = profile.healthId
+      ? profile
+      : { ...profile, healthId: generateHealthId() };
+    if (profileToSubmit.healthId !== profile.healthId) {
+      setProfile(profileToSubmit);
     }
     setSubmitting(true);
-    setTimeout(() => {
-      setSubmitting(false);
+    try {
+      await registerPatient(profileToSubmit);
       setSubmitted(true);
       toast({
         title: "Registration Complete! 🎉",
-        description: `Patient ${profile.basicInfo.fullName} has been successfully registered with ID ${profile.healthId}.`,
+        description: `Patient ${profile.basicInfo.fullName} has been successfully registered.`,
       });
-    }, 2000);
+      // Navigate to patient portal after 1.5 seconds
+      setTimeout(() => {
+        setRole("patient-portal");
+      }, 1500);
+    } catch (error) {
+      setSubmitting(false);
+      toast({
+        title: "Registration Failed",
+        description: error instanceof Error ? error.message : "Unable to register patient",
+        variant: "destructive",
+      });
+    }
   };
 
   // ─── Reset ────────────────────────────────────────────────────

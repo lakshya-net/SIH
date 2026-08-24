@@ -79,6 +79,8 @@ export interface TimeLineEntry {
 }
 
 export type AppRole =
+  | "landing"
+  | "patient-access"
   | "patient-portal"
   | "kiosk-mode"
   | "lab-portal"

@@ -37,6 +37,12 @@ import {
   UserRound,
 } from "lucide-react";
 
+function displayPatientLabel(value: unknown, field: "allergen" | "conditionName") {
+  return typeof value === "string"
+    ? value
+    : String((value as Record<string, unknown>)?.[field] ?? "");
+}
+
 function TimelineStrip({
   entry,
   index,
@@ -106,21 +112,32 @@ export default function PatientPortal() {
   patients,
   selectedPatientId,
   timeline,
-  healthUpdates,
   submitSelfReport,
-  setRole
 } = useAppStore();
-  const { toast } = useToast();
-  const patient = patients.find((p) => p.id === selectedPatientId) ?? patients[0];
-  const healthUpdate = healthUpdates.find((update) => update.patientId === patient.id);
-
-  const [bpSystolic, setBpSystolic] = useState("");
+const { toast } = useToast();
+const patient = patients.find((p) => p.id === selectedPatientId) ?? patients[0];
+const [bpSystolic, setBpSystolic] = useState("");
   const [bpDiastolic, setBpDiastolic] = useState("");
   const [sugarLevel, setSugarLevel] = useState("");
   const [temperature, setTemperature] = useState("");
   const [weight, setWeight] = useState("");
   const [symptoms, setSymptoms] = useState("");
   const [activeTab, setActiveTab] = useState("timeline");
+
+  if (!patient) {
+    return (
+      <div className="mx-auto max-w-2xl p-6">
+        <div className="rounded-lg border border-slate-200 bg-white p-8 text-center shadow-sm">
+          <h2 className="text-lg font-semibold text-slate-800">
+            No patient profile available
+          </h2>
+          <p className="mt-2 text-sm text-slate-500">
+            Complete patient registration before opening the patient portal.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   const patientTimeline = timeline.filter((t) => t.patientId === patient.id);
 
@@ -241,20 +258,20 @@ export default function PatientPortal() {
               <div className="flex flex-wrap gap-1">
                 {patient.allergies.map((a) => (
                   <Badge
-                    key={a}
+                    key={displayPatientLabel(a, "allergen")}
                     variant="outline"
                     className="border-red-300 bg-red-50 text-red-600 text-xs"
                   >
-                    {a}
+                    {displayPatientLabel(a, "allergen")}
                   </Badge>
                 ))}
                 {patient.chronicConditions.map((c) => (
                   <Badge
-                    key={c}
+                    key={displayPatientLabel(c, "conditionName")}
                     variant="outline"
                     className="border-amber-300 bg-amber-50 text-amber-600 text-xs"
                   >
-                    {c}
+                    {displayPatientLabel(c, "conditionName")}
                   </Badge>
                 ))}
               </div>
