@@ -169,11 +169,7 @@ export function runTriageEngine(payload: ConsultationPayload): ClinicalSummaryOu
   const severeAllergies = payload.patient.allergies.filter(
     (a) => a.severity === "severe / anaphylactic"
   );
-  const moderateAllergies = payload.patient.allergies.filter(
-    (a) => a.severity === "moderate"
-  );
 
-  // Check for drug allergies against current medications
   for (const allergy of payload.patient.allergies) {
     if (allergy.allergyType === "drug") {
       // Direct match check
@@ -202,9 +198,6 @@ export function runTriageEngine(payload: ConsultationPayload): ClinicalSummaryOu
       const crossReactive = DRUG_ALLERGY_CROSS_REACTIVITY[allergy.allergen] || [];
       for (const med of payload.patient.activeMedications) {
         if (crossReactive.some((cr) => med.drugName.toLowerCase().includes(cr.toLowerCase()))) {
-          const crossDrug = crossReactive.find((cr) =>
-            med.drugName.toLowerCase().includes(cr.toLowerCase())
-          );
           riskAlerts.push({
             id: uid(),
             level: "high",
@@ -292,9 +285,6 @@ export function runTriageEngine(payload: ConsultationPayload): ClinicalSummaryOu
   // ─── 4. CHRONIC CONDITION MONITORING ────────────────────────────
   const activeConditions = payload.patient.chronicConditions.filter(
     (c) => c.status === "active"
-  );
-  const managedConditions = payload.patient.chronicConditions.filter(
-    (c) => c.status === "managed"
   );
 
   for (const condition of activeConditions) {
@@ -449,7 +439,7 @@ export function runTriageEngine(payload: ConsultationPayload): ClinicalSummaryOu
       const threshold = CRITICAL_THRESHOLDS[testName];
       const numericValue = typeof value === "number" ? value : parseFloat(String(value));
 
-      let status: "normal" | "abnormal" | "critical" = report.status as any;
+      let status: "normal" | "abnormal" | "critical" = report.status;
       let clinicalSignificance = "";
 
       if (threshold && !isNaN(numericValue)) {
@@ -478,7 +468,7 @@ export function runTriageEngine(payload: ConsultationPayload): ClinicalSummaryOu
         referenceRange: threshold
           ? `${threshold.critical_low || "—"}–${threshold.critical_high || "—"} ${threshold.unit}`
           : "Lab-specific",
-        status: status as any,
+        status,
         clinicalSignificance,
       });
 
