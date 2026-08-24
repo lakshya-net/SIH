@@ -169,7 +169,7 @@ export function runTriageEngine(payload: ConsultationPayload): ClinicalSummaryOu
   const severeAllergies = payload.patient.allergies.filter(
     (a) => a.severity === "severe / anaphylactic"
   );
-
+  // Check for drug allergies against current medications
   for (const allergy of payload.patient.allergies) {
     if (allergy.allergyType === "drug") {
       // Direct match check
@@ -286,7 +286,6 @@ export function runTriageEngine(payload: ConsultationPayload): ClinicalSummaryOu
   const activeConditions = payload.patient.chronicConditions.filter(
     (c) => c.status === "active"
   );
-
   for (const condition of activeConditions) {
     // Check if condition-specific medications are present
     const conditionLower = condition.conditionName.toLowerCase();

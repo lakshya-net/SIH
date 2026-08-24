@@ -1,20 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useAppStore } from "@/lib/store";
 
 export default function PatientInput() {
   const [symptoms, setSymptoms] = useState("");
   const [medicalHistory, setMedicalHistory] = useState("");
-  useEffect(() => {
-  const savedUpdate = localStorage.getItem("patientHealthUpdate");
-
-  if (savedUpdate) {
-    const data = JSON.parse(savedUpdate);
-
-    setSymptoms(data.symptoms || "");
-    setMedicalHistory(data.medicalHistory || "");
-  }
-}, []);
+  const saveHealthUpdate = useAppStore((state) => state.saveHealthUpdate);
+  const [isSaving, setIsSaving] = useState(false);
 
   return (
     <div className="min-h-screen bg-slate-50 p-6">
@@ -57,29 +50,27 @@ export default function PatientInput() {
           </div>
 
           <button
-            onClick={() => {
-  if (!symptoms.trim() && !medicalHistory.trim()) {
-    alert("Please enter symptoms or medical history before saving.");
-    return;
-  }
-
-  localStorage.setItem(
-    "patientHealthUpdate",
-    JSON.stringify({
-      symptoms,
-      medicalHistory,
-      updatedAt: new Date().toLocaleString(),
-    })
-  );
-
-  alert("Health update saved successfully!");
-
-  setSymptoms("");
-  setMedicalHistory("");
-}}
+            onClick={async () => {
+              if (!symptoms.trim() && !medicalHistory.trim()) {
+                alert("Please enter symptoms or medical history before saving.");
+                return;
+              }
+              setIsSaving(true);
+              try {
+                await saveHealthUpdate({ symptoms, medicalHistory });
+                alert("Health update saved successfully!");
+                setSymptoms("");
+                setMedicalHistory("");
+              } catch (error) {
+                alert(error instanceof Error ? error.message : "Unable to save health update.");
+              } finally {
+                setIsSaving(false);
+              }
+            }}
+            disabled={isSaving}
             className="w-full rounded-lg bg-teal-600 px-4 py-3 font-semibold text-white hover:bg-teal-700"
           >
-            Save Health Update
+            {isSaving ? "Saving..." : "Save Health Update"}
           </button>
         </div>
       </div>
