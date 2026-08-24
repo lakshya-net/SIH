@@ -2,7 +2,6 @@
 import { useEffect, useState, useCallback } from "react";
 
 import { Badge } from "@/components/ui/badge";
-<<<<<<< HEAD
 import {
   Card,
   CardContent,
@@ -10,9 +9,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-=======
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
->>>>>>> ef6e0f74b2e6f33da9adcbf130238a7a7a6c3490
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { useAppStore } from "@/lib/store";
@@ -44,14 +40,10 @@ function buildMockPayload(
   chiefComplaint: string,
 ): import("@/types/consultation").ConsultationPayload {
   // Patient P001 — Rajesh Kumar
-<<<<<<< HEAD
   const patients: Record<
     string,
     import("@/types/consultation").ConsultationPayload["patient"]
   > = {
-=======
-  const patients: Record<string, import("@/types/consultation").ConsultationPayload["patient"]> = {
->>>>>>> ef6e0f74b2e6f33da9adcbf130238a7a7a6c3490
     P001: {
       healthId: "HID-8842-X",
       fullName: "Rajesh Kumar",
@@ -222,7 +214,8 @@ export default function DoctorClinical() {
     timeline,
     labReports,
     encounters,
-<<<<<<< HEAD
+    healthUpdates,
+    medicalDocuments,
   } = useAppStore();
   const patient =
     patients.find((p) => p.id === selectedPatientId) ?? patients[0];
@@ -232,16 +225,8 @@ export default function DoctorClinical() {
   const patientLabReports = labReports.filter(
     (l) => l.patientId === patient.id,
   );
-=======
-    healthUpdates,
-    medicalDocuments,
-  } = useAppStore();
-  const patient = patients.find((p) => p.id === selectedPatientId) ?? patients[0];
-  const patientTimeline = timeline.filter((t) => t.patientId === patient.id).slice(0, 6);
-  const patientLabReports = labReports.filter((l) => l.patientId === patient.id);
   const patientHealthUpdates = healthUpdates.filter((update) => update.patientId === patient.id);
   const patientDocuments = medicalDocuments.filter((document) => document.patientId === patient.id);
->>>>>>> ef6e0f74b2e6f33da9adcbf130238a7a7a6c3490
   const activeEncounter = encounters.find(
     (e) => e.patientId === patient.id && e.status === "Active",
   );

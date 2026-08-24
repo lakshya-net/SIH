@@ -2103,7 +2103,7 @@ export default function PatientIntakeWizard() {
       setErrors(newErrors);
       return Object.keys(newErrors).length === 0;
     },
-    [profile, t],
+    [profile],
   );
 
   // ─── Navigation ───────────────────────────────────────────────

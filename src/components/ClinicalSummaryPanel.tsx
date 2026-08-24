@@ -3,16 +3,12 @@
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-<<<<<<< HEAD
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
 } from "@/components/ui/card";
-=======
-import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
->>>>>>> ef6e0f74b2e6f33da9adcbf130238a7a7a6c3490
 import { cn } from "@/lib/utils";
 import {
   ClinicalSummaryOutput,
