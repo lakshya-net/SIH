@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Sanjeevni — GovEHR Project Documentation</title>
+<style>
+  @page { margin: 20mm 18mm; size: A4; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; color: #1e293b; line-height: 1.7; font-size: 11.5pt; }
+  
+  .cover { page-break-after: always; display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 100vh; text-align: center; background: linear-gradient(135deg, #065f46 0%, #0d9488 50%, #22d3ee 100%); color: white; padding: 60px 40px; }
+  .cover h1 { font-size: 36pt; font-weight: 800; margin-bottom: 10px; letter-spacing: -1px; }
+  .cover .subtitle { font-size: 16pt; font-weight: 300; opacity: 0.9; margin-bottom: 30px; }
+  .cover .tagline { font-size: 12pt; opacity: 0.75; max-width: 600px; margin-bottom: 40px; }
+  .cover .meta { font-size: 10pt; opacity: 0.6; }
+  .cover .logo-text { font-size: 60pt; margin-bottom: 20px; }
+  
+  .toc { page-break-after: always; padding: 40px 0; }
+  .toc h2 { font-size: 20pt; color: #065f46; margin-bottom: 20px; border-bottom: 3px solid #065f46; padding-bottom: 8px; }
+  .toc ol { padding-left: 24px; }
+  .toc li { margin: 8px 0; font-size: 12pt; }
+  .toc li a { color: #0d9488; text-decoration: none; }
+  
+  h2 { font-size: 18pt; color: #065f46; margin: 30px 0 12px 0; border-bottom: 2px solid #d1fae5; padding-bottom: 6px; }
+  h3 { font-size: 14pt; color: #0d9488; margin: 20px 0 8px 0; }
+  h4 { font-size: 12pt; color: #1e293b; margin: 14px 0 6px 0; }
+  p { margin: 6px 0 10px 0; text-align: justify; }
+  ul, ol { margin: 6px 0 12px 22px; }
+  li { margin: 3px 0; }
+  
+  .section { page-break-inside: avoid; margin-bottom: 16px; }
+  .page-break { page-break-before: always; }
+  
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 10.5pt; }
+  th { background: #065f46; color: white; padding: 8px 10px; text-align: left; font-weight: 600; }
+  td { padding: 7px 10px; border-bottom: 1px solid #e2e8f0; }
+  tr:nth-child(even) td { background: #f0fdfa; }
+  
+  .highlight-box { background: #f0fdfa; border-left: 4px solid #0d9488; padding: 12px 16px; margin: 12px 0; border-radius: 0 6px 6px 0; }
+  .warning-box { background: #fef3c7; border-left: 4px solid #f59e0b; padding: 12px 16px; margin: 12px 0; border-radius: 0 6px 6px 0; }
+  .viva-box { background: #ede9fe; border-left: 4px solid #7c3aed; padding: 14px 16px; margin: 14px 0; border-radius: 0 6px 6px 0; }
+  .viva-box h4 { color: #7c3aed; }
+  
+  .tech-badge { display: inline-block; background: #dbeafe; color: #1e40af; padding: 2px 10px; border-radius: 12px; font-size: 9.5pt; font-weight: 600; margin: 2px; }
+  .feature-card { background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px; margin: 8px 0; }
+  .feature-card h4 { color: #065f46; margin-bottom: 4px; }
+  
+  code { background: #f1f5f9; padding: 1px 5px; border-radius: 3px; font-size: 10pt; font-family: 'Consolas', 'Courier New', monospace; }
+  pre { background: #1e293b; color: #e2e8f0; padding: 14px; border-radius: 6px; overflow-x: auto; font-size: 9.5pt; margin: 10px 0; line-height: 1.5; }
+  
+  .flow-diagram { text-align: center; margin: 16px 0; padding: 20px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0; }
+  .flow-step { display: inline-block; background: #065f46; color: white; padding: 8px 16px; border-radius: 6px; margin: 4px; font-size: 10pt; font-weight: 600; }
+  .flow-arrow { display: inline-block; font-size: 16pt; color: #94a3b8; margin: 0 4px; vertical-align: middle; }
+  
+  .footer { text-align: center; margin-top: 40px; padding-top: 16px; border-top: 1px solid #e2e8f0; font-size: 9pt; color: #94a3b8; }
+</style>
+</head>
+<body>
+
+<!-- ==================== COVER PAGE ==================== -->
+<div class="cover">
+  <div class="logo-text">🏥</div>
+  <h1>Sanjeevni</h1>
+  <div class="subtitle">Government Electronic Health Record System (GovEHR)</div>
+  <div class="tagline">
+    An all-in-one centralized platform for government hospitals to record, track, and manage patient health history with AI-assisted clinical decision support.
+  </div>
+  <div class="meta">
+    <p>Smart India Hackathon (SIH) Project</p>
+    <p>Technology Stack: Next.js 14 · TypeScript · Tailwind CSS · PostgreSQL (Neon) · Gemini AI · AWS S3</p>
+    <p style="margin-top: 10px;">August 2026</p>
+  </div>
+</div>
+
+<!-- ==================== TABLE OF CONTENTS ==================== -->
+<div class="toc">
+  <h2>Table of Contents</h2>
+  <ol>
+    <li><a href="#overview">Project Overview</a></li>
+    <li><a href="#problem">Problem Statement & Motivation</a></li>
+    <li><a href="#architecture">System Architecture</a></li>
+    <li><a href="#tech-stack">Technology Stack</a></li>
+    <li><a href="#features">Main Features (6 Portals)</a></li>
+    <li><a href="#workflow">End-to-End Workflow</a></li>
+    <li><a href="#database">Database Design & Schema</a></li>
+    <li><a href="#ai-triage">AI Triage Engine</a></li>
+    <li><a href="#treatment-compaction">Treatment Compaction (USP)</a></li>
+    <li><a href="#ocr">OCR & Prescription Extraction</a></li>
+    <li><a href="#multilingual">Multilingual Support</a></li>
+    <li><a href="#identity">Identity Verification</a></li>
+    <li><a href="#api">API Endpoints</a></li>
+    <li><a href="#deployment">Setup & Deployment</a></li>
+    <li><a href="#viva">Viva Preparation — Frequently Asked Questions</a></li>
+  </ol>
+</div>
+
+<!-- ==================== 1. PROJECT OVERVIEW ==================== -->
+<div class="page-break"></div>
+<h2 id="overview">1. Project Overview</h2>
+<p>
+  <strong>Sanjeevni</strong> (named after the mythical healing herb from the Ramayana) is a comprehensive, centralized Government Electronic Health Record (EHR) and Hospital Management System designed for government hospitals across India. It provides a unified platform where patients, doctors, lab technicians, and hospital kiosks can interact with a single patient health record throughout their lifetime.
+</p>
+
+<div class="highlight-box">
+  <strong>Core Vision:</strong> Every citizen of India gets a single Unique Health ID (HID) that follows them across all government hospitals. All medical data — visits, prescriptions, lab results, self-reported vitals, surgical history, vaccinations — is chained as "clinical nodes" in a lifetime timeline. After each treatment completes, the data is <em>compacted</em> into a summary, keeping the active database lean while preserving full historical context.
+</div>
+
+<h3>Key Highlights</h3>
+<ul>
+  <li><strong>6 Role-Based Portals:</strong> Patient Portal, Kiosk Mode, Lab Portal, Doctor Clinical View, Doctor Prescription Builder, Patient Intake Wizard</li>
+  <li><strong>AI-Powered Triage:</strong> Built-in clinical decision support engine that checks drug interactions, allergy cross-reactivity, polypharmacy risks, critical lab values, and vital sign abnormalities</li>
+  <li><strong>Multilingual UI:</strong> Supports English, Hindi, and Bengali through a DOM-level translator and i18n framework</li>
+  <li><strong>Treatment Compaction:</strong> Unique data management approach where completed treatment chains are compressed into summaries, maintaining a clean active database</li>
+  <li><strong>Voice Input:</strong> Kiosk mode supports voice-based patient registration with multilingual speech transcription</li>
+  <li><strong>OCR Prescription Scanning:</strong> Upload prescription images and extract medications using Google Gemini AI</li>
+  <li><strong>Neon PostgreSQL:</strong> Serverless cloud database with automatic schema creation and mock data seeding</li>
+</ul>
+
+<!-- ==================== 2. PROBLEM STATEMENT ==================== -->
+<div class="page-break"></div>
+<h2 id="problem">2. Problem Statement & Motivation</h2>
+
+<h3>The Problem</h3>
+<ul>
+  <li>Government hospitals in India still rely on <strong>paper-based records</strong> or fragmented digital systems</li>
+  <li>Patient records are <strong>siloed</strong> within individual hospitals — there is no central repository</li>
+  <li>Patients visiting multiple hospitals must <strong>carry physical files</strong> or repeat tests</li>
+  <li>Doctors lack a <strong>complete medical history</strong> when treating patients from other hospitals</li>
+  <li>Language barriers prevent effective communication in <strong>multilingual India</strong></li>
+  <li>No standardized system for <strong>AI-assisted clinical decision support</strong> in government hospitals</li>
+</ul>
+
+<h3>Our Solution</h3>
+<p>
+  Sanjeevni creates a unified, lifetime health record for every patient with a Unique Health ID. The system captures data from multiple entry points (kiosk registration, patient self-report, doctor consultations, lab results, prescription scanning) and chains them into a coherent clinical timeline. An AI triage engine provides real-time clinical decision support to doctors, and treatment compaction ensures the system remains performant over decades of patient history.
+</p>
+
+<!-- ==================== 3. SYSTEM ARCHITECTURE ==================== -->
+<div class="page-break"></div>
+<h2 id="architecture">3. System Architecture</h2>
+
+<h3>High-Level Architecture</h3>
+<div class="flow-diagram">
+  <div class="flow-step">Patient Kiosk</div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-step">Next.js API Routes</div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-step">Neon PostgreSQL</div>
+  <br><br>
+  <div class="flow-step">Patient Portal</div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-step">React State (Zustand)</div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-step">API Layer</div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-step">Database</div>
+  <br><br>
+  <div class="flow-step">Doctor Clinical</div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-step">AI Triage Engine</div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-step">Clinical Summary</div>
+  <br><br>
+  <div class="flow-step">Lab Portal</div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-step">Test Results API</div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-step">Patient Record</div>
+</div>
+
+<h3>Frontend Architecture</h3>
+<ul>
+  <li><strong>Framework:</strong> Next.js 14 (App Router with Server Components)</li>
+  <li><strong>State Management:</strong> Zustand (single global store for all application state)</li>
+  <li><strong>UI Components:</strong> Custom component library built on Radix UI primitives + Tailwind CSS</li>
+  <li><strong>Routing:</strong> Role-based view switching via Zustand store (not URL routes)</li>
+  <li><strong>i18n:</strong> Dual approach — React context for Kiosk translations + DOM-level tree walker for page-wide translation</li>
+</ul>
+
+<h3>Backend Architecture</h3>
+<ul>
+  <li><strong>API Routes:</strong> 11 Next.js API route handlers under <code>/api/*</code></li>
+  <li><strong>Database:</strong> Neon PostgreSQL with lazy initialization and automatic schema creation</li>
+  <li><strong>Transactions:</strong> PostgreSQL transaction wrappers for atomic multi-table operations</li>
+  <li><strong>AI Integration:</strong> Google Gemini API for OCR and medical summarization</li>
+  <li><strong>Storage:</strong> AWS S3-compatible object storage for medical documents</li>
+</ul>
+
+<!-- ==================== 4. TECHNOLOGY STACK ==================== -->
+<div class="page-break"></div>
+<h2 id="tech-stack">4. Technology Stack</h2>
+
+<table>
+  <tr><th>Layer</th><th>Technology</th><th>Purpose</th></tr>
+  <tr><td>Framework</td><td>Next.js 14.2</td><td>Full-stack React framework with App Router, Server Components, API Routes</td></tr>
+  <tr><td>Language</td><td>TypeScript 5</td><td>Type-safe development with strict mode</td></tr>
+  <tr><td>UI Library</td><td>React 18</td><td>Component-based UI with hooks and concurrent features</td></tr>
+  <tr><td>Styling</td><td>Tailwind CSS 3.4</td><td>Utility-first CSS with custom design tokens</td></tr>
+  <tr><td>Components</td><td>Radix UI</td><td>Accessible, unstyled primitives (Dialog, Select, Tabs, Toast, etc.)</td></tr>
+  <tr><td>State</td><td>Zustand 5</td><td>Lightweight, immutable global state management</td></tr>
+  <tr><td>Database</td><td>Neon PostgreSQL</td><td>Serverless PostgreSQL with pg driver</td></tr>
+  <tr><td>AI</td><td>Google Gemini 3.6 Flash</td><td>OCR prescription extraction, medical summarization</td></tr>
+  <tr><td>Storage</td><td>AWS S3</td><td>Medical document storage (prescriptions, reports)</td></tr>
+  <tr><td>Icons</td><td>Lucide React</td><td>Beautiful, consistent iconography</td></tr>
+  <tr><td>Forms</td><td>Native React</td><td>Controlled components with validation</td></tr>
+  <tr><td>Toasts</td><td>Radix Toast</td><td>Non-intrusive notification system</td></tr>
+</table>
+
+<!-- ==================== 5. MAIN FEATURES ==================== -->
+<div class="page-break"></div>
+<h2 id="features">5. Main Features — The 6 Portals</h2>
+
+<h3>5.1 Patient Portal (<code>PatientPortal.tsx</code>)</h3>
+<div class="feature-card">
+  <h4>🟢 Purpose: Patient-facing web interface</h4>
+  <ul>
+    <li><strong>Patient Header Card:</strong> Displays name, Unique Health ID, blood group, gender, age, phone, address</li>
+    <li><strong>Allergies & Chronic Conditions:</strong> Prominently displayed amber/red badges for safety awareness</li>
+    <li><strong>Emergency Contacts:</strong> Quick access to next-of-kin information</li>
+    <li><strong>Lifetime Health Timeline:</strong> Chronological, scrollable list of all medical events (visits, labs, prescriptions, self-reports) with animated reveal on scroll using IntersectionObserver</li>
+    <li><strong>Self-Report Vitals:</strong> Form to submit home readings (blood pressure systolic/diastolic, blood sugar, temperature, weight, symptoms) — persisted to database via <code>/api/self-report</code></li>
+    <li><strong>Health Update Form:</strong> Submit current symptoms and medical history before consultation</li>
+    <li><strong>Medical Document Upload:</strong> Upload prescriptions, lab reports, discharge summaries to S3</li>
+  </ul>
+</div>
+
+<h3>5.2 Kiosk Mode (<code>KioskMode.tsx</code>)</h3>
+<div class="feature-card">
+  <h4>🎤 Purpose: Walk-in patient registration via voice</h4>
+  <ul>
+    <li><strong>Voice Input:</strong> Large microphone button with animated pulse rings and wave bars during recording</li>
+    <li><strong>Live Transcription:</strong> Real-time speech-to-text display (simulated with progressive word rendering)</li>
+    <li><strong>Auto-Fill Form:</strong> Patient name, age, complaint, and duration are automatically extracted from voice transcript</li>
+    <li><strong>Multilingual:</strong> Supports English, Hindi, and Bengali voice input and UI</li>
+    <li><strong>Registration Flow:</strong> Creates patient record in DB (or reuses existing by name match) and logs kiosk registration</li>
+    <li><strong>Success Screen:</strong> Confirmation with patient details and option to register another patient</li>
+  </ul>
+</div>
+
+<h3>5.3 Lab Portal (<code>LabPortal.tsx</code>)</h3>
+<div class="feature-card">
+  <h4>🔬 Purpose: Hospital lab test entry and result submission</h4>
+  <ul>
+    <li><strong>Active Queue:</strong> Searchable patient queue showing name, HID, wait time, and status (Waiting/In Progress/Completed)</li>
+    <li><strong>Test Entry:</strong> Select from predefined test types (CBC, Lipid Panel, Blood Sugar, X-Ray) with parameterized inputs</li>
+    <li><strong>Auto Status Detection:</strong> Automatically determines Normal/High/Low/Critical status based on reference ranges</li>
+    <li><strong>File Upload:</strong> Upload diagnostic files (PDF, JPG, PNG) alongside numeric results</li>
+    <li><strong>Submit to Doctor:</strong> Results are sent to the active doctor session in real-time</li>
+  </ul>
+</div>
+
+<h3>5.4 Doctor Clinical View (<code>DoctorClinical.tsx</code>)</h3>
+<div class="feature-card">
+  <h4>🧠 Purpose: AI-assisted clinical decision support for doctors</h4>
+  <ul>
+    <li><strong>Patient Selector:</strong> Switch between patients with one click; shows active session badge</li>
+    <li><strong>Chief Complaint:</strong> Editable text area for the patient's primary reason for today's visit</li>
+    <li><strong>AI Clinical Summary:</strong> Real-time analysis by the triage engine (drug interactions, allergy risks, polypharmacy warnings, critical lab alerts, vital sign abnormalities)</li>
+    <li><strong>Health Updates:</strong> Patient-submitted symptoms and medical history</li>
+    <li><strong>Medical Documents:</strong> Uploaded documents associated with the patient</li>
+    <li><strong>Timeline Panel:</strong> Patient's complete medical history in chronological order</li>
+    <li><strong>Lab Results Panel:</strong> Today's lab results with color-coded status indicators</li>
+    <li><strong>Quick Reference:</strong> Allergies and chronic conditions at a glance</li>
+  </ul>
+</div>
+
+<h3>5.5 Doctor Prescription Builder (<code>DoctorPrescription.tsx</code>)</h3>
+<div class="feature-card">
+  <h4>💊 Purpose: Prescription creation with voice and OCR support</h4>
+  <ul>
+    <li><strong>Voice Dictation:</strong> Dictate prescriptions naturally (e.g., "Paracetamol 650mg TDS for 5 days") with simulated real-time transcription and auto-populated medication rows</li>
+    <li><strong>OCR Prescription Scanner:</strong> Upload a prescription image → Gemini AI extracts medication names, dosages, frequencies, and durations</li>
+    <li><strong>Manual Entry:</strong> Add/edit/remove medication rows with drug name, dosage, frequency, duration</li>
+    <li><strong>Diagnosis & Clinical Notes:</strong> Free-text fields for diagnosis and clinical observations</li>
+    <li><strong>Save Prescription:</strong> Persists prescriptions to DB while keeping the encounter active</li>
+    <li><strong>Complete Treatment:</strong> Ends the encounter, triggers treatment compaction, creates a summary node</li>
+  </ul>
+</div>
+
+<h3>5.6 Patient Intake Wizard (<code>PatientIntakeWizard.tsx</code>)</h3>
+<div class="feature-card">
+  <h4>📋 Purpose: Comprehensive lifetime patient registration</h4>
+  <ul>
+    <li><strong>7-Step Wizard:</strong> Identity & Demographics → Chronic Conditions → Surgical History → Vaccinations → Active Medications → Allergies & Lifestyle → Final Review</li>
+    <li><strong>Unique Health ID:</strong> Auto-generated HID (e.g., HID-8842-X) on registration</li>
+    <li><strong>Phone Verification:</strong> OTP simulation for phone number verification</li>
+    <li><strong>Quick-Add Suggestions:</strong> Common conditions, vaccines, medications, and allergens for fast entry</li>
+    <li><strong>Search & Filter:</strong> Autocomplete search for conditions, vaccines, and medications</li>
+    <li><strong>Step Navigation:</strong> Progress indicator with clickable completed steps</li>
+    <li><strong>Final Review:</strong> Summary of all entered information before submission</li>
+  </ul>
+</div>
+
+<!-- ==================== 6. WORKFLOW ==================== -->
+<div class="page-break"></div>
+<h2 id="workflow">6. End-to-End Workflow</h2>
+
+<h3>Component 1: Initial Patient Input (Point of Entry)</h3>
+<ol>
+  <li><strong>Walk-in Registration:</strong> Patient arrives at hospital kiosk → speaks details in their language → system auto-fills registration form → generates Unique Health ID</li>
+  <li><strong>Identity Verification:</strong> OTP-based or National ID (Aadhaar) verification audit record is created</li>
+  <li><strong>Full Registration:</strong> Patient fills 7-step intake wizard (demographics, conditions, surgeries, vaccines, medications, allergies, lifestyle)</li>
+  <li><strong>Self-Report:</strong> Patient can submit home vitals (BP, sugar, temperature) through the Patient Portal</li>
+</ol>
+
+<h3>Component 2: Recurring Input</h3>
+<ol>
+  <li><strong>Hospital Lab:</strong> Lab technician searches patient by name or HID → enters test parameters → uploads diagnostic files → submits results to active doctor session</li>
+  <li><strong>Doctor Consultation:</strong> Doctor enters patient's HID → reviews complete medical history → AI triage engine analyzes and provides clinical decision support</li>
+  <li><strong>Prescription:</strong> Doctor dictates or scans prescription → reviews extracted medications → saves to patient record</li>
+  <li><strong>Document Upload:</strong> MRI, X-Ray, CT Scan reports uploaded from hospital systems</li>
+</ol>
+
+<h3>Component 3: Data Storage & Compaction (USP)</h3>
+<ol>
+  <li><strong>Chained Instances:</strong> Each patient interaction (visit, lab, prescription, self-report) creates a "clinical node" chained to the patient's record</li>
+  <li><strong>Active Treatment:</strong> While treatment is ongoing, all detailed data (vitals, prescriptions, lab results, documents) is preserved in the database</li>
+  <li><strong>Treatment Completion:</strong> Doctor declares treatment ended → system compacts the treatment chain:
+    <ul>
+      <li>Detailed clinical nodes, vitals, prescriptions, lab reports, and documents are <strong>deleted</strong> from the active database</li>
+      <li>A <strong>treatment summary</strong> node is created with diagnosis, notes, key findings, and medication names</li>
+      <li>The encounter status changes from "Active" to "Completed"</li>
+    </ul>
+  </li>
+  <li><strong>Lifetime History:</strong> Compacted summaries remain in the patient's timeline for future reference</li>
+</ol>
+
+<h3>Component 4: Patient History Fetching</h3>
+<ol>
+  <li>Doctor logs in → enters patient's Unique Health ID</li>
+  <li>System pulls complete medical history: all visits, lab results, prescriptions, treatment summaries</li>
+  <li>Doctor can review history, add prescriptions, or end the current treatment</li>
+</ol>
+
+<!-- ==================== 7. DATABASE DESIGN ==================== -->
+<div class="page-break"></div>
+<h2 id="database">7. Database Design & Schema</h2>
+
+<h3>Database Tables (11 tables)</h3>
+<table>
+  <tr><th>Table</th><th>Purpose</th><th>Key Fields</th></tr>
+  <tr><td><code>patients</code></td><td>Core patient demographics</td><td>id, unique_health_id, name, age, gender, blood_group, phone, address, emergency_contacts_json, allergies_json, chronic_conditions_json</td></tr>
+  <tr><td><code>encounters</code></td><td>Doctor visit sessions</td><td>id, patient_id, doctor_id, date, status (Active/Completed), diagnosis, clinical_notes</td></tr>
+  <tr><td><code>clinical_nodes</code></td><td>Timeline events (visits, labs, prescriptions, self-reports)</td><td>id, patient_id, encounter_id, node_type, title, description, payload_json</td></tr>
+  <tr><td><code>treatment_summaries</code></td><td>Compacted treatment records</td><td>id, patient_id, encounter_id, summary, diagnosis, key_findings_json</td></tr>
+  <tr><td><code>vitals</code></td><td>Self-reported and clinical vitals</td><td>systolic, diastolic, sugar, temperature, weight, symptoms</td></tr>
+  <tr><td><code>lab_reports</code></td><td>Lab test reports</td><td>test_name, report_date, doctor_id</td></tr>
+  <tr><td><code>lab_results</code></td><td>Individual lab test values</td><td>test_name, value, unit, reference_range, status</td></tr>
+  <tr><td><code>prescriptions</code></td><td>Medication prescriptions</td><td>medicine_name, dosage, frequency, duration</td></tr>
+  <tr><td><code>identity_verifications</code></td><td>OTP/National ID audit trail</td><td>method, phone_last4, national_id_hash</td></tr>
+  <tr><td><code>kiosk_registrations</code></td><td>Kiosk walk-in records</td><td>name, age, complaint, language, transcript</td></tr>
+  <tr><td><code>document_metadata</code></td><td>Uploaded file references</td><td>file_name, mime_type, size_bytes, storage_key</td></tr>
+  <tr><td><code>health_updates</code></td><td>Patient-submitted symptoms</td><td>symptoms, medical_history</td></tr>
+</table>
+
+<h3>Schema Features</h3>
+<ul>
+  <li><strong>Lazy Initialization:</strong> Schema is created on first API request — no database needed for <code>next build</code></li>
+  <li><strong>Auto-Seeding:</strong> Development mode seeds mock patients, encounters, lab reports, and timeline entries</li>
+  <li><strong>JSONB Columns:</strong> Emergency contacts, allergies, chronic conditions stored as JSONB for flexibility</li>
+  <li><strong>Database Indexes:</strong> Optimized indexes on patient_id + date for clinical nodes, lab reports, and health updates</li>
+  <li><strong>Transaction Support:</strong> <code>withTransaction()</code> helper ensures atomic multi-table operations</li>
+</ul>
+
+<!-- ==================== 8. AI TRIAGE ENGINE ==================== -->
+<div class="page-break"></div>
+<h2 id="ai-triage">8. AI Triage Engine</h2>
+
+<p>
+  The triage engine (<code>triageEngine.ts</code>) is a rule-based clinical decision support system that runs entirely in-memory (no external API calls). It analyzes the consultation payload and generates:
+</p>
+
+<h3>8 Risk Categories Analyzed</h3>
+<ol>
+  <li><strong>Allergy Risk Checks:</strong> Direct drug-allergy matching, cross-reactivity detection (e.g., Penicillin → Amoxicillin), severe allergy alerts</li>
+  <li><strong>Drug Interaction Checks:</strong> 10 known drug pairs checked (e.g., Warfarin + Aspirin = major bleeding risk)</li>
+  <li><strong>Polypharmacy Warning:</strong> Flags when patient has ≥5 concurrent medications</li>
+  <li><strong>Chronic Condition Monitoring:</strong> Checks for unmedicated conditions, worsening HbA1c, elevated blood pressure</li>
+  <li><strong>Vital Signs Assessment:</strong> Hypertensive emergency (>180/120), critical SpO2 (<90%), high fever (>39.5°F)</li>
+  <li><strong>Lab Result Analysis:</strong> 10 critical thresholds for glucose, HbA1c, cholesterol, hemoglobin, creatinine, WBC, platelets, sodium, potassium</li>
+  <li><strong>Care Recommendations:</strong> Prioritized actionable items based on findings</li>
+  <li><strong>Clinical Summary:</strong> Weighted risk score with severity levels (critical/high/moderate/low/informational)</li>
+</ol>
+
+<h3>Drug Allergy Cross-Reactivity Database</h3>
+<table>
+  <tr><th>Known Allergy</th><th>Cross-Reactive Drugs</th></tr>
+  <tr><td>Penicillin</td><td>Amoxicillin, Ampicillin, Piperacillin</td></tr>
+  <tr><td>Sulfa drugs</td><td>Sulfamethoxazole, Sulfasalazine, Celecoxib</td></tr>
+  <tr><td>Aspirin</td><td>Ibuprofen, Naproxen, Diclofenac</td></tr>
+</table>
+
+<div class="viva-box">
+  <h4>💡 Viva Point: Why Rule-Based Instead of ML?</h4>
+  <p>The triage engine uses a deterministic rule-based approach rather than machine learning for several reasons:</p>
+  <ul>
+    <li><strong>Explainability:</strong> Every alert has clear evidence and reasoning that can be audited by doctors</li>
+    <li><strong>Reliability:</strong> No risk of model hallucination or unpredictable outputs in critical medical scenarios</li>
+    <li><strong>Compliance:</strong> Deterministic rules are easier to validate for medical device regulations</li>
+    <li><strong>Performance:</strong> Runs in milliseconds with no external API calls</li>
+  </ul>
+</div>
+
+<!-- ==================== 9. TREATMENT COMPACTION ==================== -->
+<div class="page-break"></div>
+<h2 id="treatment-compaction">9. Treatment Compaction (Unique Selling Point)</h2>
+
+<div class="highlight-box">
+  <strong>The Core Innovation:</strong> After any treatment or procedure is completed, the entire chain of clinical data is compressed. Relevant information for future reference is extracted and stored as a summary node, while the detailed treatment chain is deleted from the active database.
+</div>
+
+<h3>How Treatment Compaction Works</h3>
+<ol>
+  <li><strong>Save Prescription:</strong> Doctor saves prescriptions → data is persisted → encounter remains Active → no data is deleted</li>
+  <li><strong>Complete Treatment:</strong> Doctor clicks "Declare Treatment Ended & Create Summary"
+    <ul>
+      <li>A single PostgreSQL transaction is initiated</li>
+      <li>All prescriptions for the encounter are saved</li>
+      <li>A <code>treatment_summaries</code> row is created with diagnosis, notes, and key findings</li>
+      <li>A "Treatment Summary" clinical node is created in the patient's timeline</li>
+      <li><strong>Detailed data is deleted:</strong> clinical nodes, vitals, lab reports/results, document metadata, prescriptions</li>
+      <li>Encounter status is updated from "Active" to "Completed"</li>
+      <li>Encounter diagnosis and clinical notes are set to NULL (preserved only in summary)</li>
+    </ul>
+  </li>
+</ol>
+
+<h3>Why This Matters</h3>
+<ul>
+  <li><strong>Performance:</strong> Active database stays small — only current treatments have full detail</li>
+  <li><strong>Storage Efficiency:</strong> Detailed data from completed treatments doesn't accumulate indefinitely</li>
+  <li><strong>Historical Preservation:</strong> Treatment summaries contain the essential information for continuity of care</li>
+  <li><strong>Privacy:</strong> Reduces the attack surface by minimizing stored sensitive data</li>
+</ul>
+
+<!-- ==================== 10. OCR ==================== -->
+<div class="page-break"></div>
+<h2 id="ocr">10. OCR & Prescription Extraction</h2>
+
+<h3>How It Works</h3>
+<ol>
+  <li>Doctor uploads a prescription image (JPEG, PNG, WEBP — max 10MB)</li>
+  <li>Image is sent to <code>/api/ocr</code> endpoint as FormData</li>
+  <li>Server converts image to base64 and sends to <strong>Google Gemini 3.6 Flash</strong> with a structured prompt</li>
+  <li>Gemini analyzes the image and returns JSON with extracted medications:
+    <pre>{
+  "rawText": "Full OCR text...",
+  "medications": [
+    { "medicineName": "Paracetamol", "dosage": "650mg", "frequency": "TDS", "duration": "5 days" }
+  ]
+}</pre>
+  </li>
+  <li>Medications are auto-populated in the prescription builder for doctor review</li>
+  <li>Doctor can edit, add, or remove medications before saving</li>
+</ol>
+
+<h3>AI Summarization (<code>/api/summarize</code>)</h3>
+<p>
+  Uses Gemini to generate patient-friendly summaries of medical reports. Takes raw medical text and returns a simplified explanation suitable for patients.
+</p>
+
+<!-- ==================== 11. MULTILINGUAL ==================== -->
+<div class="page-break"></div>
+<h2 id="multilingual">11. Multilingual Support</h2>
+
+<h3>Dual Translation Approach</h3>
+
+<h4>1. React i18n Context (for Kiosk Mode)</h4>
+<ul>
+  <li><code>I18nProvider</code> wraps the application with language context</li>
+  <li><code>useI18n()</code> hook provides <code>t(key)</code> translation function</li>
+  <li>Supports English (en), Hindi (hi), Bengali (bn)</li>
+  <li>Language persisted in localStorage with key <code>govehr-language</code></li>
+  <li>Kiosk-specific translations in <code>mockData.ts</code></li>
+</ul>
+
+<h4>2. DOM-Level Translator (for Full Page Translation)</h4>
+<ul>
+  <li><code>DomTranslator</code> component walks the rendered DOM and replaces English text with Hindi translations</li>
+  <li>Uses a TreeWalker to iterate over all text nodes</li>
+  <li>Pre-sorted dictionary (longest key first) for greedy substring matching</li>
+  <li>Protected from translating: inputs, code blocks, SVG, doctor-facing sections (<code>data-no-translate</code> attribute)</li>
+  <li><code>MutationObserver</code> integration keeps translations in sync with React re-renders</li>
+  <li>Patient data (names, IDs, medical values) are never translated because they don't appear as exact dictionary keys</li>
+</ul>
+
+<div class="viva-box">
+  <h4>💡 Viva Point: Why DOM-Level Translation?</h4>
+  <p>The DOM translator was chosen for full-page translation because:</p>
+  <ul>
+    <li>It translates <em>everything</em> without modifying React source code</li>
+    <li>Works with dynamically rendered content via MutationObserver</li>
+    <li>Doctor-facing sections are excluded via <code>data-no-translate</code> attribute — ensuring medical terminology stays in English</li>
+    <li>Patient data (names, IDs, phone numbers) are automatically excluded since they never match dictionary keys</li>
+  </ul>
+</div>
+
+<!-- ==================== 12. IDENTITY VERIFICATION ==================== -->
+<div class="page-break"></div>
+<h2 id="identity">12. Identity Verification</h2>
+
+<p>
+  The <code>IdentityVerification</code> component provides two verification methods:
+</p>
+<ul>
+  <li><strong>OTP Verification:</strong> Simulated OTP sent to phone number → enter code → verification recorded</li>
+  <li><strong>National ID Verification:</strong> Aadhaar-based identity verification with hash storage</li>
+</ul>
+<p>
+  Both methods create audit records in the <code>identity_verifications</code> table with method, phone last 4 digits (or hashed national ID), and timestamp. The verification state is managed globally via Zustand and persists across portal switches.
+</p>
+
+<!-- ==================== 13. API ENDPOINTS ==================== -->
+<div class="page-break"></div>
+<h2 id="api">13. API Endpoints</h2>
+
+<table>
+  <tr><th>Endpoint</th><th>Method</th><th>Purpose</th></tr>
+  <tr><td><code>/api/state</code></td><td>GET</td><td>Returns full application state (patients, encounters, labs, timeline, health updates, documents) — used to hydrate the Zustand store on app load</td></tr>
+  <tr><td><code>/api/self-report</code></td><td>POST</td><td>Saves patient self-reported vitals and creates clinical node</td></tr>
+  <tr><td><code>/api/kiosk/register</code></td><td>POST</td><td>Registers a walk-in patient via kiosk (creates or reuses patient)</td></tr>
+  <tr><td><code>/api/identity/verify</code></td><td>POST</td><td>Records identity verification audit (OTP or National ID)</td></tr>
+  <tr><td><code>/api/labs</code></td><td>POST</td><td>Submits lab report results with associated files</td></tr>
+  <tr><td><code>/api/prescriptions/commit</code></td><td>POST</td><td>Saves prescriptions while treatment remains active</td></tr>
+  <tr><td><code>/api/treatments/complete</code></td><td>POST</td><td>Completes treatment and triggers compaction (deletes details, creates summary)</td></tr>
+  <tr><td><code>/api/health-updates</code></td><td>POST</td><td>Saves patient-submitted symptoms and medical history</td></tr>
+  <tr><td><code>/api/documents</code></td><td>POST</td><td>Uploads medical documents to S3 and saves metadata</td></tr>
+  <tr><td><code>/api/ocr</code></td><td>POST</td><td>Extracts medications from prescription image using Gemini AI</td></tr>
+  <tr><td><code>/api/summarize</code></td><td>POST</td><td>Generates patient-friendly medical report summaries using Gemini AI</td></tr>
+</table>
+
+<!-- ==================== 14. SETUP & DEPLOYMENT ==================== -->
+<div class="page-break"></div>
+<h2 id="deployment">14. Setup & Deployment</h2>
+
+<h3>Prerequisites</h3>
+<ul>
+  <li>Node.js 18+</li>
+  <li>Neon PostgreSQL account (free tier available)</li>
+  <li>Google Gemini API key (free tier available)</li>
+  <li>AWS S3 bucket (or S3-compatible like Cloudflare R2, MinIO)</li>
+</ul>
+
+<h3>Environment Variables</h3>
+<pre>DATABASE_URL="postgresql://user:pass@ep-xxx.us-east-2.aws.neon.tech/neondb?sslmode=require"
+GEMINI_API_KEY="your-gemini-api-key"
+S3_BUCKET="your-bucket-name"
+S3_REGION="us-east-1"
+S3_ACCESS_KEY_ID="your-access-key"
+S3_SECRET_ACCESS_KEY="your-secret-key"
+S3_ENDPOINT=""           # Optional: for R2, MinIO
+S3_FORCE_PATH_STYLE="false"
+S3_PUBLIC_BASE_URL=""    # Optional: for public objects</pre>
+
+<h3>Quick Start</h3>
+<pre>npm install
+# Set DATABASE_URL and GEMINI_API_KEY in .env.local
+npm run dev</pre>
+
+<h3>Available Scripts</h3>
+<table>
+  <tr><th>Script</th><th>Purpose</th></tr>
+  <tr><td><code>npm run dev</code></td><td>Start development server (port 3000)</td></tr>
+  <tr><td><code>npm run build</code></td><td>Production build with type checking</td></tr>
+  <tr><td><code>npm run start</code></td><td>Start production server</td></tr>
+  <tr><td><code>npm run lint</code></td><td>Run ESLint checks</td></tr>
+</table>
+
+<!-- ==================== 15. VIVA PREPARATION ==================== -->
+<div class="page-break"></div>
+<h2 id="viva">15. Viva Preparation — Frequently Asked Questions</h2>
+
+<div class="viva-box">
+  <h4>Q1: What is the problem your project solves?</h4>
+  <p>Government hospitals in India use fragmented, paper-based systems. Patients visiting multiple hospitals must carry physical files or repeat tests. There is no centralized repository for lifetime health records. Sanjeevni solves this by creating a unified EHR system with a Unique Health ID for every patient, enabling doctors to access complete medical history across all government hospitals.</p>
+</div>
+
+<div class="viva-box">
+  <h4>Q2: What is your Unique Selling Point (USP)?</h4>
+  <p>Treatment Compaction. Unlike traditional EHR systems that accumulate data indefinitely, Sanjeevni compresses completed treatment chains into summary nodes. This keeps the active database lean (only current treatments have full detail) while preserving essential information for continuity of care. It's a novel approach to balancing data completeness with system performance.</p>
+</div>
+
+<div class="viva-box">
+  <h4>Q3: How does the AI Triage Engine work?</h4>
+  <p>It's a deterministic rule-based engine that analyzes 8 categories: drug interactions, allergy cross-reactivity, polypharmacy risks, chronic condition monitoring, vital sign assessment, lab result analysis, and care recommendations. It runs entirely in-memory with no external API calls, ensuring sub-millisecond response times and full explainability for medical audit trails.</p>
+</div>
+
+<div class="viva-box">
+  <h4>Q4: How do you handle multilingual support?</h4>
+  <p>Dual approach: (1) React i18n context for Kiosk Mode with 3 languages (English, Hindi, Bengali), and (2) a DOM-level TreeWalker translator that walks the rendered page and replaces English text with Hindi translations without modifying React source code. Doctor-facing sections are excluded via data-no-translate attributes, and patient data is automatically excluded since it never matches dictionary keys.</p>
+</div>
+
+<div class="viva-box">
+  <h4>Q5: Why PostgreSQL and not MongoDB?</h4>
+  <p>Health records have strong relational integrity requirements — patients have encounters, encounters have prescriptions and lab results, prescriptions belong to specific encounters. PostgreSQL's ACID transactions ensure atomicity for multi-table operations like treatment compaction. JSONB columns provide flexibility for variable-structured data (allergies, emergency contacts) while maintaining relational integrity where needed.</p>
+</div>
+
+<div class="viva-box">
+  <h4>Q6: How does the OCR prescription scanning work?</h4>
+  <p>Doctors upload a prescription image (JPEG/PNG/WEBP). The server sends it to Google Gemini 3.6 Flash (multimodal AI) with a structured extraction prompt. Gemini returns JSON with extracted medications (name, dosage, frequency, duration). The medications are auto-populated in the prescription builder for doctor review and editing before committing to the database.</p>
+</div>
+
+<div class="viva-box">
+  <h4>Q7: How do you ensure data security and privacy?</h4>
+  <ul>
+    <li>Identity verification creates audit trails (OTP/National ID)</li>
+    <li>Treatment compaction reduces stored sensitive data after completion</li>
+    <li>Server-side API keys never exposed to the client (Gemini key via header, not URL)</li>
+    <li>Medical documents stored in S3 with controlled access</li>
+    <li>Doctor-facing sections are protected from translation (data-no-translate)</li>
+    <li>Phone verification and national ID hashing for identity protection</li>
+  </ul>
+</div>
+
+<div class="viva-box">
+  <h4>Q8: How does the system scale?</h4>
+  <ul>
+    <li><strong>Neon PostgreSQL:</strong> Serverless database that scales automatically with connection pooling (max 10 connections, idle timeout 30s)</li>
+    <li><strong>Treatment Compaction:</strong> Keeps active data volume bounded — completed treatments are compressed to summaries</li>
+    <li><strong>Database Indexes:</strong> Optimized composite indexes on (patient_id, date) for fast timeline queries</li>
+    <li><strong>Lazy Initialization:</strong> Database is created on first request, not at build time</li>
+    <li><strong>S3 Storage:</strong> Medical documents stored in scalable object storage, not the database</li>
+  </ul>
+</div>
+
+<div class="viva-box">
+  <h4>Q9: What technologies did you use and why?</h4>
+  <ul>
+    <li><strong>Next.js 14:</strong> Full-stack framework with API routes, server components, and excellent TypeScript support</li>
+    <li><strong>Zustand:</strong> Lightweight state management (no boilerplate, easy debugging, single store for all 6 portals)</li>
+    <li><strong>Tailwind CSS:</strong> Rapid UI development with consistent design system</li>
+    <li><strong>Radix UI:</strong> Accessible, unstyled primitives (WCAG compliant)</li>
+    <li><strong>Neon PostgreSQL:</strong> Serverless, free tier, compatible with standard pg driver</li>
+    <li><strong>Google Gemini:</strong> Free tier for OCR and summarization, multimodal capabilities</li>
+  </ul>
+</div>
+
+<div class="viva-box">
+  <h4>Q10: What would you improve in the future?</h4>
+  <ul>
+    <li>Real Web Speech API integration for actual voice recognition in Kiosk Mode</li>
+    <li>DigiLocker API integration for automatic Aadhaar-based document fetching</li>
+    <li>End-to-end encryption for patient data in transit and at rest</li>
+    <li>Integration with real DICOM viewers for medical imaging (X-Ray, MRI, CT)</li>
+    <li>Mobile app (React Native) for patient portal access</li>
+    <li>Real-time notifications via WebSocket for lab result delivery</li>
+    <li>Role-based access control (RBAC) with hospital-level permissions</li>
+    <li>Analytics dashboard for hospital administrators</li>
+  </ul>
+</div>
+
+<div class="viva-box">
+  <h4>Q11: Explain the data flow for a typical patient visit.</h4>
+  <p><strong>Flow:</strong> Patient registers at kiosk (voice or form) → HID generated → Vitals recorded → Doctor selects patient → AI triage runs → Lab tests ordered → Lab technician enters results → Results appear in doctor view → Doctor creates prescription (voice/OCR/manual) → Treatment completed → Data compacted → Summary node created → Patient can view lifetime timeline in portal.</p>
+</div>
+
+<div class="viva-box">
+  <h4>Q12: How does state management work across 6 portals?</h4>
+  <p>Zustand provides a single global store (<code>useAppStore</code>) shared by all 6 portals. The store holds: current role (which portal is active), patient data, encounters, lab reports, timeline, prescriptions, clinical notes, and OCR text. Portal switching is done by changing <code>currentRole</code> — no page reload needed. On app load, <code>loadPersistedState()</code> fetches data from <code>/api/state</code> to hydrate the store from the database.</p>
+</div>
+
+<div class="footer">
+  <p>Sanjeevni — Government Electronic Health Record System</p>
+  <p>Smart India Hackathon (SIH) Project Documentation</p>
+  <p>Generated August 2026</p>
+</div>
+
+</body>
+</html>
