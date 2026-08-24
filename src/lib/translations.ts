@@ -366,6 +366,14 @@ export const translations: Record<string, string> = {
   // ═══════════════════════════════════════════════════════════════════
   // Patient Portal — self-report vitals placeholders
   // ═══════════════════════════════════════════════════════════════════
-  "e.g., Headache since morning, mild chest discomfort, dizziness...":
+    "e.g., Headache since morning, mild chest discomfort, dizziness...":
     "जैसे, सुबह से सिरदर्द, हल्का सीने में बेचैनी, चक्कर आना...",
+
+  // ═══════════════════════════════════════════════════════════════════
+  // Patient Portal tabs (upstream "api routing update")
+  // ═══════════════════════════════════════════════════════════════════
+  History: "इतिहास",
+  Vitals: "वाइटल",
+  "Health Update": "स्वास्थ्य अपडेट",
+  Documents: "दस्तावेज़",
 };
