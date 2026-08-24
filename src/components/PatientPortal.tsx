@@ -1,12 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import MedicalDocumentUpload from "./MedicalDocumentUpload";
-import PatientInput from "./PatientInput";
-<<<<<<< HEAD
-=======
-import { useState } from "react";
->>>>>>> ef6e0f74b2e6f33da9adcbf130238a7a7a6c3490
+
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {

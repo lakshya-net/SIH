@@ -169,14 +169,8 @@ export function runTriageEngine(
 
   // ─── 1. ALLERGY RISK CHECKS ────────────────────────────────────
   const severeAllergies = payload.patient.allergies.filter(
-<<<<<<< HEAD
     (a) => a.severity === "severe / anaphylactic",
   );
-
-=======
-    (a) => a.severity === "severe / anaphylactic"
-  );
->>>>>>> ef6e0f74b2e6f33da9adcbf130238a7a7a6c3490
   // Check for drug allergies against current medications
   for (const allergy of payload.patient.allergies) {
     if (allergy.allergyType === "drug") {
@@ -209,15 +203,11 @@ export function runTriageEngine(
       const crossReactive =
         DRUG_ALLERGY_CROSS_REACTIVITY[allergy.allergen] || [];
       for (const med of payload.patient.activeMedications) {
-<<<<<<< HEAD
         if (
           crossReactive.some((cr) =>
             med.drugName.toLowerCase().includes(cr.toLowerCase()),
           )
         ) {
-=======
-        if (crossReactive.some((cr) => med.drugName.toLowerCase().includes(cr.toLowerCase()))) {
->>>>>>> ef6e0f74b2e6f33da9adcbf130238a7a7a6c3490
           riskAlerts.push({
             id: uid(),
             level: "high",
