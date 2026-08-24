@@ -11,12 +11,9 @@ import LabPortal from "@/components/LabPortal";
 import DoctorClinical from "@/components/DoctorClinical";
 import DoctorPrescription from "@/components/DoctorPrescription";
 import PatientIntakeWizard from "@/components/PatientIntakeWizard";
-<<<<<<< HEAD
 import DomTranslator from "@/components/DomTranslator";
-=======
 import LandingPage from "@/components/LandingPage";
 import PatientAccess from "@/components/PatientAccess";
->>>>>>> 51467903d403dda401975ca061b87a102aa33a54
 
 export default function Home() {
   const { currentRole, loadPersistedState } = useAppStore();
@@ -49,21 +46,13 @@ export default function Home() {
   };
 
   return (
-<<<<<<< HEAD
     <I18nProvider>
       <div className="min-h-screen bg-background">
         <DomTranslator />
-        <TopNav />
+        {currentRole !== "landing" && currentRole !== "patient-access" && currentRole !== "intake-registration" && <TopNav />}
         <main>{renderView()}</main>
-        <IdentityVerification />
+        {currentRole !== "landing" && currentRole !== "patient-access" && currentRole !== "intake-registration" && <IdentityVerification />}
       </div>
     </I18nProvider>
-=======
-    <div className="min-h-screen bg-background">
-      {currentRole !== "landing" && currentRole !== "patient-access" && currentRole !== "intake-registration" && <TopNav />}
-      <main>{renderView()}</main>
-      {currentRole !== "landing" && currentRole !== "patient-access" && currentRole !== "intake-registration" && <IdentityVerification />}
-    </div>
->>>>>>> 51467903d403dda401975ca061b87a102aa33a54
   );
 }

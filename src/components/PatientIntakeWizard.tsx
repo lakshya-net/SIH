@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/tooltip";
 import { useToast } from "@/hooks/use-toast";
 import { useAppStore } from "@/lib/store";
+import { LanguageDropdown } from "@/components/LanguageSwitcher";
 import {
   FullPatientProfile,
   INITIAL_PATIENT_PROFILE,
@@ -2397,19 +2398,25 @@ export default function PatientIntakeWizard() {
 
   return (
     <div className="mx-auto max-w-4xl space-y-4 p-4 sm:p-6">
-      {/* Header */}
-      <div className="flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-600">
-          <FileText className="h-5 w-5 text-white" />
+            {/* Header */}
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-600">
+            <FileText className="h-5 w-5 text-white" />
+          </div>
+          <div>
+            <h1 className="text-lg font-bold text-slate-800">
+              Patient Lifetime Intake
+            </h1>
+            <p className="text-xs text-slate-400">
+              Comprehensive medical history registration
+            </p>
+          </div>
         </div>
-        <div>
-          <h1 className="text-lg font-bold text-slate-800">
-            Patient Lifetime Intake
-          </h1>
-          <p className="text-xs text-slate-400">
-            Comprehensive medical history registration
-          </p>
-        </div>
+
+        {/* Language Selector — lets the patient fill the intake form in
+            Hindi / Bengali after logging in */}
+        <LanguageDropdown />
       </div>
 
       {/* Step Indicator */}

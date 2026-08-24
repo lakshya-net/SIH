@@ -345,4 +345,27 @@ export const translations: Record<string, string> = {
   "Phone Number *": "फ़ोन नंबर *",
   "Contact Name *": "संपर्क नाम *",
   "Contact Phone *": "संपर्क फ़ोन *",
+
+  // ═══════════════════════════════════════════════════════════════════
+  // Patient Intake Wizard — header & remaining labels/placeholders
+  // ═══════════════════════════════════════════════════════════════════
+    "Patient Lifetime Intake": "मरीज़ आजीवन इनटेक",
+  "Comprehensive medical history registration":
+    "व्यापक चिकित्सा इतिहास पंजीकरण",
+  "Select frequency": "आवृत्ति चुनें",
+  "Start Date": "प्रारंभ तिथि",
+  Reaction: "प्रतिक्रिया",
+  "Smoking Status": "धूम्रपान की स्थिति",
+  "Alcohol Use": "शराब का सेवन",
+  Update: "अपडेट करें",
+  "Search allergen...": "एलर्जेन खोजें...",
+  "e.g., 500mg, 10 units": "जैसे, 500mg, 10 यूनिट",
+  "e.g., Hypertension, Diabetes": "जैसे, उच्च रक्तचाप, मधुमेह",
+  "e.g., Rash, swelling": "जैसे, रैश, सूजन",
+
+  // ═══════════════════════════════════════════════════════════════════
+  // Patient Portal — self-report vitals placeholders
+  // ═══════════════════════════════════════════════════════════════════
+  "e.g., Headache since morning, mild chest discomfort, dizziness...":
+    "जैसे, सुबह से सिरदर्द, हल्का सीने में बेचैनी, चक्कर आना...",
 };

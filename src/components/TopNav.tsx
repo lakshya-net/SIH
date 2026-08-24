@@ -107,7 +107,6 @@ export default function TopNav() {
           </DropdownMenuContent>
         </DropdownMenu>
 
-<<<<<<< HEAD
         {/* Right: Language Selector + Verification Button */}
         <div className="flex items-center gap-2">
           <LanguageDropdown />
@@ -115,25 +114,13 @@ export default function TopNav() {
           <Button
             variant="outline"
             size="sm"
-            className="gap-1.5 border-cyan-200 text-cyan-600 hover:bg-cyan-50"
+            className="gap-1.5 border-green-200 text-green-700 hover:bg-green-50"
             onClick={() => setVerificationOpen(true)}
           >
             <ShieldCheck className="h-3.5 w-3.5" />
             <span className="hidden sm:inline text-xs">Verify Identity</span>
           </Button>
         </div>
-=======
-        {/* Right: Verification Button */}
-        <Button
-          variant="outline"
-          size="sm"
-          className="gap-1.5 border-green-200 text-green-700 hover:bg-green-50"
-          onClick={() => setVerificationOpen(true)}
-        >
-          <ShieldCheck className="h-3.5 w-3.5" />
-          <span className="hidden sm:inline text-xs">Verify Identity</span>
-        </Button>
->>>>>>> 51467903d403dda401975ca061b87a102aa33a54
       </div>
     </header>
   );

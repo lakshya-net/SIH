@@ -17,13 +17,6 @@
 
 import { translations } from "./translations";
 
-// ─── State ─────────────────────────────────────────────────────────
-const originalTexts = new WeakMap<Node, string>();
-let isTranslating = false;
-let debounceTimer: ReturnType<typeof setTimeout> | null = null;
-let observer: MutationObserver | null = null;
-let currentLanguage = "en";
-
 // Tags whose text content must never be touched
 const SKIP_TAGS = new Set([
   "INPUT",
@@ -36,6 +29,17 @@ const SKIP_TAGS = new Set([
   "SVG",
   "PATH",
 ]);
+
+// ─── State ─────────────────────────────────────────────────────────
+const originalTexts = new WeakMap<Node, string>();
+// Store the *original English* placeholder for each element so we can
+// restore it when switching back to English. Keyed by Element.
+const originalPlaceholders = new WeakMap<Element, string>();
+const placeholderKeys = new WeakSet<Element>();
+let isTranslating = false;
+let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+let observer: MutationObserver | null = null;
+let currentLanguage = "en";
 
 // Pre-sort dictionary keys longest-first so substring matches are greedy
 const sortedKeys = Object.keys(translations).sort((a, b) => b.length - a.length);
@@ -108,6 +112,79 @@ function restoreTextNode(node: Text): boolean {
   return false;
 }
 
+/**
+ * Translate the `placeholder` attribute of form controls (input, textarea, select).
+ *
+ * Unlike visible text nodes, placeholder attributes are not picked up by the
+ * TreeWalker (we skip those element subtrees so we never corrupt user-typed
+ * values). So we walk them separately here and translate/restore the
+ * attribute string — leaving the actual `value`/`textContent` of the control
+ * untouched.
+ *
+ * We remember the original English placeholder so switching back to English
+ * restores it exactly (rather than double-translating).
+ */
+const PLACEHOLDER_ATTRS = ["placeholder"] as const;
+
+function translateElementAttrs(el: HTMLElement): boolean {
+  if (el.closest("[data-no-translate]")) return false;
+
+  let modified = false;
+  for (const attr of PLACEHOLDER_ATTRS) {
+    const raw = el.getAttribute(attr);
+    if (!raw) continue;
+
+    // Remember the original English placeholder once.
+    if (!originalPlaceholders.has(el)) {
+      originalPlaceholders.set(el, raw);
+    } else if (!placeholderKeys.has(el)) {
+      // Already processed in a previous run — start from the original English
+      // so repeated passes never double-translate.
+      el.setAttribute(attr, originalPlaceholders.get(el)!);
+    }
+    placeholderKeys.add(el);
+
+    const trimmed = raw.trim();
+    if (trimmed.length < 2) continue;
+
+    // Exact match
+    if (translations[trimmed]) {
+      el.setAttribute(attr, translations[trimmed]);
+      modified = true;
+      continue;
+    }
+    // Greedy substring replacement (longest key first)
+    let result = trimmed;
+    let didMatch = false;
+    for (const key of sortedKeys) {
+      if (key.length < 3) continue;
+      if (result.includes(key)) {
+        result = result.split(key).join(translations[key]);
+        didMatch = true;
+      }
+    }
+    if (didMatch) {
+      el.setAttribute(attr, result);
+      modified = true;
+    }
+  }
+  return modified;
+}
+
+function restoreElementAttrs(el: HTMLElement): boolean {
+  if (!placeholderKeys.has(el)) return false;
+  let modified = false;
+  for (const attr of PLACEHOLDER_ATTRS) {
+    const original = originalPlaceholders.get(el);
+    if (original === undefined) continue;
+    if (el.getAttribute(attr) !== original) {
+      el.setAttribute(attr, original);
+      modified = true;
+    }
+  }
+  return modified;
+}
+
 // ─── Public API ────────────────────────────────────────────────────
 
 /**
@@ -136,6 +213,13 @@ export function translatePage(language: string): void {
     translateTextNode(node);
   }
 
+  // Also translate placeholder attributes on form controls (these are
+  // skipped by the text-node walker so user-entered values stay intact).
+  const formControls = document.querySelectorAll<HTMLElement>(
+    "input, textarea, select",
+  );
+  formControls.forEach((el) => translateElementAttrs(el));
+
   isTranslating = false;
 }
 
@@ -159,6 +243,12 @@ export function restorePage(): void {
   while ((node = walker.nextNode() as Text | null)) {
     restoreTextNode(node);
   }
+
+  // Restore placeholder attributes to their original English.
+  const formControls = document.querySelectorAll<HTMLElement>(
+    "input, textarea, select",
+  );
+  formControls.forEach((el) => restoreElementAttrs(el));
 
   isTranslating = false;
 }
