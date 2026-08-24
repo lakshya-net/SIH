@@ -176,6 +176,12 @@
   }
 }
 
+/* Make data-no-translate wrapper divs layout-transparent
+   so they don't break flex/grid when wrapping doctor views */
+[data-no-translate] {
+  display: contents;
+}
+
 /* Scrollbar styling */
 ::-webkit-scrollbar {
   width: 6px;

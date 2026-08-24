@@ -46,147 +46,9 @@ function buildConsultationPayload(
   patient: Patient,
   selfReport: Vitals | null,
   chiefComplaint: string,
-<<<<<<< HEAD
-): import("@/types/consultation").ConsultationPayload {
-  // Patient P001 — Rajesh Kumar
-  const patients: Record<
-    string,
-    import("@/types/consultation").ConsultationPayload["patient"]
-  > = {
-    P001: {
-      healthId: "HID-8842-X",
-      fullName: "Rajesh Kumar",
-      age: 58,
-      gender: "Male",
-      bloodGroup: "B+",
-      chronicConditions: [
-        {
-          conditionName: "Type 2 Diabetes",
-          diagnosedYear: "2020",
-          status: "active",
-          latestMetrics: "HbA1c 8.2%, Fasting Glucose 145 mg/dL",
-        },
-        {
-          conditionName: "Hypertension",
-          diagnosedYear: "2020",
-          status: "active",
-          latestMetrics: "BP 148/92 mmHg",
-        },
-      ],
-      allergies: [
-        {
-          allergen: "Penicillin",
-          allergyType: "drug",
-          severity: "severe / anaphylactic",
-          reactionDescription: "Anaphylaxis, throat swelling",
-        },
-        {
-          allergen: "Sulfa drugs",
-          allergyType: "drug",
-          severity: "moderate",
-          reactionDescription: "Skin rash, urticaria",
-        },
-      ],
-      surgeries: [
-        {
-          procedureName: "Appendectomy",
-          yearOfProcedure: "2005",
-          complicationsOrNotes: "Laparoscopic, uneventful recovery",
-        },
-      ],
-      vaccinations: [
-        {
-          vaccineName: "COVID-19 (Covishield)",
-          doseNumber: "Booster",
-          administeredDate: "2023-01-15",
-        },
-        {
-          vaccineName: "Tetanus (Td/Tdap)",
-          doseNumber: "Dose 1",
-          administeredDate: "2022-06-10",
-        },
-      ],
-      activeMedications: [
-        {
-          drugName: "Metformin",
-          dosage: "500mg",
-          frequency: "BD",
-          prescribedFor: "Type 2 Diabetes",
-        },
-        {
-          drugName: "Amlodipine",
-          dosage: "5mg",
-          frequency: "OD",
-          prescribedFor: "Hypertension",
-        },
-        {
-          drugName: "Atorvastatin",
-          dosage: "10mg",
-          frequency: "OD",
-          prescribedFor: "Dyslipidemia",
-        },
-        {
-          drugName: "Aspirin",
-          dosage: "75mg",
-          frequency: "OD",
-          prescribedFor: "Cardiovascular protection",
-        },
-      ],
-    },
-    P002: {
-      healthId: "HID-3156-K",
-      fullName: "Sunita Devi",
-      age: 42,
-      gender: "Female",
-      bloodGroup: "O+",
-      chronicConditions: [
-        {
-          conditionName: "Asthma",
-          diagnosedYear: "2015",
-          status: "managed",
-          latestMetrics: "FEV1 78% predicted",
-        },
-      ],
-      allergies: [
-        {
-          allergen: "Dust Mites",
-          allergyType: "environmental",
-          severity: "moderate",
-          reactionDescription: "Wheezing, nasal congestion",
-        },
-      ],
-      surgeries: [],
-      vaccinations: [
-        {
-          vaccineName: "COVID-19 (Covaxin)",
-          doseNumber: "Dose 2",
-          administeredDate: "2022-03-20",
-        },
-      ],
-      activeMedications: [
-        {
-          drugName: "Salbutamol Inhaler",
-          dosage: "100mcg",
-          frequency: "As needed (PRN)",
-          prescribedFor: "Asthma",
-        },
-        {
-          drugName: "Cetirizine",
-          dosage: "10mg",
-          frequency: "OD",
-          prescribedFor: "Allergic rhinitis",
-        },
-      ],
-    },
-  };
-
-  const p = patients[patientId] || patients["P001"];
-
-=======
   patientLabs: LabReport[],
   committedPrescriptions: Prescription[]
 ): ConsultationPayload {
->>>>>>> 19b1ffbfc4ff01a7e3541f6ab47e89d41fedef89
   return {
     patient: {
       healthId: patient.uniqueHealthId,
@@ -260,19 +122,6 @@ export default function DoctorClinical() {
     timeline,
     labReports,
     encounters,
-<<<<<<< HEAD
-    healthUpdates,
-    medicalDocuments,
-  } = useAppStore();
-  const patient =
-    patients.find((p) => p.id === selectedPatientId) ?? patients[0];
-  const patientTimeline = timeline
-    .filter((t) => t.patientId === patient.id)
-    .slice(0, 6);
-  const patientLabReports = labReports.filter(
-    (l) => l.patientId === patient.id,
-  );
-=======
     selfReportVitals,
     prescriptions,
     healthUpdates,
@@ -281,7 +130,6 @@ export default function DoctorClinical() {
   const patient = patients.find((p) => p.id === selectedPatientId) ?? patients[0];
   const patientTimeline = timeline.filter((t) => t.patientId === patient.id).slice(0, 6);
   const patientLabReports = labReports.filter((l) => l.patientId === patient.id);
->>>>>>> 19b1ffbfc4ff01a7e3541f6ab47e89d41fedef89
   const patientHealthUpdates = healthUpdates.filter((update) => update.patientId === patient.id);
   const patientDocuments = medicalDocuments.filter((document) => document.patientId === patient.id);
   const activeEncounter = encounters.find(
