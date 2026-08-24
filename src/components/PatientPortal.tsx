@@ -1,6 +1,7 @@
 "use client";
-
-import { useState } from "react";
+import MedicalDocumentUpload from "./MedicalDocumentUpload";
+import PatientInput from "./PatientInput";
+import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -27,9 +28,30 @@ import {
 } from "lucide-react";
 
 export default function PatientPortal() {
-  const { patients, selectedPatientId, timeline, submitSelfReport } = useAppStore();
+  const {
+  patients,
+  selectedPatientId,
+  timeline,
+  labReports,
+  encounters,
+  submitSelfReport,
+  setRole
+} = useAppStore();
   const { toast } = useToast();
   const patient = patients.find((p) => p.id === selectedPatientId) ?? patients[0];
+  const [healthUpdate, setHealthUpdate] = useState<{
+  symptoms: string;
+  medicalHistory: string;
+  updatedAt: string;
+} | null>(null);
+
+useEffect(() => {
+  const savedUpdate = localStorage.getItem("patientHealthUpdate");
+
+  if (savedUpdate) {
+    setHealthUpdate(JSON.parse(savedUpdate));
+  }
+}, []);
 
   const [bpSystolic, setBpSystolic] = useState("");
   const [bpDiastolic, setBpDiastolic] = useState("");
@@ -80,7 +102,44 @@ export default function PatientPortal() {
 
   return (
     <div className="mx-auto max-w-5xl space-y-6 p-4 sm:p-6">
-      {/* Patient Header Card */}
+      <PatientInput />
+      <MedicalDocumentUpload />
+
+      {healthUpdate && (
+  <Card className="border-emerald-200 bg-emerald-50">
+    <CardHeader>
+      <CardTitle>Latest Health Update</CardTitle>
+      <CardDescription>
+        Information submitted by the patient
+      </CardDescription>
+    </CardHeader>
+
+    <CardContent className="space-y-4">
+      <div>
+        <p className="text-sm font-semibold text-slate-700">
+          Current Symptoms
+        </p>
+        <p className="mt-1 text-slate-600">
+          {healthUpdate.symptoms}
+        </p>
+      </div>
+
+      <div>
+        <p className="text-sm font-semibold text-slate-700">
+          Medical History / Additional Information
+        </p>
+        <p className="mt-1 text-slate-600">
+          {healthUpdate.medicalHistory}
+        </p>
+      </div>
+
+      <p className="text-xs text-slate-500">
+        Last updated: {healthUpdate.updatedAt}
+      </p>
+    </CardContent>
+  </Card>
+)}
+      {/* Patient Header Ca]rd */}
       <Card className="border-slate-200 bg-gradient-to-r from-emerald-50 via-white to-cyan-50">
         <CardContent className="p-6">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -255,6 +314,13 @@ export default function PatientPortal() {
                 <Activity className="mr-2 h-4 w-4" />
                 Submit Vitals to Record
               </Button>
+              <Button
+  variant="outline"
+  className="w-full"
+  onClick={() => setRole("doctor-clinical")}
+>
+  Continue to Doctor Clinical View
+</Button>
             </CardContent>
           </Card>
         </TabsContent>
