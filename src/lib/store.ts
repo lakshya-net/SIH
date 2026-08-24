@@ -15,6 +15,24 @@ import {
 import { ConsultationPayload, ClinicalSummaryOutput } from "@/types/consultation";
 import { runTriageEngine } from "./triageEngine";
 
+export interface HealthUpdate {
+  id: string;
+  patientId: string;
+  symptoms: string;
+  medicalHistory: string;
+  updatedAt: string;
+}
+
+export interface MedicalDocument {
+  id: string;
+  patientId: string;
+  fileName: string;
+  mimeType: string | null;
+  sizeBytes: number | null;
+  storageKey: string | null;
+  uploadedAt: string;
+}
+
 interface AppState {
   currentRole: AppRole;
   setRole: (role: AppRole) => void;
@@ -31,6 +49,8 @@ interface AppState {
   encounters: Encounter[];
   labReports: LabReport[];
   timeline: TimeLineEntry[];
+  healthUpdates: HealthUpdate[];
+  medicalDocuments: MedicalDocument[];
   databaseReady: boolean;
   loadPersistedState: () => Promise<void>;
 
@@ -39,6 +59,8 @@ interface AppState {
 
   selfReportVitals: Vitals | null;
   submitSelfReport: (vitals: Vitals) => Promise<void>;
+  saveHealthUpdate: (input: { symptoms: string; medicalHistory: string }) => Promise<void>;
+  saveMedicalDocument: (file: File) => Promise<void>;
   recordIdentityVerification: (input: { method: "otp" | "national-id"; phone?: string; nationalId?: string }) => Promise<void>;
   registerKiosk: (input: { name: string; age?: number; complaint: string; duration?: string; language: string; transcript?: string }) => Promise<string | null>;
   submitLab: (input: { patientId: string; testName: string; results: LabReport["results"]; files?: { name: string; type?: string; size?: number }[] }) => Promise<void>;
@@ -93,6 +115,8 @@ export const useAppStore = create<AppState>((set, get) => ({
   encounters: mockEncounters,
   labReports: mockLabReports,
   timeline: mockTimeline,
+  healthUpdates: [],
+  medicalDocuments: [],
   databaseReady: false,
   loadPersistedState: async () => {
     try {
@@ -138,6 +162,32 @@ export const useAppStore = create<AppState>((set, get) => ({
       });
       await get().loadPersistedState();
     } catch { /* retain the optimistic entry */ }
+  },
+  saveHealthUpdate: async (input) => {
+    const patientId = get().selectedPatientId;
+    const response = await fetch("/api/health-updates", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ patientId, ...input }),
+    });
+    if (!response.ok) {
+      throw new Error((await response.json()).error ?? "Unable to save health update");
+    }
+    await get().loadPersistedState();
+  },
+  saveMedicalDocument: async (input) => {
+    const patientId = get().selectedPatientId;
+    const formData = new FormData();
+    formData.append("patientId", patientId);
+    formData.append("file", input);
+    const response = await fetch("/api/documents", {
+      method: "POST",
+      body: formData,
+    });
+    if (!response.ok) {
+      throw new Error((await response.json()).error ?? "Unable to save medical document");
+    }
+    await get().loadPersistedState();
   },
 
   recordIdentityVerification: async (input) => {

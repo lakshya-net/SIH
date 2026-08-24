@@ -3,6 +3,10 @@
 import { useEffect, useRef, useState } from "react";
 import MedicalDocumentUpload from "./MedicalDocumentUpload";
 import PatientInput from "./PatientInput";
+<<<<<<< HEAD
+=======
+import { useState } from "react";
+>>>>>>> ef6e0f74b2e6f33da9adcbf130238a7a7a6c3490
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -102,11 +106,25 @@ function TimelineStrip({
 }
 
 export default function PatientPortal() {
+<<<<<<< HEAD
   const { patients, selectedPatientId, timeline, submitSelfReport } =
     useAppStore();
   const { toast } = useToast();
   const patient =
     patients.find((p) => p.id === selectedPatientId) ?? patients[0];
+=======
+  const {
+  patients,
+  selectedPatientId,
+  timeline,
+  healthUpdates,
+  submitSelfReport,
+  setRole
+} = useAppStore();
+  const { toast } = useToast();
+  const patient = patients.find((p) => p.id === selectedPatientId) ?? patients[0];
+  const healthUpdate = healthUpdates.find((update) => update.patientId === patient.id);
+>>>>>>> ef6e0f74b2e6f33da9adcbf130238a7a7a6c3490
 
   const [bpSystolic, setBpSystolic] = useState("");
   const [bpDiastolic, setBpDiastolic] = useState("");

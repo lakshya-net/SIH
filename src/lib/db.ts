@@ -12,6 +12,7 @@ import {
   type TimeLineEntry,
   type Vitals,
 } from "./mockData";
+import { uploadDocument } from "./storage";
 
 const globalForDb = globalThis as unknown as {
   govehrPool?: Pool;
@@ -106,8 +107,13 @@ async function initializeDatabase() {
       file_name TEXT NOT NULL, mime_type TEXT, size_bytes INTEGER, storage_key TEXT,
       created_at TEXT NOT NULL
     );
+    CREATE TABLE IF NOT EXISTS health_updates (
+      id TEXT PRIMARY KEY, patient_id TEXT NOT NULL REFERENCES patients(id),
+      symptoms TEXT NOT NULL, medical_history TEXT NOT NULL, updated_at TEXT NOT NULL
+    );
     CREATE INDEX IF NOT EXISTS idx_nodes_patient_date ON clinical_nodes(patient_id, created_at DESC);
     CREATE INDEX IF NOT EXISTS idx_labs_patient_date ON lab_reports(patient_id, report_date DESC);
+    CREATE INDEX IF NOT EXISTS idx_health_updates_patient_date ON health_updates(patient_id, updated_at DESC);
   `);
   if (process.env.NODE_ENV !== "production") {
     await seed(pool);
@@ -251,11 +257,13 @@ interface EncounterRow {
 export async function getState() {
   await ensureDatabase();
   const pool = getPool();
-  const [patientsResult, encountersResult, labsResult, timelineResult] = await Promise.all([
+  const [patientsResult, encountersResult, labsResult, timelineResult, healthUpdatesResult, documentsResult] = await Promise.all([
     pool.query<PatientRow>("SELECT * FROM patients ORDER BY name"),
     pool.query<EncounterRow>("SELECT * FROM encounters ORDER BY date DESC"),
     pool.query("SELECT * FROM lab_reports ORDER BY report_date DESC"),
     pool.query("SELECT * FROM clinical_nodes ORDER BY created_at DESC"),
+    pool.query("SELECT id, patient_id, symptoms, medical_history, updated_at FROM health_updates ORDER BY updated_at DESC"),
+    pool.query("SELECT id, patient_id, file_name, mime_type, size_bytes, created_at FROM document_metadata ORDER BY created_at DESC"),
   ]);
 
   const prescriptions = await pool.query(
@@ -314,7 +322,58 @@ export async function getState() {
       doctorName: payload.doctorName,
     };
   });
-  return { patients, encounters, labReports: labs, timeline };
+  const healthUpdates = healthUpdatesResult.rows.map((row) => ({
+    id: row.id,
+    patientId: row.patient_id,
+    symptoms: row.symptoms,
+    medicalHistory: row.medical_history,
+    updatedAt: row.updated_at,
+  }));
+  const medicalDocuments = documentsResult.rows.map((row) => ({
+    id: row.id,
+    patientId: row.patient_id,
+    fileName: row.file_name,
+    mimeType: row.mime_type,
+    sizeBytes: row.size_bytes,
+    storageKey: row.storage_key,
+    uploadedAt: row.created_at,
+  }));
+  return { patients, encounters, labReports: labs, timeline, healthUpdates, medicalDocuments };
+}
+
+export async function saveHealthUpdate(input: { patientId: string; symptoms: string; medicalHistory: string }) {
+  await ensureDatabase();
+  const updatedAt = now();
+  await getPool().query(
+    `INSERT INTO health_updates (id, patient_id, symptoms, medical_history, updated_at)
+     VALUES ($1,$2,$3,$4,$5)`,
+    [`HEALTH-${Date.now()}`, input.patientId, input.symptoms, input.medicalHistory, updatedAt],
+  );
+  return updatedAt;
+}
+
+export async function saveMedicalDocument(input: {
+  patientId: string;
+  name: string;
+  type: string;
+  size: number;
+  body: Buffer;
+}) {
+  await ensureDatabase();
+  const key = `patients/${input.patientId}/${Date.now()}-${input.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
+  const url = await uploadDocument({
+    key,
+    body: input.body,
+    contentType: input.type,
+  });
+  await getPool().query(
+    `INSERT INTO document_metadata
+     (id, patient_id, file_name, mime_type, size_bytes, storage_key, created_at)
+     VALUES ($1,$2,$3,$4,$5,$6,$7)`,
+    [`DOC-${Date.now()}-${Math.random().toString(36).slice(2)}`, input.patientId,
+      input.name, input.type, input.size, key, now()],
+  );
+  return { key, url };
 }
 
 export async function saveSelfReport(patientId: string, vitals: Vitals) {
