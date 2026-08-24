@@ -103,7 +103,6 @@ function StepIndicator({
   return (
     <div className="flex items-center justify-between overflow-x-auto pb-2">
       {STEPS.map((step, idx) => {
-        const Icon = step.icon;
         const isActive = step.id === currentStep;
         const isCompleted = completedSteps.has(step.id);
         const isClickable = isCompleted || step.id <= currentStep;

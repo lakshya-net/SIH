@@ -2,7 +2,6 @@
 import { useEffect, useState, useCallback } from "react";
 
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
@@ -12,24 +11,20 @@ import { ClinicalSummaryOutput } from "@/types/consultation";
 import ClinicalSummaryPanel from "@/components/ClinicalSummaryPanel";
 import {
   Brain,
-  AlertTriangle,
   Calendar,
   FlaskConical,
   Pill,
   FileText,
   ClipboardList,
   Stethoscope,
-  CheckCircle2,
   Shield,
   Activity,
   Heart,
   ChevronRight,
   Loader2,
   Sparkles,
-  RefreshCw,
   Users,
   UserCheck,
-  Download,
 } from "lucide-react";
 
 // ─── Mock ConsultationPayload for demonstration ───────────────────
@@ -39,7 +34,7 @@ function buildMockPayload(
   chiefComplaint: string
 ): import("@/types/consultation").ConsultationPayload {
   // Patient P001 — Rajesh Kumar
-  const patients: Record<string, any> = {
+  const patients: Record<string, import("@/types/consultation").ConsultationPayload["patient"]> = {
     P001: {
       healthId: "HID-8842-X",
       fullName: "Rajesh Kumar",
@@ -127,10 +122,21 @@ function buildMockPayload(
   };
 }
 export default function DoctorClinical() {
-  const { patients, selectedPatientId, setSelectedPatientId, timeline, labReports, encounters } = useAppStore();
+  const {
+    patients,
+    selectedPatientId,
+    setSelectedPatientId,
+    timeline,
+    labReports,
+    encounters,
+    healthUpdates,
+    medicalDocuments,
+  } = useAppStore();
   const patient = patients.find((p) => p.id === selectedPatientId) ?? patients[0];
   const patientTimeline = timeline.filter((t) => t.patientId === patient.id).slice(0, 6);
   const patientLabReports = labReports.filter((l) => l.patientId === patient.id);
+  const patientHealthUpdates = healthUpdates.filter((update) => update.patientId === patient.id);
+  const patientDocuments = medicalDocuments.filter((document) => document.patientId === patient.id);
   const activeEncounter = encounters.find(
     (e) => e.patientId === patient.id && e.status === "Active"
   );
@@ -140,12 +146,10 @@ export default function DoctorClinical() {
   const [chiefComplaint, setChiefComplaint] = useState(
     activeEncounter?.diagnosis || "Follow-up for chronic conditions"
   );
-  const [analyzingPatientId, setAnalyzingPatientId] = useState<string | null>(null);
 
   // Run triage engine when patient changes
   useEffect(() => {
     setIsAnalyzing(true);
-    setAnalyzingPatientId(patient.id);
     const payload = buildMockPayload(
       patient.id,
       {
@@ -161,10 +165,9 @@ export default function DoctorClinical() {
       const output = runTriageEngine(payload);
       setTriageOutput(output);
       setIsAnalyzing(false);
-      setAnalyzingPatientId(null);
     }, 1200);
     return () => clearTimeout(timer);
-  }, [patient.id]);
+  }, [patient.id, chiefComplaint]);
 
   const handlePatientSwitch = useCallback((newPatientId: string) => {
     if (newPatientId === patient.id) return;
@@ -298,6 +301,73 @@ export default function DoctorClinical() {
           healthId={patient.uniqueHealthId}
         />
       ) : null}
+
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <Card className="border-emerald-200 bg-emerald-50/40">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm flex items-center gap-2">
+              <ClipboardList className="h-4 w-4 text-emerald-600" />
+              Patient Health Updates
+            </CardTitle>
+            <CardDescription className="text-xs">
+              Symptoms and medical history submitted by the patient
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {patientHealthUpdates.length > 0 ? (
+              patientHealthUpdates.slice(0, 3).map((update) => (
+                <div key={update.id} className="rounded-lg border border-emerald-100 bg-white p-3">
+                  <div>
+                    <p className="text-xs font-semibold text-slate-700">Current Symptoms</p>
+                    <p className="mt-1 text-xs text-slate-600">{update.symptoms || "None reported"}</p>
+                  </div>
+                  <div className="mt-3">
+                    <p className="text-xs font-semibold text-slate-700">Medical History / Additional Information</p>
+                    <p className="mt-1 text-xs text-slate-600">{update.medicalHistory || "None provided"}</p>
+                  </div>
+                  <p className="mt-3 text-[10px] text-slate-400">
+                    Submitted: {new Date(update.updatedAt).toLocaleString()}
+                  </p>
+                </div>
+              ))
+            ) : (
+              <p className="py-4 text-center text-sm text-slate-400">No patient health updates available.</p>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card className="border-violet-200 bg-violet-50/40">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm flex items-center gap-2">
+              <FileText className="h-4 w-4 text-violet-600" />
+              Medical Documents
+            </CardTitle>
+            <CardDescription className="text-xs">
+              Documents associated with this patient
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {patientDocuments.length > 0 ? (
+              patientDocuments.slice(0, 5).map((document) => (
+                <div key={document.id} className="flex items-center justify-between rounded-lg border border-violet-100 bg-white p-3">
+                  <div className="min-w-0">
+                    <p className="truncate text-xs font-semibold text-slate-700">{document.fileName}</p>
+                    <p className="mt-1 text-[10px] text-slate-500">
+                      {document.mimeType || "Unknown type"}
+                      {document.sizeBytes !== null ? ` • ${(document.sizeBytes / 1024).toFixed(1)} KB` : ""}
+                    </p>
+                  </div>
+                  <span className="ml-3 shrink-0 text-[10px] text-slate-400">
+                    {new Date(document.uploadedAt).toLocaleDateString()}
+                  </span>
+                </div>
+              ))
+            ) : (
+              <p className="py-4 text-center text-sm text-slate-400">No medical documents available.</p>
+            )}
+          </CardContent>
+        </Card>
+      </div>
 
       <Separator />
 
@@ -472,4 +542,3 @@ export default function DoctorClinical() {
     </div>
   );
 }
-

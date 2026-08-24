@@ -1,7 +1,7 @@
 "use client";
 import MedicalDocumentUpload from "./MedicalDocumentUpload";
 import PatientInput from "./PatientInput";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -32,26 +32,13 @@ export default function PatientPortal() {
   patients,
   selectedPatientId,
   timeline,
-  labReports,
-  encounters,
+  healthUpdates,
   submitSelfReport,
   setRole
 } = useAppStore();
   const { toast } = useToast();
   const patient = patients.find((p) => p.id === selectedPatientId) ?? patients[0];
-  const [healthUpdate, setHealthUpdate] = useState<{
-  symptoms: string;
-  medicalHistory: string;
-  updatedAt: string;
-} | null>(null);
-
-useEffect(() => {
-  const savedUpdate = localStorage.getItem("patientHealthUpdate");
-
-  if (savedUpdate) {
-    setHealthUpdate(JSON.parse(savedUpdate));
-  }
-}, []);
+  const healthUpdate = healthUpdates.find((update) => update.patientId === patient.id);
 
   const [bpSystolic, setBpSystolic] = useState("");
   const [bpDiastolic, setBpDiastolic] = useState("");

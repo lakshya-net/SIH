@@ -1,30 +1,29 @@
 "use client";
 
 import { useState } from "react";
+import { useAppStore } from "@/lib/store";
 
 export default function MedicalDocumentUpload() {
   const [file, setFile] = useState<File | null>(null);
+  const saveMedicalDocument = useAppStore((state) => state.saveMedicalDocument);
+  const [isSaving, setIsSaving] = useState(false);
 
-  const handleUpload = () => {
+  const handleUpload = async () => {
     if (!file) {
       alert("Please select a document first.");
       return;
     }
 
-    const documentData = {
-      name: file.name,
-      type: file.type,
-      size: file.size,
-      uploadedAt: new Date().toLocaleString(),
-    };
-
-    localStorage.setItem(
-      "patientMedicalDocument",
-      JSON.stringify(documentData)
-    );
-
-    alert("Medical document uploaded successfully!");
-    setFile(null);
+    setIsSaving(true);
+    try {
+      await saveMedicalDocument(file);
+      alert("Medical document uploaded successfully!");
+      setFile(null);
+    } catch (error) {
+      alert(error instanceof Error ? error.message : "Unable to save medical document.");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -53,9 +52,10 @@ export default function MedicalDocumentUpload() {
 
       <button
         onClick={handleUpload}
+        disabled={isSaving}
         className="mt-4 w-full rounded-lg bg-emerald-600 px-4 py-3 font-semibold text-white hover:bg-emerald-700"
       >
-        Upload Medical Document
+        {isSaving ? "Saving..." : "Save Medical Document"}
       </button>
     </div>
   );
