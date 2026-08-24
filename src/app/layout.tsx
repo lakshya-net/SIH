@@ -6,7 +6,7 @@ import { Toaster } from "@/components/ui/toaster";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "GovEHR — Government Electronic Health Record System",
+  title: "Sanjeevani — Government Electronic Health Record System",
   description:
     "Centralized Government Electronic Health Record & Hospital Management System",
 };

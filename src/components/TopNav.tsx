@@ -35,19 +35,29 @@ const roles: { id: AppRole; label: string; icon: React.ElementType; description:
 
 export default function TopNav() {
   const { currentRole, setRole, setVerificationOpen } = useAppStore();
-  const current = roles.find((r) => r.id === currentRole)!;
+  const current = roles.find((r) => r.id === currentRole) ?? roles[0];
   const Icon = current.icon;
+  const visibleRoles =
+    currentRole === "doctor-clinical" || currentRole === "doctor-prescription"
+      ? roles.filter((role) =>
+          role.id === "doctor-clinical" || role.id === "doctor-prescription",
+        )
+      : currentRole === "lab-portal" || currentRole === "kiosk-mode"
+        ? roles.filter((role) => role.id === "lab-portal" || role.id === "kiosk-mode")
+        : roles.filter((role) =>
+            role.id === "patient-portal" || role.id === "intake-registration",
+          );
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
+    <header className="sticky top-0 z-50 w-full border-b border-indigo-100/80 bg-white/90 shadow-sm shadow-indigo-100/40 backdrop-blur supports-[backdrop-filter]:bg-white/70">
       <div className="mx-auto flex h-14 max-w-screen-2xl items-center justify-between px-4 sm:px-6">
         {/* Left: Branding */}
         <div className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-600">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-orange-500 to-green-700 shadow-md shadow-orange-200">
             <Heart className="h-4 w-4 text-white" fill="currentColor" />
           </div>
           <div className="hidden sm:block">
-            <span className="text-sm font-bold tracking-tight text-slate-800">GovEHR</span>
+            <span className="text-sm font-bold tracking-tight text-slate-800">Sanjeevani</span>
             <span className="ml-1.5 text-xs text-slate-400">v1.0</span>
           </div>
         </div>
@@ -57,7 +67,7 @@ export default function TopNav() {
           <DropdownMenuTrigger asChild>
             <Button
               variant="outline"
-              className="gap-2 border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 hover:text-emerald-800"
+              className="gap-2 border-orange-200 bg-orange-50 text-slate-800 hover:bg-orange-100"
             >
               <Icon className="h-4 w-4" />
               <span className="hidden sm:inline">{current.label}</span>
@@ -72,7 +82,7 @@ export default function TopNav() {
               Switch Role / View
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            {roles.map((role) => {
+            {visibleRoles.map((role) => {
               const RoleIcon = role.icon;
               const isActive = role.id === currentRole;
               return (
@@ -80,7 +90,7 @@ export default function TopNav() {
                   key={role.id}
                   onClick={() => setRole(role.id)}
                   className={`flex items-center gap-3 cursor-pointer ${
-                    isActive ? "bg-emerald-50 text-emerald-700" : ""
+                    isActive ? "bg-orange-50 text-slate-800" : ""
                   }`}
                 >
                   <RoleIcon className="h-4 w-4" />
@@ -89,7 +99,7 @@ export default function TopNav() {
                     <div className="text-xs text-slate-400">{role.description}</div>
                   </div>
                   {isActive && (
-                    <div className="h-2 w-2 rounded-full bg-emerald-500" />
+                    <div className="h-2 w-2 rounded-full bg-green-700" />
                   )}
                 </DropdownMenuItem>
               );
@@ -97,6 +107,7 @@ export default function TopNav() {
           </DropdownMenuContent>
         </DropdownMenu>
 
+<<<<<<< HEAD
         {/* Right: Language Selector + Verification Button */}
         <div className="flex items-center gap-2">
           <LanguageDropdown />
@@ -111,6 +122,18 @@ export default function TopNav() {
             <span className="hidden sm:inline text-xs">Verify Identity</span>
           </Button>
         </div>
+=======
+        {/* Right: Verification Button */}
+        <Button
+          variant="outline"
+          size="sm"
+          className="gap-1.5 border-green-200 text-green-700 hover:bg-green-50"
+          onClick={() => setVerificationOpen(true)}
+        >
+          <ShieldCheck className="h-3.5 w-3.5" />
+          <span className="hidden sm:inline text-xs">Verify Identity</span>
+        </Button>
+>>>>>>> 51467903d403dda401975ca061b87a102aa33a54
       </div>
     </header>
   );

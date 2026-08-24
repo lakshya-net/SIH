@@ -13,24 +13,25 @@ import {
   type Vitals,
 } from "./mockData";
 import { uploadDocument } from "./storage";
+import type { FullPatientProfile, AllergyRecord, ChronicCondition } from "@/types/patientHistory";
 
 const globalForDb = globalThis as unknown as {
-  govehrPool?: Pool;
-  govehrInitialization?: Promise<void>;
+  sanjeevaniPool?: Pool;
+  sanjeevaniInitialization?: Promise<void>;
 };
 
 function getPool() {
-  if (globalForDb.govehrPool) return globalForDb.govehrPool;
+  if (globalForDb.sanjeevaniPool) return globalForDb.sanjeevaniPool;
   const databaseUrl = process.env.DATABASE_URL;
   if (!databaseUrl) {
     throw new Error("DATABASE_URL is required to connect to the Neon PostgreSQL database");
   }
-  globalForDb.govehrPool = new Pool({
+  globalForDb.sanjeevaniPool = new Pool({
     connectionString: databaseUrl,
     max: 10,
     idleTimeoutMillis: 30_000,
   });
-  return globalForDb.govehrPool;
+  return globalForDb.sanjeevaniPool;
 }
 
 const now = () => new Date().toISOString();
@@ -121,13 +122,13 @@ async function initializeDatabase() {
 }
 
 async function ensureDatabase() {
-  if (!globalForDb.govehrInitialization) {
-    globalForDb.govehrInitialization = initializeDatabase().catch((error) => {
-      globalForDb.govehrInitialization = undefined;
+  if (!globalForDb.sanjeevaniInitialization) {
+    globalForDb.sanjeevaniInitialization = initializeDatabase().catch((error) => {
+      globalForDb.sanjeevaniInitialization = undefined;
       throw error;
     });
   }
-  await globalForDb.govehrInitialization;
+  await globalForDb.sanjeevaniInitialization;
 }
 
 async function withTransaction<T>(callback: (client: PoolClient) => Promise<T>) {
@@ -301,8 +302,13 @@ export async function getState() {
   const patients = patientsResult.rows.map((row): Patient => ({
     id: row.id, uniqueHealthId: row.unique_health_id, name: row.name, age: row.age, gender: row.gender,
     bloodGroup: row.blood_group, phone: row.phone, address: row.address,
-    emergencyContacts: parse(row.emergency_contacts_json, []), allergies: parse(row.allergies_json, []),
-    chronicConditions: parse(row.chronic_conditions_json, []),
+    emergencyContacts: parse(row.emergency_contacts_json, []),
+    allergies: parse<unknown[]>(row.allergies_json, []).map((allergy) =>
+      typeof allergy === "string" ? allergy : String((allergy as { allergen?: unknown }).allergen ?? ""),
+    ).filter(Boolean),
+    chronicConditions: parse<unknown[]>(row.chronic_conditions_json, []).map((condition) =>
+      typeof condition === "string" ? condition : String((condition as { conditionName?: unknown }).conditionName ?? ""),
+    ).filter(Boolean),
   }));
   const encounters = encountersResult.rows.map((row) => ({
     id: row.id, patientId: row.patient_id, doctorId: row.doctor_id, date: row.date, status: row.status,
@@ -521,7 +527,7 @@ export async function savePrescription(input: { patientId: string; diagnosis: st
   });
 }
 
-export async function completeTreatment(input: { patientId: string; diagnosis: string; clinicalNotes: string; prescriptions: Prescription[] }) {
+export async function completeTreatment(input: { patientId: string; diagnosis: string; clinicalNotes: string; prescriptions: Prescription[]; diseaseNarrative?: string }) {
   await ensureDatabase();
   await withTransaction(async (client) => {
     const encounterResult = await client.query<EncounterRow>(
@@ -542,11 +548,12 @@ export async function completeTreatment(input: { patientId: string; diagnosis: s
       input.diagnosis || encounter.diagnosis || "Completed treatment",
       input.clinicalNotes || encounter.clinical_notes || "",
       prescriptions.rows,
+      input.diseaseNarrative,
     );
   });
 }
 
-async function compactTreatment(client: PoolClient, encounterId: string, diagnosis: string, notes: string, prescriptions: Prescription[]) {
+async function compactTreatment(client: PoolClient, encounterId: string, diagnosis: string, notes: string, prescriptions: Prescription[], diseaseNarrative?: string) {
   const encounter = await client.query<{ patient_id: string }>(
     "SELECT patient_id FROM encounters WHERE id=$1 FOR UPDATE", [encounterId],
   );
@@ -554,8 +561,11 @@ async function compactTreatment(client: PoolClient, encounterId: string, diagnos
   const labs = await client.query<{ test_name: string }>(
     "SELECT test_name FROM lab_reports WHERE encounter_id=$1", [encounterId],
   );
-  const summaryText = `${diagnosis}. ${notes}`.trim();
-  const keyFindings = { prescriptions, labs: labs.rows };
+  
+  // Use AI-generated disease narrative if available, otherwise fall back to basic summary
+  const summaryText = diseaseNarrative || `${diagnosis}. ${notes}`.trim();
+  const keyFindings = { prescriptions, labs: labs.rows, diagnosis };
+  
   await client.query(
     `INSERT INTO treatment_summaries
      (id,patient_id,encounter_id,summary,diagnosis,key_findings_json,completed_at)
@@ -565,15 +575,17 @@ async function compactTreatment(client: PoolClient, encounterId: string, diagnos
        key_findings_json=EXCLUDED.key_findings_json, completed_at=EXCLUDED.completed_at`,
     [`SUM-${encounterId}`, patientId, encounterId, summaryText, diagnosis, JSON.stringify(keyFindings), now()],
   );
+  
   await client.query(
     `INSERT INTO clinical_nodes
      (id,patient_id,encounter_id,node_type,title,description,payload_json,created_at)
      VALUES ($1,$2,$3,$4,$5,$6,$7::jsonb,$8)
      ON CONFLICT (id) DO UPDATE SET
        description=EXCLUDED.description, payload_json=EXCLUDED.payload_json, created_at=EXCLUDED.created_at`,
-    [`SUMMARY-${encounterId}`, patientId, encounterId, "Treatment Summary", "Completed Treatment Summary",
+    [`SUMMARY-${encounterId}`, patientId, encounterId, "Treatment Summary", `${diagnosis} - Treatment Summary`,
       summaryText, JSON.stringify(keyFindings), now()],
   );
+  
   await client.query("DELETE FROM clinical_nodes WHERE encounter_id=$1 AND id <> $2", [encounterId, `SUMMARY-${encounterId}`]);
   await client.query("DELETE FROM vitals WHERE encounter_id=$1", [encounterId]);
   await client.query("DELETE FROM document_metadata WHERE encounter_id=$1", [encounterId]);
@@ -583,6 +595,152 @@ async function compactTreatment(client: PoolClient, encounterId: string, diagnos
     "UPDATE encounters SET status='Completed', diagnosis=NULL, clinical_notes=NULL WHERE id=$1",
     [encounterId],
   );
+}
+
+export async function registerPatientProfile(profile: FullPatientProfile) {
+  await ensureDatabase();
+  const pool = getPool();
+
+  if (!profile.basicInfo?.fullName || !profile.basicInfo?.dob || !profile.healthId) {
+    throw new Error("Missing required fields: fullName, dob, and healthId");
+  }
+
+  // Check if patient with this healthId already exists
+  const existing = await pool.query(
+    "SELECT id FROM patients WHERE unique_health_id = $1",
+    [profile.healthId]
+  );
+
+  if (existing.rows.length > 0) {
+    throw new Error("Health ID already registered");
+  }
+
+  // Generate a unique patient ID
+  const patientId = `P${Date.now()}`;
+  const encounterId = `ENC${Date.now()}`;
+
+  await withTransaction(async (client) => {
+    // Insert patient
+    await client.query(
+      `INSERT INTO patients
+       (id, unique_health_id, name, age, gender, blood_group, phone, address,
+        emergency_contacts_json, allergies_json, chronic_conditions_json, created_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
+      [
+        patientId,
+        profile.healthId,
+        profile.basicInfo.fullName,
+        calculateAge(profile.basicInfo.dob),
+        profile.basicInfo.gender,
+        profile.basicInfo.bloodGroup || "Unknown",
+        profile.basicInfo.phone || "",
+        profile.basicInfo.address || "",
+        JSON.stringify([
+          {
+            name: profile.basicInfo.emergencyContactName || "",
+            phone: profile.basicInfo.emergencyContactPhone || "",
+            relation: profile.basicInfo.emergencyContactRelation || "",
+          },
+        ]),
+        JSON.stringify(
+          (profile.allergies || []).map((a: AllergyRecord) => ({
+            allergen: a.allergen,
+            allergyType: a.allergyType,
+            severity: a.severity,
+            reactionDescription: a.reactionDescription,
+          }))
+        ),
+        JSON.stringify(
+          (profile.chronicConditions || []).map((c: ChronicCondition) => ({
+            conditionName: c.conditionName,
+            diagnosedYear: c.diagnosedYear,
+            status: c.status,
+            latestMetrics: c.latestMetrics,
+          }))
+        ),
+        now(),
+      ]
+    );
+
+    // Create an initial active encounter for this patient
+    await client.query(
+      `INSERT INTO encounters
+       (id, patient_id, doctor_id, date, status, diagnosis, clinical_notes, created_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+      [
+        encounterId,
+        patientId,
+        "INTAKE",
+        new Date().toISOString().split("T")[0],
+        "Active",
+        "Initial Registration",
+        `Patient registered via intake wizard on ${new Date().toLocaleDateString()}`,
+        now(),
+      ]
+    );
+
+    // Store surgical history
+    if (profile.surgeries && profile.surgeries.length > 0) {
+      for (const surgery of profile.surgeries) {
+        await client.query(
+          `INSERT INTO clinical_nodes
+           (id, patient_id, encounter_id, node_type, title, description, payload_json, created_at)
+           VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb, $8)`,
+          [
+            `SURGERY-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+            patientId,
+            null,
+            "Surgery",
+            surgery.procedureName,
+            `${surgery.procedureName} at ${surgery.operatingHospital} (${surgery.yearOfProcedure})${
+              surgery.complicationsOrNotes ? ` - ${surgery.complicationsOrNotes}` : ""
+            }`,
+            JSON.stringify(surgery),
+            `${surgery.yearOfProcedure}-01-01T00:00:00.000Z`,
+          ]
+        );
+      }
+    }
+
+    // Store vaccination history
+    if (profile.vaccinations && profile.vaccinations.length > 0) {
+      for (const vaccine of profile.vaccinations) {
+        await client.query(
+          `INSERT INTO clinical_nodes
+           (id, patient_id, encounter_id, node_type, title, description, payload_json, created_at)
+           VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb, $8)`,
+          [
+            `VACCINE-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+            patientId,
+            null,
+            "Vaccination",
+            vaccine.vaccineName,
+            `${vaccine.vaccineName} - ${vaccine.doseNumber} administered on ${vaccine.administeredDate}${
+              vaccine.hospitalOrFacility ? ` at ${vaccine.hospitalOrFacility}` : ""
+            }`,
+            JSON.stringify(vaccine),
+            vaccine.administeredDate + "T00:00:00.000Z",
+          ]
+        );
+      }
+    }
+  });
+
+  return { patientId, encounterId };
+}
+
+function calculateAge(dob: string): number {
+  const birthDate = new Date(dob);
+  const today = new Date();
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const monthDiff = today.getMonth() - birthDate.getMonth();
+  if (
+    monthDiff < 0 ||
+    (monthDiff === 0 && today.getDate() < birthDate.getDate())
+  ) {
+    age--;
+  }
+  return age;
 }
 
 export function getDb() {

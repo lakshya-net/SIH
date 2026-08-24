@@ -34,6 +34,12 @@ import {
   UserCheck,
 } from "lucide-react";
 
+function displayPatientLabel(value: unknown, field: "allergen" | "conditionName") {
+  return typeof value === "string"
+    ? value
+    : String((value as Record<string, unknown>)?.[field] ?? "");
+}
+
 // ─── ConsultationPayload built from live application state ─────────
 // Builds the triage-engine input from LIVE data only:
 //  - patient demographics/allergies/chronic conditions: store (hydrated from
@@ -57,12 +63,12 @@ function buildConsultationPayload(
       gender: patient.gender,
       bloodGroup: patient.bloodGroup,
       chronicConditions: patient.chronicConditions.map((c) => ({
-        conditionName: c,
+        conditionName: displayPatientLabel(c, "conditionName"),
         diagnosedYear: "not recorded",
         status: "active",
       })),
       allergies: patient.allergies.map((a) => ({
-        allergen: a,
+        allergen: displayPatientLabel(a, "allergen"),
         allergyType: "unspecified",
         severity: "per record",
       })),
@@ -127,13 +133,19 @@ export default function DoctorClinical() {
     healthUpdates,
     medicalDocuments,
   } = useAppStore();
-  const patient = patients.find((p) => p.id === selectedPatientId) ?? patients[0];
-  const patientTimeline = timeline.filter((t) => t.patientId === patient.id).slice(0, 6);
-  const patientLabReports = labReports.filter((l) => l.patientId === patient.id);
-  const patientHealthUpdates = healthUpdates.filter((update) => update.patientId === patient.id);
-  const patientDocuments = medicalDocuments.filter((document) => document.patientId === patient.id);
+  const patient = patients.find((p) => p.id === selectedPatientId) ?? patients[0] ?? null;
+  const patientTimeline = patient
+    ? timeline.filter((t) => t.patientId === patient.id).slice(0, 6)
+    : [];
+  const patientLabReports = patient ? labReports.filter((l) => l.patientId === patient.id) : [];
+  const patientHealthUpdates = patient
+    ? healthUpdates.filter((update) => update.patientId === patient.id)
+    : [];
+  const patientDocuments = patient
+    ? medicalDocuments.filter((document) => document.patientId === patient.id)
+    : [];
   const activeEncounter = encounters.find(
-    (e) => e.patientId === patient.id && e.status === "Active",
+    (e) => patient && e.patientId === patient.id && e.status === "Active",
   );
 
   const [triageOutput, setTriageOutput] =
@@ -148,6 +160,10 @@ export default function DoctorClinical() {
   // persisted lab reports, and medications from prescriptions committed via
   // /api/prescriptions/commit. The old hardcoded mock payload is gone.
   useEffect(() => {
+    if (!patient) {
+      setIsAnalyzing(false);
+      return;
+    }
     setIsAnalyzing(true);
     const patientSelfReport =
       selfReportVitals && selectedPatientId === patient.id ? selfReportVitals : null;
@@ -166,14 +182,14 @@ export default function DoctorClinical() {
     }, 1200);
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [patient.id, selfReportVitals, prescriptions]);
+  }, [patient, selfReportVitals, prescriptions]);
 
   const handlePatientSwitch = useCallback(
     (newPatientId: string) => {
-      if (newPatientId === patient.id) return;
+      if (!patient || newPatientId === patient.id) return;
       setSelectedPatientId(newPatientId);
     },
-    [patient.id, setSelectedPatientId],
+    [patient, setSelectedPatientId],
   );
 
   const getTimelineIcon = (type: string) => {
@@ -190,6 +206,20 @@ export default function DoctorClinical() {
         return <FileText className="h-3.5 w-3.5" />;
     }
   };
+
+  if (!patient) {
+    return (
+      <div className="mx-auto max-w-2xl p-6">
+        <Card className="border-blue-100 bg-white/85 shadow-xl shadow-indigo-100/40">
+          <CardContent className="p-10 text-center">
+            <Loader2 className="mx-auto h-8 w-8 animate-spin text-blue-600" />
+            <h2 className="mt-4 text-lg font-semibold text-slate-800">Loading patient records</h2>
+            <p className="mt-2 text-sm text-slate-500">The clinical workspace is waiting for saved patient data.</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto max-w-screen-2xl p-4 sm:p-6 space-y-6">
@@ -521,11 +551,11 @@ export default function DoctorClinical() {
                   {patient.allergies.length > 0 ? (
                     patient.allergies.map((a) => (
                       <Badge
-                        key={a}
+                        key={displayPatientLabel(a, "allergen")}
                         variant="outline"
                         className="mr-1 border-red-300 bg-red-50 text-red-600 text-[10px]"
                       >
-                        {a}
+                        {displayPatientLabel(a, "allergen")}
                       </Badge>
                     ))
                   ) : (
@@ -536,11 +566,11 @@ export default function DoctorClinical() {
                   <span className="font-semibold text-slate-500">Chronic:</span>{" "}
                   {patient.chronicConditions.map((c) => (
                     <Badge
-                      key={c}
+                      key={displayPatientLabel(c, "conditionName")}
                       variant="outline"
                       className="mr-1 border-amber-300 bg-amber-50 text-amber-600 text-[10px]"
                     >
-                      {c}
+                      {displayPatientLabel(c, "conditionName")}
                     </Badge>
                   ))}
                 </div>

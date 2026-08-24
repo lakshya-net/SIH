@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -36,7 +36,13 @@ export default function IdentityVerification() {
   const [otpInput, setOtpInput] = useState(["", "", "", "", "", ""]);
   const [nationalId, setNationalId] = useState("");
   const [loading, setLoading] = useState(false);
-  const [selectedPatient, setSelectedPatient] = useState(patients[0]);
+  const [selectedPatient, setSelectedPatient] = useState<(typeof patients)[number] | null>(null);
+
+  useEffect(() => {
+    if (!selectedPatient && patients.length > 0) {
+      setSelectedPatient(patients[0]);
+    }
+  }, [patients, selectedPatient]);
 
   const handleSendOtp = () => {
     if (!phoneNumber) return;
@@ -50,7 +56,7 @@ export default function IdentityVerification() {
 
   const handleVerifyOtp = () => {
     const code = otpInput.join("");
-    if (code.length !== 6) return;
+    if (code.length !== 6 || !selectedPatient) return;
     setLoading(true);
     setTimeout(() => {
       setLoading(false);
@@ -62,7 +68,7 @@ export default function IdentityVerification() {
   };
 
   const handleVerifyNationalId = () => {
-    if (!nationalId || nationalId.length < 4) return;
+    if (!nationalId || nationalId.length < 4 || !selectedPatient) return;
     setLoading(true);
     setTimeout(() => {
       setLoading(false);
@@ -107,7 +113,7 @@ export default function IdentityVerification() {
                     key={p.id}
                     onClick={() => setSelectedPatient(p)}
                     className={`rounded-lg border p-3 text-left text-sm transition-colors ${
-                      selectedPatient.id === p.id
+                      selectedPatient?.id === p.id
                         ? "border-emerald-400 bg-emerald-50 text-emerald-700"
                         : "border-slate-200 hover:border-slate-300"
                     }`}
@@ -266,9 +272,9 @@ export default function IdentityVerification() {
               <CheckCircle2 className="h-8 w-8 text-emerald-600" />
             </div>
             <div>
-              <p className="text-lg font-semibold text-slate-800">{selectedPatient.name}</p>
+              <p className="text-lg font-semibold text-slate-800">{selectedPatient?.name}</p>
               <Badge variant="outline" className="mt-1 border-emerald-300 bg-emerald-50 text-emerald-700">
-                {selectedPatient.uniqueHealthId}
+                {selectedPatient?.uniqueHealthId}
               </Badge>
             </div>
             <p className="text-sm text-slate-500">
