@@ -159,7 +159,9 @@ function riskLevelScore(level: RiskLevel): number {
 // MAIN TRIAGE ENGINE
 // ═══════════════════════════════════════════════════════════════════
 
-export function runTriageEngine(payload: ConsultationPayload): ClinicalSummaryOutput {
+export function runTriageEngine(
+  payload: ConsultationPayload,
+): ClinicalSummaryOutput {
   const riskAlerts: RiskAlert[] = [];
   const drugInteractions: DrugInteraction[] = [];
   const labTrends: LabTrend[] = [];
@@ -167,8 +169,14 @@ export function runTriageEngine(payload: ConsultationPayload): ClinicalSummaryOu
 
   // ─── 1. ALLERGY RISK CHECKS ────────────────────────────────────
   const severeAllergies = payload.patient.allergies.filter(
+<<<<<<< HEAD
+    (a) => a.severity === "severe / anaphylactic",
+  );
+
+=======
     (a) => a.severity === "severe / anaphylactic"
   );
+>>>>>>> ef6e0f74b2e6f33da9adcbf130238a7a7a6c3490
   // Check for drug allergies against current medications
   for (const allergy of payload.patient.allergies) {
     if (allergy.allergyType === "drug") {
@@ -187,17 +195,29 @@ export function runTriageEngine(payload: ConsultationPayload): ClinicalSummaryOu
             evidence: [
               `Allergy: ${allergy.allergen} (${allergy.severity})`,
               `Active medication: ${med.drugName} ${med.dosage} ${med.frequency}`,
-              allergy.reactionDescription ? `Reaction: ${allergy.reactionDescription}` : "",
+              allergy.reactionDescription
+                ? `Reaction: ${allergy.reactionDescription}`
+                : "",
             ].filter(Boolean),
-            actionRequired: "DISCONTINUE immediately. Select alternative medication.",
+            actionRequired:
+              "DISCONTINUE immediately. Select alternative medication.",
           });
         }
       }
 
       // Cross-reactivity check
-      const crossReactive = DRUG_ALLERGY_CROSS_REACTIVITY[allergy.allergen] || [];
+      const crossReactive =
+        DRUG_ALLERGY_CROSS_REACTIVITY[allergy.allergen] || [];
       for (const med of payload.patient.activeMedications) {
+<<<<<<< HEAD
+        if (
+          crossReactive.some((cr) =>
+            med.drugName.toLowerCase().includes(cr.toLowerCase()),
+          )
+        ) {
+=======
         if (crossReactive.some((cr) => med.drugName.toLowerCase().includes(cr.toLowerCase()))) {
+>>>>>>> ef6e0f74b2e6f33da9adcbf130238a7a7a6c3490
           riskAlerts.push({
             id: uid(),
             level: "high",
@@ -209,7 +229,8 @@ export function runTriageEngine(payload: ConsultationPayload): ClinicalSummaryOu
               `Cross-reactive drug: ${med.drugName}`,
               `Similar chemical structure within same drug class`,
             ],
-            actionRequired: "Verify allergy status. Consider alternative if cross-reactivity confirmed.",
+            actionRequired:
+              "Verify allergy status. Consider alternative if cross-reactivity confirmed.",
           });
         }
       }
@@ -225,7 +246,8 @@ export function runTriageEngine(payload: ConsultationPayload): ClinicalSummaryOu
       title: `${severeAllergies.length} Severe/Anaphylactic Allerg${severeAllergies.length > 1 ? "ies" : "y"} Recorded`,
       description: `Patient has severe allergies: ${severeAllergies.map((a) => a.allergen).join(", ")}. Ensure emergency protocols are ready.`,
       evidence: severeAllergies.map(
-        (a) => `${a.allergen} — ${a.reactionDescription || "Anaphylactic risk"}`
+        (a) =>
+          `${a.allergen} — ${a.reactionDescription || "Anaphylactic risk"}`,
       ),
       actionRequired:
         "Confirm anaphylaxis kit availability. Verify epinephrine auto-injector prescription.",
@@ -250,8 +272,8 @@ export function runTriageEngine(payload: ConsultationPayload): ClinicalSummaryOu
             interaction.severity === "major"
               ? "critical"
               : interaction.severity === "moderate"
-              ? "moderate"
-              : "low",
+                ? "moderate"
+                : "low",
           category: "drug-interaction",
           title: `${interaction.severity.toUpperCase()} Interaction: ${interaction.drugA} + ${interaction.drugB}`,
           description: interaction.description,
@@ -270,12 +292,13 @@ export function runTriageEngine(payload: ConsultationPayload): ClinicalSummaryOu
   if (payload.patient.activeMedications.length >= 5) {
     riskAlerts.push({
       id: uid(),
-      level: payload.patient.activeMedications.length >= 8 ? "high" : "moderate",
+      level:
+        payload.patient.activeMedications.length >= 8 ? "high" : "moderate",
       category: "polypharmacy",
       title: `Polypharmacy Warning: ${payload.patient.activeMedications.length} Active Medications`,
       description: `Patient is on ${payload.patient.activeMedications.length} concurrent medications. Increased risk of adverse drug reactions, non-adherence, and drug-drug interactions.`,
       evidence: payload.patient.activeMedications.map(
-        (m) => `${m.drugName} ${m.dosage} ${m.frequency}`
+        (m) => `${m.drugName} ${m.dosage} ${m.frequency}`,
       ),
       actionRequired:
         "Review medication list for deprescribing opportunities. Simplify regimen where possible.",
@@ -284,7 +307,7 @@ export function runTriageEngine(payload: ConsultationPayload): ClinicalSummaryOu
 
   // ─── 4. CHRONIC CONDITION MONITORING ────────────────────────────
   const activeConditions = payload.patient.chronicConditions.filter(
-    (c) => c.status === "active"
+    (c) => c.status === "active",
   );
   for (const condition of activeConditions) {
     // Check if condition-specific medications are present
@@ -292,10 +315,14 @@ export function runTriageEngine(payload: ConsultationPayload): ClinicalSummaryOu
     const hasRelevantMeds = payload.patient.activeMedications.some(
       (m) =>
         m.prescribedFor.toLowerCase().includes(conditionLower) ||
-        conditionLower.includes(m.prescribedFor.toLowerCase())
+        conditionLower.includes(m.prescribedFor.toLowerCase()),
     );
 
-    if (!hasRelevantMeds && conditionLower !== "anxiety" && conditionLower !== "depression") {
+    if (
+      !hasRelevantMeds &&
+      conditionLower !== "anxiety" &&
+      conditionLower !== "depression"
+    ) {
       riskAlerts.push({
         id: uid(),
         level: "moderate",
@@ -305,7 +332,9 @@ export function runTriageEngine(payload: ConsultationPayload): ClinicalSummaryOu
         evidence: [
           `Condition: ${condition.conditionName}`,
           `Status: Active since ${condition.diagnosedYear}`,
-          condition.latestMetrics ? `Metrics: ${condition.latestMetrics}` : "No recent metrics",
+          condition.latestMetrics
+            ? `Metrics: ${condition.latestMetrics}`
+            : "No recent metrics",
         ],
         actionRequired:
           "Verify if condition is being managed non-pharmacologically or requires medication review.",
@@ -325,16 +354,16 @@ export function runTriageEngine(payload: ConsultationPayload): ClinicalSummaryOu
           category: "chronic-flare",
           title: `${condition.conditionName}: Elevated HbA1c`,
           description: `Latest HbA1c indicates poor glycemic control. ${condition.latestMetrics}. Target is typically < 7% for most adults.`,
-          evidence: [`Latest metrics: ${condition.latestMetrics}`, "Target: HbA1c < 7%"],
+          evidence: [
+            `Latest metrics: ${condition.latestMetrics}`,
+            "Target: HbA1c < 7%",
+          ],
           actionRequired:
             "Consider medication adjustment. Evaluate adherence, diet, and lifestyle factors.",
         });
       }
 
-      if (
-        metrics.includes("bp") ||
-        metrics.includes("blood pressure")
-      ) {
+      if (metrics.includes("bp") || metrics.includes("blood pressure")) {
         const bpMatch = metrics.match(/(\d+)\s*\/\s*(\d+)/);
         if (bpMatch) {
           const sys = parseInt(bpMatch[1]);
@@ -384,8 +413,12 @@ export function runTriageEngine(payload: ConsultationPayload): ClinicalSummaryOu
           category: "vital-abnormal",
           title: "Elevated Blood Pressure",
           description: `Blood pressure ${bp.systolic}/${bp.diastolic} mmHg. Consider medication adjustment if persistent.`,
-          evidence: [`BP: ${bp.systolic}/${bp.diastolic} mmHg`, "Target: < 130/80 mmHg"],
-          actionRequired: "Confirm with repeat measurement. Review current antihypertensive therapy.",
+          evidence: [
+            `BP: ${bp.systolic}/${bp.diastolic} mmHg`,
+            "Target: < 130/80 mmHg",
+          ],
+          actionRequired:
+            "Confirm with repeat measurement. Review current antihypertensive therapy.",
         });
       }
     }
@@ -401,7 +434,8 @@ export function runTriageEngine(payload: ConsultationPayload): ClinicalSummaryOu
         title: "Critical Oxygen Saturation",
         description: `SpO2 ${spo2}% indicates severe hypoxia. Immediate intervention required.`,
         evidence: [`SpO2: ${spo2}%`, "Critical threshold: < 90%"],
-        actionRequired: "Administer supplemental oxygen. Evaluate respiratory status.",
+        actionRequired:
+          "Administer supplemental oxygen. Evaluate respiratory status.",
       });
     } else if (spo2 < 94) {
       riskAlerts.push({
@@ -411,7 +445,8 @@ export function runTriageEngine(payload: ConsultationPayload): ClinicalSummaryOu
         title: "Low Oxygen Saturation",
         description: `SpO2 ${spo2}% is below normal. Monitor closely.`,
         evidence: [`SpO2: ${spo2}%`, "Normal: ≥ 95%"],
-        actionRequired: "Assess respiratory function. Consider pulse oximetry monitoring.",
+        actionRequired:
+          "Assess respiratory function. Consider pulse oximetry monitoring.",
       });
     }
   }
@@ -436,7 +471,8 @@ export function runTriageEngine(payload: ConsultationPayload): ClinicalSummaryOu
   for (const report of payload.currentVisit.todayLabReports) {
     for (const [testName, value] of Object.entries(report.keyMetrics)) {
       const threshold = CRITICAL_THRESHOLDS[testName];
-      const numericValue = typeof value === "number" ? value : parseFloat(String(value));
+      const numericValue =
+        typeof value === "number" ? value : parseFloat(String(value));
 
       let status: "normal" | "abnormal" | "critical" = report.status;
       let clinicalSignificance = "";
@@ -483,7 +519,8 @@ export function runTriageEngine(payload: ConsultationPayload): ClinicalSummaryOu
             `Value: ${numericValue}`,
             `Status: ${status}`,
           ],
-          actionRequired: "Urgent clinical review required. Consider repeat testing.",
+          actionRequired:
+            "Urgent clinical review required. Consider repeat testing.",
         });
       }
     }
@@ -519,7 +556,8 @@ export function runTriageEngine(payload: ConsultationPayload): ClinicalSummaryOu
     (c) =>
       c.conditionName.toLowerCase().includes("diabetes") &&
       c.latestMetrics?.toLowerCase().includes("hba1c") &&
-      parseFloat(c.latestMetrics.match(/hba1c\s*(\d+\.?\d*)/)?.[1] || "0") > 7.5
+      parseFloat(c.latestMetrics.match(/hba1c\s*(\d+\.?\d*)/)?.[1] || "0") >
+        7.5,
   );
 
   if (uncontrolledDiabetes) {
@@ -560,14 +598,15 @@ export function runTriageEngine(payload: ConsultationPayload): ClinicalSummaryOu
 
   // Vaccination gaps
   const hasCovidVaccines = payload.patient.vaccinations.some((v) =>
-    v.vaccineName.toLowerCase().includes("covid")
+    v.vaccineName.toLowerCase().includes("covid"),
   );
   if (!hasCovidVaccines && payload.patient.age > 50) {
     careRecommendations.push({
       priority: priorityCounter++,
       category: "monitoring",
       title: "COVID-19 Vaccination Status",
-      rationale: "Patient over 50 with no recorded COVID-19 vaccination. Discuss vaccination benefits.",
+      rationale:
+        "Patient over 50 with no recorded COVID-19 vaccination. Discuss vaccination benefits.",
       evidenceLevel: "moderate",
     });
   }
@@ -577,7 +616,7 @@ export function runTriageEngine(payload: ConsultationPayload): ClinicalSummaryOu
     activeConditions.some(
       (c) =>
         c.conditionName.toLowerCase().includes("diabetes") ||
-        c.conditionName.toLowerCase().includes("hypertension")
+        c.conditionName.toLowerCase().includes("hypertension"),
     )
   ) {
     careRecommendations.push({
@@ -593,7 +632,9 @@ export function runTriageEngine(payload: ConsultationPayload): ClinicalSummaryOu
   // Monitoring
   if (
     activeConditions.some(
-      (c) => c.conditionName.toLowerCase().includes("kidney") || c.conditionName.toLowerCase().includes("renal")
+      (c) =>
+        c.conditionName.toLowerCase().includes("kidney") ||
+        c.conditionName.toLowerCase().includes("renal"),
     )
   ) {
     careRecommendations.push({
@@ -645,8 +686,10 @@ export function runTriageEngine(payload: ConsultationPayload): ClinicalSummaryOu
     labTrends,
     careRecommendations,
     polypharmacyWarning: payload.patient.activeMedications.length >= 5,
-    allergyAlertCount: riskAlerts.filter((a) => a.category === "allergy").length,
-    criticalLabCount: riskAlerts.filter((a) => a.category === "lab-critical").length,
+    allergyAlertCount: riskAlerts.filter((a) => a.category === "allergy")
+      .length,
+    criticalLabCount: riskAlerts.filter((a) => a.category === "lab-critical")
+      .length,
   };
 }
 
@@ -654,7 +697,7 @@ export function runTriageEngine(payload: ConsultationPayload): ClinicalSummaryOu
 function generateClinicalBrief(
   payload: ConsultationPayload,
   riskAlerts: RiskAlert[],
-  labTrends: LabTrend[]
+  labTrends: LabTrend[],
 ): string {
   const p = payload.patient;
   const v = payload.currentVisit;
@@ -663,11 +706,13 @@ function generateClinicalBrief(
 
   // Demographics
   parts.push(
-    `${p.age}-year-old ${p.gender.toLowerCase()} presenting with: "${v.chiefComplaint}."`
+    `${p.age}-year-old ${p.gender.toLowerCase()} presenting with: "${v.chiefComplaint}."`,
   );
 
   // Active conditions
-  const activeConditions = p.chronicConditions.filter((c) => c.status === "active");
+  const activeConditions = p.chronicConditions.filter(
+    (c) => c.status === "active",
+  );
   if (activeConditions.length > 0) {
     const conditionStr = activeConditions.map((c) => {
       const metrics = c.latestMetrics ? ` (${c.latestMetrics})` : "";
@@ -711,7 +756,7 @@ function generateClinicalBrief(
   // Surgical history note
   if (p.surgeries.length > 0) {
     parts.push(
-      `Prior surgeries: ${p.surgeries.map((s) => `${s.procedureName} (${s.yearOfProcedure})`).join(", ")}.`
+      `Prior surgeries: ${p.surgeries.map((s) => `${s.procedureName} (${s.yearOfProcedure})`).join(", ")}.`,
     );
   }
 

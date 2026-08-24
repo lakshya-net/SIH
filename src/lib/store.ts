@@ -65,7 +65,14 @@ interface AppState {
   registerKiosk: (input: { name: string; age?: number; complaint: string; duration?: string; language: string; transcript?: string }) => Promise<string | null>;
   submitLab: (input: { patientId: string; testName: string; results: LabReport["results"]; files?: { name: string; type?: string; size?: number }[] }) => Promise<void>;
 
-  labQueue: { patientId: string; name: string; hid: string; waitTime: string; status: string }[];
+  labQueue: {
+    patientId: string;
+    name: string;
+    hid: string;
+    waitTime: string;
+    status: string;
+  }[];
+  updateLabQueueStatus: (patientId: string, status: string) => void;
 
   prescriptions: Prescription[];
   addPrescription: (rx: Prescription) => void;
@@ -125,7 +132,10 @@ export const useAppStore = create<AppState>((set, get) => ({
     }
   },
 
-  activeEncounter: mockEncounters.find((e) => e.status === "Active" && e.patientId === "P001") ?? null,
+  activeEncounter:
+    mockEncounters.find(
+      (e) => e.status === "Active" && e.patientId === "P001",
+    ) ?? null,
   setActiveEncounter: (encounter) => set({ activeEncounter: encounter }),
 
   selfReportVitals: null,
@@ -212,14 +222,45 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   labQueue: [
-    { patientId: "P001", name: "Rajesh Kumar", hid: "HID-8842-X", waitTime: "12 min", status: "Waiting" },
-    { patientId: "P002", name: "Sunita Devi", hid: "HID-3156-K", waitTime: "5 min", status: "In Progress" },
-    { patientId: "P003", name: "Vikram Singh", hid: "HID-7891-M", waitTime: "22 min", status: "Waiting" },
-    { patientId: "P004", name: "Ananya Patel", hid: "HID-2045-N", waitTime: "3 min", status: "Completed" },
+    {
+      patientId: "P001",
+      name: "Rajesh Kumar",
+      hid: "HID-8842-X",
+      waitTime: "12 min",
+      status: "Waiting",
+    },
+    {
+      patientId: "P002",
+      name: "Sunita Devi",
+      hid: "HID-3156-K",
+      waitTime: "5 min",
+      status: "In Progress",
+    },
+    {
+      patientId: "P003",
+      name: "Vikram Singh",
+      hid: "HID-7891-M",
+      waitTime: "22 min",
+      status: "Waiting",
+    },
+    {
+      patientId: "P004",
+      name: "Ananya Patel",
+      hid: "HID-2045-N",
+      waitTime: "3 min",
+      status: "Completed",
+    },
   ],
+  updateLabQueueStatus: (patientId, status) =>
+    set((state) => ({
+      labQueue: state.labQueue.map((patient) =>
+        patient.patientId === patientId ? { ...patient, status } : patient,
+      ),
+    })),
 
   prescriptions: [],
-  addPrescription: (rx) => set((state) => ({ prescriptions: [...state.prescriptions, rx] })),
+  addPrescription: (rx) =>
+    set((state) => ({ prescriptions: [...state.prescriptions, rx] })),
   removePrescription: (index) =>
     set((state) => ({
       prescriptions: state.prescriptions.filter((_, i) => i !== index),

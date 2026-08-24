@@ -3,7 +3,13 @@
 import { useState, useCallback } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -69,13 +75,48 @@ import {
 
 // ─── Step Definitions ──────────────────────────────────────────────
 const STEPS = [
-  { id: 1, title: "Identity & Demographics", icon: User, description: "Basic personal information" },
-  { id: 2, title: "Chronic Conditions", icon: Activity, description: "Medical history & comorbidities" },
-  { id: 3, title: "Surgical History", icon: Stethoscope, description: "Past surgeries & procedures" },
-  { id: 4, title: "Vaccinations", icon: Syringe, description: "Immunization records" },
-  { id: 5, title: "Active Medications", icon: Pill, description: "Current prescriptions" },
-  { id: 6, title: "Allergies & Lifestyle", icon: AlertTriangle, description: "Allergens & habits" },
-  { id: 7, title: "Final Review", icon: ClipboardCheck, description: "Review & submit" },
+  {
+    id: 1,
+    title: "Identity & Demographics",
+    icon: User,
+    description: "Basic personal information",
+  },
+  {
+    id: 2,
+    title: "Chronic Conditions",
+    icon: Activity,
+    description: "Medical history & comorbidities",
+  },
+  {
+    id: 3,
+    title: "Surgical History",
+    icon: Stethoscope,
+    description: "Past surgeries & procedures",
+  },
+  {
+    id: 4,
+    title: "Vaccinations",
+    icon: Syringe,
+    description: "Immunization records",
+  },
+  {
+    id: 5,
+    title: "Active Medications",
+    icon: Pill,
+    description: "Current prescriptions",
+  },
+  {
+    id: 6,
+    title: "Allergies & Lifestyle",
+    icon: AlertTriangle,
+    description: "Allergens & habits",
+  },
+  {
+    id: 7,
+    title: "Final Review",
+    icon: ClipboardCheck,
+    description: "Review & submit",
+  },
 ];
 
 // ─── Helper: Generate unique ID ────────────────────────────────────
@@ -119,8 +160,8 @@ function StepIndicator({
                       isActive
                         ? "bg-emerald-600 text-white shadow-md"
                         : isCompleted
-                        ? "bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
-                        : "text-slate-400 cursor-not-allowed"
+                          ? "bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
+                          : "text-slate-400 cursor-not-allowed"
                     }`}
                   >
                     <div
@@ -128,8 +169,8 @@ function StepIndicator({
                         isActive
                           ? "bg-white text-emerald-600"
                           : isCompleted
-                          ? "bg-emerald-200 text-emerald-700"
-                          : "bg-slate-200 text-slate-400"
+                            ? "bg-emerald-200 text-emerald-700"
+                            : "bg-slate-200 text-slate-400"
                       }`}
                     >
                       {isCompleted ? <Check className="h-3 w-3" /> : step.id}
@@ -170,7 +211,10 @@ function StepBasicInfo({
   const [verified, setVerified] = useState(false);
 
   const update = (field: string, value: string) => {
-    onChange({ ...profile, basicInfo: { ...profile.basicInfo, [field]: value } });
+    onChange({
+      ...profile,
+      basicInfo: { ...profile.basicInfo, [field]: value },
+    });
   };
 
   const simulateVerification = () => {
@@ -223,7 +267,9 @@ function StepBasicInfo({
             value={profile.basicInfo.fullName}
             onChange={(e) => update("fullName", e.target.value)}
           />
-          {errors.fullName && <p className="text-xs text-red-500">{errors.fullName}</p>}
+          {errors.fullName && (
+            <p className="text-xs text-red-500">{errors.fullName}</p>
+          )}
         </div>
         <div className="space-y-1.5">
           <Label className="text-xs font-semibold">
@@ -274,7 +320,9 @@ function StepBasicInfo({
               ))}
             </SelectContent>
           </Select>
-          {errors.bloodGroup && <p className="text-xs text-red-500">{errors.bloodGroup}</p>}
+          {errors.bloodGroup && (
+            <p className="text-xs text-red-500">{errors.bloodGroup}</p>
+          )}
         </div>
       </div>
 
@@ -313,7 +361,9 @@ function StepBasicInfo({
               )}
             </Button>
           </div>
-          {errors.phone && <p className="text-xs text-red-500">{errors.phone}</p>}
+          {errors.phone && (
+            <p className="text-xs text-red-500">{errors.phone}</p>
+          )}
           {verified && (
             <p className="text-xs text-emerald-600 flex items-center gap-1">
               <CheckCircle2 className="h-3 w-3" />
@@ -359,7 +409,9 @@ function StepBasicInfo({
             onChange={(e) => update("emergencyContactName", e.target.value)}
           />
           {errors.emergencyContactName && (
-            <p className="text-xs text-red-500">{errors.emergencyContactName}</p>
+            <p className="text-xs text-red-500">
+              {errors.emergencyContactName}
+            </p>
           )}
         </div>
         <div className="space-y-1.5">
@@ -372,7 +424,9 @@ function StepBasicInfo({
             onChange={(e) => update("emergencyContactPhone", e.target.value)}
           />
           {errors.emergencyContactPhone && (
-            <p className="text-xs text-red-500">{errors.emergencyContactPhone}</p>
+            <p className="text-xs text-red-500">
+              {errors.emergencyContactPhone}
+            </p>
           )}
         </div>
         <div className="space-y-1.5">
@@ -409,7 +463,7 @@ function StepChronicConditions({
   const filteredSuggestions = COMMON_CONDITIONS.filter(
     (c) =>
       c.toLowerCase().includes(searchTerm.toLowerCase()) &&
-      !conditions.some((ec) => ec.conditionName === c)
+      !conditions.some((ec) => ec.conditionName === c),
   );
 
   const handleAdd = () => {
@@ -421,7 +475,12 @@ function StepChronicConditions({
     } else {
       onChange([...conditions, form]);
     }
-    setForm({ conditionName: "", diagnosedYear: "", status: "active", latestMetrics: "" });
+    setForm({
+      conditionName: "",
+      diagnosedYear: "",
+      status: "active",
+      latestMetrics: "",
+    });
     setShowForm(false);
     setEditingIdx(null);
     setSearchTerm("");
@@ -446,15 +505,24 @@ function StepChronicConditions({
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-sm font-semibold text-slate-700">Chronic Conditions & Comorbidities</h3>
-          <p className="text-xs text-slate-400">Track ongoing medical conditions</p>
+          <h3 className="text-sm font-semibold text-slate-700">
+            Chronic Conditions & Comorbidities
+          </h3>
+          <p className="text-xs text-slate-400">
+            Track ongoing medical conditions
+          </p>
         </div>
         <Button
           size="sm"
           onClick={() => {
             setShowForm(true);
             setEditingIdx(null);
-            setForm({ conditionName: "", diagnosedYear: "", status: "active", latestMetrics: "" });
+            setForm({
+              conditionName: "",
+              diagnosedYear: "",
+              status: "active",
+              latestMetrics: "",
+            });
           }}
           className="bg-emerald-600 hover:bg-emerald-700"
         >
@@ -467,7 +535,9 @@ function StepChronicConditions({
       {!showForm && conditions.length === 0 && (
         <Card className="border-dashed border-slate-300">
           <CardContent className="p-4">
-            <p className="text-xs text-slate-500 mb-2 font-medium">Quick add common conditions:</p>
+            <p className="text-xs text-slate-500 mb-2 font-medium">
+              Quick add common conditions:
+            </p>
             <div className="flex flex-wrap gap-1.5">
               {COMMON_CONDITIONS.slice(0, 8).map((c) => (
                 <button
@@ -498,14 +568,16 @@ function StepChronicConditions({
                     c.status === "active"
                       ? "bg-red-100 text-red-600"
                       : c.status === "managed"
-                      ? "bg-amber-100 text-amber-600"
-                      : "bg-emerald-100 text-emerald-600"
+                        ? "bg-amber-100 text-amber-600"
+                        : "bg-emerald-100 text-emerald-600"
                   }`}
                 >
                   <Activity className="h-4 w-4" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-slate-800">{c.conditionName}</p>
+                  <p className="text-sm font-medium text-slate-800">
+                    {c.conditionName}
+                  </p>
                   <div className="flex items-center gap-2 text-xs text-slate-400">
                     <span>Diagnosed: {c.diagnosedYear}</span>
                     <Badge
@@ -514,23 +586,35 @@ function StepChronicConditions({
                         c.status === "active"
                           ? "border-red-200 bg-red-50 text-red-600"
                           : c.status === "managed"
-                          ? "border-amber-200 bg-amber-50 text-amber-600"
-                          : "border-emerald-200 bg-emerald-50 text-emerald-600"
+                            ? "border-amber-200 bg-amber-50 text-amber-600"
+                            : "border-emerald-200 bg-emerald-50 text-emerald-600"
                       }`}
                     >
                       {c.status}
                     </Badge>
                     {c.latestMetrics && (
-                      <span className="text-slate-500">| {c.latestMetrics}</span>
+                      <span className="text-slate-500">
+                        | {c.latestMetrics}
+                      </span>
                     )}
                   </div>
                 </div>
               </div>
               <div className="flex items-center gap-1">
-                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleEdit(idx)}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7"
+                  onClick={() => handleEdit(idx)}
+                >
                   <Edit3 className="h-3.5 w-3.5 text-slate-400" />
                 </Button>
-                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleRemove(idx)}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7"
+                  onClick={() => handleRemove(idx)}
+                >
                   <Trash2 className="h-3.5 w-3.5 text-red-400" />
                 </Button>
               </div>
@@ -547,7 +631,15 @@ function StepChronicConditions({
               <h4 className="text-xs font-semibold text-slate-700">
                 {editingIdx !== null ? "Edit Condition" : "Add New Condition"}
               </h4>
-              <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => { setShowForm(false); setEditingIdx(null); }}>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6"
+                onClick={() => {
+                  setShowForm(false);
+                  setEditingIdx(null);
+                }}
+              >
                 <X className="h-3.5 w-3.5" />
               </Button>
             </div>
@@ -594,14 +686,18 @@ function StepChronicConditions({
                   min="1900"
                   max="2099"
                   value={form.diagnosedYear}
-                  onChange={(e) => setForm({ ...form, diagnosedYear: e.target.value })}
+                  onChange={(e) =>
+                    setForm({ ...form, diagnosedYear: e.target.value })
+                  }
                 />
               </div>
               <div className="space-y-1.5">
                 <Label className="text-xs">Status</Label>
                 <Select
                   value={form.status}
-                  onValueChange={(v: "active" | "managed" | "resolved") => setForm({ ...form, status: v })}
+                  onValueChange={(v: "active" | "managed" | "resolved") =>
+                    setForm({ ...form, status: v })
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -618,12 +714,18 @@ function StepChronicConditions({
                 <Input
                   placeholder="e.g., BP 130/85"
                   value={form.latestMetrics || ""}
-                  onChange={(e) => setForm({ ...form, latestMetrics: e.target.value })}
+                  onChange={(e) =>
+                    setForm({ ...form, latestMetrics: e.target.value })
+                  }
                 />
               </div>
             </div>
 
-            <Button size="sm" onClick={handleAdd} className="bg-emerald-600 hover:bg-emerald-700">
+            <Button
+              size="sm"
+              onClick={handleAdd}
+              className="bg-emerald-600 hover:bg-emerald-700"
+            >
               <Check className="h-3.5 w-3.5 mr-1" />
               {editingIdx !== null ? "Update" : "Add Condition"}
             </Button>
@@ -654,7 +756,8 @@ function StepSurgicalHistory({
   });
 
   const handleAdd = () => {
-    if (!form.procedureName || !form.operatingHospital || !form.yearOfProcedure) return;
+    if (!form.procedureName || !form.operatingHospital || !form.yearOfProcedure)
+      return;
     if (editingIdx !== null) {
       const updated = [...surgeries];
       updated[editingIdx] = { ...form, id: updated[editingIdx].id };
@@ -662,7 +765,14 @@ function StepSurgicalHistory({
     } else {
       onChange([...surgeries, { ...form, id: uid() }]);
     }
-    setForm({ id: "", procedureName: "", operatingHospital: "", yearOfProcedure: "", surgeonName: "", complicationsOrNotes: "" });
+    setForm({
+      id: "",
+      procedureName: "",
+      operatingHospital: "",
+      yearOfProcedure: "",
+      surgeonName: "",
+      complicationsOrNotes: "",
+    });
     setShowForm(false);
     setEditingIdx(null);
   };
@@ -681,15 +791,26 @@ function StepSurgicalHistory({
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-sm font-semibold text-slate-700">Surgical & Procedural History</h3>
-          <p className="text-xs text-slate-400">Record all past surgeries, operations, and implants</p>
+          <h3 className="text-sm font-semibold text-slate-700">
+            Surgical & Procedural History
+          </h3>
+          <p className="text-xs text-slate-400">
+            Record all past surgeries, operations, and implants
+          </p>
         </div>
         <Button
           size="sm"
           onClick={() => {
             setShowForm(true);
             setEditingIdx(null);
-            setForm({ id: "", procedureName: "", operatingHospital: "", yearOfProcedure: "", surgeonName: "", complicationsOrNotes: "" });
+            setForm({
+              id: "",
+              procedureName: "",
+              operatingHospital: "",
+              yearOfProcedure: "",
+              surgeonName: "",
+              complicationsOrNotes: "",
+            });
           }}
           className="bg-emerald-600 hover:bg-emerald-700"
         >
@@ -702,8 +823,12 @@ function StepSurgicalHistory({
         <Card className="border-dashed border-slate-300">
           <CardContent className="p-8 text-center">
             <Stethoscope className="mx-auto h-8 w-8 text-slate-300 mb-2" />
-            <p className="text-sm text-slate-400">No surgical records added yet</p>
-            <p className="text-xs text-slate-300 mt-1">Click &quot;Add Surgery&quot; to record surgical history</p>
+            <p className="text-sm text-slate-400">
+              No surgical records added yet
+            </p>
+            <p className="text-xs text-slate-300 mt-1">
+              Click &quot;Add Surgery&quot; to record surgical history
+            </p>
           </CardContent>
         </Card>
       )}
@@ -711,14 +836,19 @@ function StepSurgicalHistory({
       {surgeries.length > 0 && (
         <div className="space-y-2">
           {surgeries.map((s, idx) => (
-            <div key={s.id} className="rounded-lg border border-slate-200 bg-white p-3 shadow-sm">
+            <div
+              key={s.id}
+              className="rounded-lg border border-slate-200 bg-white p-3 shadow-sm"
+            >
               <div className="flex items-start justify-between">
                 <div className="flex items-start gap-3">
                   <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-100 text-violet-600">
                     <Stethoscope className="h-4 w-4" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-slate-800">{s.procedureName}</p>
+                    <p className="text-sm font-medium text-slate-800">
+                      {s.procedureName}
+                    </p>
                     <div className="flex flex-wrap items-center gap-2 text-xs text-slate-400 mt-0.5">
                       <span className="flex items-center gap-1">
                         <MapPin className="h-3 w-3" />
@@ -731,15 +861,27 @@ function StepSurgicalHistory({
                       {s.surgeonName && <span>Dr. {s.surgeonName}</span>}
                     </div>
                     {s.complicationsOrNotes && (
-                      <p className="mt-1 text-xs text-slate-500 italic">{s.complicationsOrNotes}</p>
+                      <p className="mt-1 text-xs text-slate-500 italic">
+                        {s.complicationsOrNotes}
+                      </p>
                     )}
                   </div>
                 </div>
                 <div className="flex items-center gap-1">
-                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleEdit(idx)}>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7"
+                    onClick={() => handleEdit(idx)}
+                  >
                     <Edit3 className="h-3.5 w-3.5 text-slate-400" />
                   </Button>
-                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleRemove(idx)}>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7"
+                    onClick={() => handleRemove(idx)}
+                  >
                     <Trash2 className="h-3.5 w-3.5 text-red-400" />
                   </Button>
                 </div>
@@ -756,36 +898,56 @@ function StepSurgicalHistory({
               <h4 className="text-xs font-semibold text-slate-700">
                 {editingIdx !== null ? "Edit Surgery" : "Add New Surgery"}
               </h4>
-              <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => { setShowForm(false); setEditingIdx(null); }}>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6"
+                onClick={() => {
+                  setShowForm(false);
+                  setEditingIdx(null);
+                }}
+              >
                 <X className="h-3.5 w-3.5" />
               </Button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <Label className="text-xs">Procedure Name <span className="text-red-500">*</span></Label>
+                <Label className="text-xs">
+                  Procedure Name <span className="text-red-500">*</span>
+                </Label>
                 <Input
                   placeholder="e.g., Appendectomy, Knee Replacement"
                   value={form.procedureName}
-                  onChange={(e) => setForm({ ...form, procedureName: e.target.value })}
+                  onChange={(e) =>
+                    setForm({ ...form, procedureName: e.target.value })
+                  }
                 />
               </div>
               <div className="space-y-1.5">
-                <Label className="text-xs">Operating Hospital <span className="text-red-500">*</span></Label>
+                <Label className="text-xs">
+                  Operating Hospital <span className="text-red-500">*</span>
+                </Label>
                 <Input
                   placeholder="e.g., AIIMS New Delhi"
                   value={form.operatingHospital}
-                  onChange={(e) => setForm({ ...form, operatingHospital: e.target.value })}
+                  onChange={(e) =>
+                    setForm({ ...form, operatingHospital: e.target.value })
+                  }
                 />
               </div>
               <div className="space-y-1.5">
-                <Label className="text-xs">Year of Procedure <span className="text-red-500">*</span></Label>
+                <Label className="text-xs">
+                  Year of Procedure <span className="text-red-500">*</span>
+                </Label>
                 <Input
                   type="number"
                   placeholder="2018"
                   min="1900"
                   max="2099"
                   value={form.yearOfProcedure}
-                  onChange={(e) => setForm({ ...form, yearOfProcedure: e.target.value })}
+                  onChange={(e) =>
+                    setForm({ ...form, yearOfProcedure: e.target.value })
+                  }
                 />
               </div>
               <div className="space-y-1.5">
@@ -793,7 +955,9 @@ function StepSurgicalHistory({
                 <Input
                   placeholder="e.g., Dr. Sharma"
                   value={form.surgeonName || ""}
-                  onChange={(e) => setForm({ ...form, surgeonName: e.target.value })}
+                  onChange={(e) =>
+                    setForm({ ...form, surgeonName: e.target.value })
+                  }
                 />
               </div>
             </div>
@@ -802,11 +966,17 @@ function StepSurgicalHistory({
               <Textarea
                 placeholder="Any complications, implant details, or post-operative notes..."
                 value={form.complicationsOrNotes || ""}
-                onChange={(e) => setForm({ ...form, complicationsOrNotes: e.target.value })}
+                onChange={(e) =>
+                  setForm({ ...form, complicationsOrNotes: e.target.value })
+                }
                 rows={2}
               />
             </div>
-            <Button size="sm" onClick={handleAdd} className="bg-emerald-600 hover:bg-emerald-700">
+            <Button
+              size="sm"
+              onClick={handleAdd}
+              className="bg-emerald-600 hover:bg-emerald-700"
+            >
               <Check className="h-3.5 w-3.5 mr-1" />
               {editingIdx !== null ? "Update" : "Add Surgery"}
             </Button>
@@ -840,7 +1010,7 @@ function StepVaccinations({
   const filteredVaccines = COMMON_VACCINES.filter(
     (v) =>
       v.toLowerCase().includes(searchTerm.toLowerCase()) &&
-      !vaccinations.some((ev) => ev.vaccineName === v)
+      !vaccinations.some((ev) => ev.vaccineName === v),
   );
 
   const handleAdd = () => {
@@ -852,7 +1022,14 @@ function StepVaccinations({
     } else {
       onChange([...vaccinations, { ...form, id: uid() }]);
     }
-    setForm({ id: "", vaccineName: "", doseNumber: "", administeredDate: "", hospitalOrFacility: "", batchNumber: "" });
+    setForm({
+      id: "",
+      vaccineName: "",
+      doseNumber: "",
+      administeredDate: "",
+      hospitalOrFacility: "",
+      batchNumber: "",
+    });
     setShowForm(false);
     setEditingIdx(null);
     setSearchTerm("");
@@ -872,15 +1049,26 @@ function StepVaccinations({
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-sm font-semibold text-slate-700">Vaccination & Immunization History</h3>
-          <p className="text-xs text-slate-400">Record routine, COVID-19, and travel vaccines</p>
+          <h3 className="text-sm font-semibold text-slate-700">
+            Vaccination & Immunization History
+          </h3>
+          <p className="text-xs text-slate-400">
+            Record routine, COVID-19, and travel vaccines
+          </p>
         </div>
         <Button
           size="sm"
           onClick={() => {
             setShowForm(true);
             setEditingIdx(null);
-            setForm({ id: "", vaccineName: "", doseNumber: "", administeredDate: "", hospitalOrFacility: "", batchNumber: "" });
+            setForm({
+              id: "",
+              vaccineName: "",
+              doseNumber: "",
+              administeredDate: "",
+              hospitalOrFacility: "",
+              batchNumber: "",
+            });
           }}
           className="bg-emerald-600 hover:bg-emerald-700"
         >
@@ -893,8 +1081,12 @@ function StepVaccinations({
         <Card className="border-dashed border-slate-300">
           <CardContent className="p-8 text-center">
             <Syringe className="mx-auto h-8 w-8 text-slate-300 mb-2" />
-            <p className="text-sm text-slate-400">No vaccination records added yet</p>
-            <p className="text-xs text-slate-300 mt-1">Click &quot;Add Vaccine&quot; to record immunization history</p>
+            <p className="text-sm text-slate-400">
+              No vaccination records added yet
+            </p>
+            <p className="text-xs text-slate-300 mt-1">
+              Click &quot;Add Vaccine&quot; to record immunization history
+            </p>
           </CardContent>
         </Card>
       )}
@@ -902,15 +1094,23 @@ function StepVaccinations({
       {vaccinations.length > 0 && (
         <div className="space-y-2">
           {vaccinations.map((v, idx) => (
-            <div key={v.id} className="flex items-center justify-between rounded-lg border border-slate-200 bg-white p-3 shadow-sm">
+            <div
+              key={v.id}
+              className="flex items-center justify-between rounded-lg border border-slate-200 bg-white p-3 shadow-sm"
+            >
               <div className="flex items-center gap-3">
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-100 text-blue-600">
                   <Syringe className="h-4 w-4" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-slate-800">{v.vaccineName}</p>
+                  <p className="text-sm font-medium text-slate-800">
+                    {v.vaccineName}
+                  </p>
                   <div className="flex flex-wrap items-center gap-2 text-xs text-slate-400">
-                    <Badge variant="outline" className="border-blue-200 bg-blue-50 text-blue-600 text-[10px]">
+                    <Badge
+                      variant="outline"
+                      className="border-blue-200 bg-blue-50 text-blue-600 text-[10px]"
+                    >
                       {v.doseNumber}
                     </Badge>
                     <span className="flex items-center gap-1">
@@ -928,10 +1128,20 @@ function StepVaccinations({
                 </div>
               </div>
               <div className="flex items-center gap-1">
-                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleEdit(idx)}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7"
+                  onClick={() => handleEdit(idx)}
+                >
                   <Edit3 className="h-3.5 w-3.5 text-slate-400" />
                 </Button>
-                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleRemove(idx)}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7"
+                  onClick={() => handleRemove(idx)}
+                >
                   <Trash2 className="h-3.5 w-3.5 text-red-400" />
                 </Button>
               </div>
@@ -947,14 +1157,24 @@ function StepVaccinations({
               <h4 className="text-xs font-semibold text-slate-700">
                 {editingIdx !== null ? "Edit Vaccine" : "Add New Vaccine"}
               </h4>
-              <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => { setShowForm(false); setEditingIdx(null); }}>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6"
+                onClick={() => {
+                  setShowForm(false);
+                  setEditingIdx(null);
+                }}
+              >
                 <X className="h-3.5 w-3.5" />
               </Button>
             </div>
 
             {/* Vaccine Search */}
             <div className="space-y-1.5">
-              <Label className="text-xs">Vaccine Name <span className="text-red-500">*</span></Label>
+              <Label className="text-xs">
+                Vaccine Name <span className="text-red-500">*</span>
+              </Label>
               <div className="relative">
                 <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-slate-400" />
                 <Input
@@ -987,8 +1207,13 @@ function StepVaccinations({
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               <div className="space-y-1.5">
-                <Label className="text-xs">Dose Number <span className="text-red-500">*</span></Label>
-                <Select value={form.doseNumber} onValueChange={(v) => setForm({ ...form, doseNumber: v })}>
+                <Label className="text-xs">
+                  Dose Number <span className="text-red-500">*</span>
+                </Label>
+                <Select
+                  value={form.doseNumber}
+                  onValueChange={(v) => setForm({ ...form, doseNumber: v })}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Select" />
                   </SelectTrigger>
@@ -1002,11 +1227,15 @@ function StepVaccinations({
                 </Select>
               </div>
               <div className="space-y-1.5">
-                <Label className="text-xs">Date Administered <span className="text-red-500">*</span></Label>
+                <Label className="text-xs">
+                  Date Administered <span className="text-red-500">*</span>
+                </Label>
                 <Input
                   type="date"
                   value={form.administeredDate}
-                  onChange={(e) => setForm({ ...form, administeredDate: e.target.value })}
+                  onChange={(e) =>
+                    setForm({ ...form, administeredDate: e.target.value })
+                  }
                 />
               </div>
               <div className="space-y-1.5">
@@ -1014,7 +1243,9 @@ function StepVaccinations({
                 <Input
                   placeholder="e.g., PHC Central"
                   value={form.hospitalOrFacility || ""}
-                  onChange={(e) => setForm({ ...form, hospitalOrFacility: e.target.value })}
+                  onChange={(e) =>
+                    setForm({ ...form, hospitalOrFacility: e.target.value })
+                  }
                 />
               </div>
               <div className="space-y-1.5">
@@ -1022,12 +1253,18 @@ function StepVaccinations({
                 <Input
                   placeholder="e.g., CVD-2021-A1"
                   value={form.batchNumber || ""}
-                  onChange={(e) => setForm({ ...form, batchNumber: e.target.value })}
+                  onChange={(e) =>
+                    setForm({ ...form, batchNumber: e.target.value })
+                  }
                 />
               </div>
             </div>
 
-            <Button size="sm" onClick={handleAdd} className="bg-emerald-600 hover:bg-emerald-700">
+            <Button
+              size="sm"
+              onClick={handleAdd}
+              className="bg-emerald-600 hover:bg-emerald-700"
+            >
               <Check className="h-3.5 w-3.5 mr-1" />
               {editingIdx !== null ? "Update" : "Add Vaccine"}
             </Button>
@@ -1061,7 +1298,7 @@ function StepMedications({
   const filteredMeds = COMMON_MEDICATIONS.filter(
     (m) =>
       m.toLowerCase().includes(searchTerm.toLowerCase()) &&
-      !medications.some((em) => em.drugName === m)
+      !medications.some((em) => em.drugName === m),
   );
 
   const handleAdd = () => {
@@ -1073,7 +1310,14 @@ function StepMedications({
     } else {
       onChange([...medications, { ...form, id: uid() }]);
     }
-    setForm({ id: "", drugName: "", dosage: "", frequency: "", prescribedFor: "", startDate: "" });
+    setForm({
+      id: "",
+      drugName: "",
+      dosage: "",
+      frequency: "",
+      prescribedFor: "",
+      startDate: "",
+    });
     setShowForm(false);
     setEditingIdx(null);
     setSearchTerm("");
@@ -1093,15 +1337,26 @@ function StepMedications({
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-sm font-semibold text-slate-700">Active & Chronic Medications</h3>
-          <p className="text-xs text-slate-400">Record current prescriptions and supplements</p>
+          <h3 className="text-sm font-semibold text-slate-700">
+            Active & Chronic Medications
+          </h3>
+          <p className="text-xs text-slate-400">
+            Record current prescriptions and supplements
+          </p>
         </div>
         <Button
           size="sm"
           onClick={() => {
             setShowForm(true);
             setEditingIdx(null);
-            setForm({ id: "", drugName: "", dosage: "", frequency: "", prescribedFor: "", startDate: "" });
+            setForm({
+              id: "",
+              drugName: "",
+              dosage: "",
+              frequency: "",
+              prescribedFor: "",
+              startDate: "",
+            });
           }}
           className="bg-emerald-600 hover:bg-emerald-700"
         >
@@ -1114,8 +1369,12 @@ function StepMedications({
         <Card className="border-dashed border-slate-300">
           <CardContent className="p-8 text-center">
             <Pill className="mx-auto h-8 w-8 text-slate-300 mb-2" />
-            <p className="text-sm text-slate-400">No medications recorded yet</p>
-            <p className="text-xs text-slate-300 mt-1">Click &quot;Add Medication&quot; to record current prescriptions</p>
+            <p className="text-sm text-slate-400">
+              No medications recorded yet
+            </p>
+            <p className="text-xs text-slate-300 mt-1">
+              Click &quot;Add Medication&quot; to record current prescriptions
+            </p>
           </CardContent>
         </Card>
       )}
@@ -1123,22 +1382,33 @@ function StepMedications({
       {medications.length > 0 && (
         <div className="space-y-2">
           {medications.map((m, idx) => (
-            <div key={m.id} className="flex items-center justify-between rounded-lg border border-slate-200 bg-white p-3 shadow-sm">
+            <div
+              key={m.id}
+              className="flex items-center justify-between rounded-lg border border-slate-200 bg-white p-3 shadow-sm"
+            >
               <div className="flex items-center gap-3">
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-100 text-amber-600">
                   <Pill className="h-4 w-4" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-slate-800">{m.drugName}</p>
+                  <p className="text-sm font-medium text-slate-800">
+                    {m.drugName}
+                  </p>
                   <div className="flex flex-wrap items-center gap-2 text-xs text-slate-400">
-                    <Badge variant="outline" className="border-amber-200 bg-amber-50 text-amber-600 text-[10px]">
+                    <Badge
+                      variant="outline"
+                      className="border-amber-200 bg-amber-50 text-amber-600 text-[10px]"
+                    >
                       {m.dosage}
                     </Badge>
                     <span>{m.frequency}</span>
                     {m.prescribedFor && (
                       <>
                         <span>for</span>
-                        <Badge variant="outline" className="border-slate-200 bg-slate-50 text-slate-600 text-[10px]">
+                        <Badge
+                          variant="outline"
+                          className="border-slate-200 bg-slate-50 text-slate-600 text-[10px]"
+                        >
                           {m.prescribedFor}
                         </Badge>
                       </>
@@ -1153,10 +1423,20 @@ function StepMedications({
                 </div>
               </div>
               <div className="flex items-center gap-1">
-                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleEdit(idx)}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7"
+                  onClick={() => handleEdit(idx)}
+                >
                   <Edit3 className="h-3.5 w-3.5 text-slate-400" />
                 </Button>
-                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleRemove(idx)}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7"
+                  onClick={() => handleRemove(idx)}
+                >
                   <Trash2 className="h-3.5 w-3.5 text-red-400" />
                 </Button>
               </div>
@@ -1172,14 +1452,24 @@ function StepMedications({
               <h4 className="text-xs font-semibold text-slate-700">
                 {editingIdx !== null ? "Edit Medication" : "Add New Medication"}
               </h4>
-              <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => { setShowForm(false); setEditingIdx(null); }}>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6"
+                onClick={() => {
+                  setShowForm(false);
+                  setEditingIdx(null);
+                }}
+              >
                 <X className="h-3.5 w-3.5" />
               </Button>
             </div>
 
             {/* Drug Search */}
             <div className="space-y-1.5">
-              <Label className="text-xs">Drug Name <span className="text-red-500">*</span></Label>
+              <Label className="text-xs">
+                Drug Name <span className="text-red-500">*</span>
+              </Label>
               <div className="relative">
                 <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-slate-400" />
                 <Input
@@ -1212,7 +1502,9 @@ function StepMedications({
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <Label className="text-xs">Dosage <span className="text-red-500">*</span></Label>
+                <Label className="text-xs">
+                  Dosage <span className="text-red-500">*</span>
+                </Label>
                 <Input
                   placeholder="e.g., 500mg, 10 units"
                   value={form.dosage}
@@ -1220,14 +1512,21 @@ function StepMedications({
                 />
               </div>
               <div className="space-y-1.5">
-                <Label className="text-xs">Frequency <span className="text-red-500">*</span></Label>
-                <Select value={form.frequency} onValueChange={(v) => setForm({ ...form, frequency: v })}>
+                <Label className="text-xs">
+                  Frequency <span className="text-red-500">*</span>
+                </Label>
+                <Select
+                  value={form.frequency}
+                  onValueChange={(v) => setForm({ ...form, frequency: v })}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Select frequency" />
                   </SelectTrigger>
                   <SelectContent>
                     {FREQUENCY_OPTIONS.map((f) => (
-                      <SelectItem key={f} value={f}>{f}</SelectItem>
+                      <SelectItem key={f} value={f}>
+                        {f}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -1237,7 +1536,9 @@ function StepMedications({
                 <Input
                   placeholder="e.g., Hypertension, Diabetes"
                   value={form.prescribedFor}
-                  onChange={(e) => setForm({ ...form, prescribedFor: e.target.value })}
+                  onChange={(e) =>
+                    setForm({ ...form, prescribedFor: e.target.value })
+                  }
                 />
               </div>
               <div className="space-y-1.5">
@@ -1245,12 +1546,18 @@ function StepMedications({
                 <Input
                   type="date"
                   value={form.startDate || ""}
-                  onChange={(e) => setForm({ ...form, startDate: e.target.value })}
+                  onChange={(e) =>
+                    setForm({ ...form, startDate: e.target.value })
+                  }
                 />
               </div>
             </div>
 
-            <Button size="sm" onClick={handleAdd} className="bg-emerald-600 hover:bg-emerald-700">
+            <Button
+              size="sm"
+              onClick={handleAdd}
+              className="bg-emerald-600 hover:bg-emerald-700"
+            >
               <Check className="h-3.5 w-3.5 mr-1" />
               {editingIdx !== null ? "Update" : "Add Medication"}
             </Button>
@@ -1271,7 +1578,9 @@ function StepAllergiesLifestyle({
   allergies: AllergyRecord[];
   onAllergiesChange: (a: AllergyRecord[]) => void;
   lifestyle: FullPatientProfile["lifestyleMetrics"];
-  onLifestyleChange: (l: NonNullable<FullPatientProfile["lifestyleMetrics"]>) => void;
+  onLifestyleChange: (
+    l: NonNullable<FullPatientProfile["lifestyleMetrics"]>,
+  ) => void;
 }) {
   const [showForm, setShowForm] = useState(false);
   const [editingIdx, setEditingIdx] = useState<number | null>(null);
@@ -1286,7 +1595,7 @@ function StepAllergiesLifestyle({
   const filteredAllergens = COMMON_ALLERGENS.filter(
     (a) =>
       a.toLowerCase().includes(searchTerm.toLowerCase()) &&
-      !allergies.some((ea) => ea.allergen === a)
+      !allergies.some((ea) => ea.allergen === a),
   );
 
   const handleAdd = () => {
@@ -1298,7 +1607,12 @@ function StepAllergiesLifestyle({
     } else {
       onAllergiesChange([...allergies, form]);
     }
-    setForm({ allergen: "", allergyType: "drug", severity: "mild", reactionDescription: "" });
+    setForm({
+      allergen: "",
+      allergyType: "drug",
+      severity: "mild",
+      reactionDescription: "",
+    });
     setShowForm(false);
     setEditingIdx(null);
     setSearchTerm("");
@@ -1324,14 +1638,21 @@ function StepAllergiesLifestyle({
               <AlertTriangle className="h-4 w-4 text-amber-500" />
               Allergies & Adverse Reactions
             </h3>
-            <p className="text-xs text-slate-400">Drug, food, and environmental allergies</p>
+            <p className="text-xs text-slate-400">
+              Drug, food, and environmental allergies
+            </p>
           </div>
           <Button
             size="sm"
             onClick={() => {
               setShowForm(true);
               setEditingIdx(null);
-              setForm({ allergen: "", allergyType: "drug", severity: "mild", reactionDescription: "" });
+              setForm({
+                allergen: "",
+                allergyType: "drug",
+                severity: "mild",
+                reactionDescription: "",
+              });
             }}
             className="bg-emerald-600 hover:bg-emerald-700"
           >
@@ -1345,7 +1666,9 @@ function StepAllergiesLifestyle({
             <CardContent className="p-6 text-center">
               <AlertTriangle className="mx-auto h-6 w-6 text-slate-300 mb-2" />
               <p className="text-sm text-slate-400">No allergies recorded</p>
-              <p className="text-xs text-slate-300 mt-1">Click &quot;Add Allergy&quot; to record known allergies</p>
+              <p className="text-xs text-slate-300 mt-1">
+                Click &quot;Add Allergy&quot; to record known allergies
+              </p>
             </CardContent>
           </Card>
         )}
@@ -1353,23 +1676,31 @@ function StepAllergiesLifestyle({
         {allergies.length > 0 && (
           <div className="space-y-2">
             {allergies.map((a, idx) => (
-              <div key={idx} className="flex items-center justify-between rounded-lg border border-slate-200 bg-white p-3 shadow-sm">
+              <div
+                key={idx}
+                className="flex items-center justify-between rounded-lg border border-slate-200 bg-white p-3 shadow-sm"
+              >
                 <div className="flex items-center gap-3">
                   <div
                     className={`flex h-8 w-8 items-center justify-center rounded-lg ${
                       a.severity === "severe / anaphylactic"
                         ? "bg-red-100 text-red-600"
                         : a.severity === "moderate"
-                        ? "bg-amber-100 text-amber-600"
-                        : "bg-yellow-100 text-yellow-600"
+                          ? "bg-amber-100 text-amber-600"
+                          : "bg-yellow-100 text-yellow-600"
                     }`}
                   >
                     <AlertTriangle className="h-4 w-4" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-slate-800">{a.allergen}</p>
+                    <p className="text-sm font-medium text-slate-800">
+                      {a.allergen}
+                    </p>
                     <div className="flex flex-wrap items-center gap-2 text-xs text-slate-400">
-                      <Badge variant="outline" className="text-[10px] border-slate-200 bg-slate-50">
+                      <Badge
+                        variant="outline"
+                        className="text-[10px] border-slate-200 bg-slate-50"
+                      >
                         {a.allergyType}
                       </Badge>
                       <Badge
@@ -1378,21 +1709,33 @@ function StepAllergiesLifestyle({
                           a.severity === "severe / anaphylactic"
                             ? "border-red-200 bg-red-50 text-red-600"
                             : a.severity === "moderate"
-                            ? "border-amber-200 bg-amber-50 text-amber-600"
-                            : "border-yellow-200 bg-yellow-50 text-yellow-600"
+                              ? "border-amber-200 bg-amber-50 text-amber-600"
+                              : "border-yellow-200 bg-yellow-50 text-yellow-600"
                         }`}
                       >
                         {a.severity}
                       </Badge>
-                      {a.reactionDescription && <span className="italic">{a.reactionDescription}</span>}
+                      {a.reactionDescription && (
+                        <span className="italic">{a.reactionDescription}</span>
+                      )}
                     </div>
                   </div>
                 </div>
                 <div className="flex items-center gap-1">
-                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleEdit(idx)}>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7"
+                    onClick={() => handleEdit(idx)}
+                  >
                     <Edit3 className="h-3.5 w-3.5 text-slate-400" />
                   </Button>
-                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleRemove(idx)}>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7"
+                    onClick={() => handleRemove(idx)}
+                  >
                     <Trash2 className="h-3.5 w-3.5 text-red-400" />
                   </Button>
                 </div>
@@ -1408,14 +1751,24 @@ function StepAllergiesLifestyle({
                 <h4 className="text-xs font-semibold text-slate-700">
                   {editingIdx !== null ? "Edit Allergy" : "Add New Allergy"}
                 </h4>
-                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => { setShowForm(false); setEditingIdx(null); }}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6"
+                  onClick={() => {
+                    setShowForm(false);
+                    setEditingIdx(null);
+                  }}
+                >
                   <X className="h-3.5 w-3.5" />
                 </Button>
               </div>
 
               {/* Allergen Search */}
               <div className="space-y-1.5">
-                <Label className="text-xs">Allergen <span className="text-red-500">*</span></Label>
+                <Label className="text-xs">
+                  Allergen <span className="text-red-500">*</span>
+                </Label>
                 <div className="relative">
                   <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-slate-400" />
                   <Input
@@ -1449,28 +1802,42 @@ function StepAllergiesLifestyle({
               <div className="grid grid-cols-3 gap-3">
                 <div className="space-y-1.5">
                   <Label className="text-xs">Allergy Type</Label>
-                  <Select value={form.allergyType} onValueChange={(v: "drug" | "food" | "environmental" | "other") => setForm({ ...form, allergyType: v })}>
+                  <Select
+                    value={form.allergyType}
+                    onValueChange={(
+                      v: "drug" | "food" | "environmental" | "other",
+                    ) => setForm({ ...form, allergyType: v })}
+                  >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="drug">Drug</SelectItem>
                       <SelectItem value="food">Food</SelectItem>
-                      <SelectItem value="environmental">Environmental</SelectItem>
+                      <SelectItem value="environmental">
+                        Environmental
+                      </SelectItem>
                       <SelectItem value="other">Other</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-1.5">
                   <Label className="text-xs">Severity</Label>
-                  <Select value={form.severity} onValueChange={(v: "mild" | "moderate" | "severe / anaphylactic") => setForm({ ...form, severity: v })}>
+                  <Select
+                    value={form.severity}
+                    onValueChange={(
+                      v: "mild" | "moderate" | "severe / anaphylactic",
+                    ) => setForm({ ...form, severity: v })}
+                  >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="mild">Mild</SelectItem>
                       <SelectItem value="moderate">Moderate</SelectItem>
-                      <SelectItem value="severe / anaphylactic">Severe / Anaphylactic</SelectItem>
+                      <SelectItem value="severe / anaphylactic">
+                        Severe / Anaphylactic
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -1479,12 +1846,18 @@ function StepAllergiesLifestyle({
                   <Input
                     placeholder="e.g., Rash, swelling"
                     value={form.reactionDescription || ""}
-                    onChange={(e) => setForm({ ...form, reactionDescription: e.target.value })}
+                    onChange={(e) =>
+                      setForm({ ...form, reactionDescription: e.target.value })
+                    }
                   />
                 </div>
               </div>
 
-              <Button size="sm" onClick={handleAdd} className="bg-emerald-600 hover:bg-emerald-700">
+              <Button
+                size="sm"
+                onClick={handleAdd}
+                className="bg-emerald-600 hover:bg-emerald-700"
+              >
                 <Check className="h-3.5 w-3.5 mr-1" />
                 {editingIdx !== null ? "Update" : "Add Allergy"}
               </Button>
@@ -1566,10 +1939,30 @@ function StepReview({
       icon: Activity,
       count: profile.chronicConditions.length,
     },
-    { step: 3, title: "Surgical History", icon: Stethoscope, count: profile.surgeries.length },
-    { step: 4, title: "Vaccinations", icon: Syringe, count: profile.vaccinations.length },
-    { step: 5, title: "Medications", icon: Pill, count: profile.activeMedications.length },
-    { step: 6, title: "Allergies & Lifestyle", icon: AlertTriangle, count: profile.allergies.length },
+    {
+      step: 3,
+      title: "Surgical History",
+      icon: Stethoscope,
+      count: profile.surgeries.length,
+    },
+    {
+      step: 4,
+      title: "Vaccinations",
+      icon: Syringe,
+      count: profile.vaccinations.length,
+    },
+    {
+      step: 5,
+      title: "Medications",
+      icon: Pill,
+      count: profile.activeMedications.length,
+    },
+    {
+      step: 6,
+      title: "Allergies & Lifestyle",
+      icon: AlertTriangle,
+      count: profile.allergies.length,
+    },
   ];
 
   return (
@@ -1577,7 +1970,9 @@ function StepReview({
       <div className="rounded-lg border border-emerald-200 bg-gradient-to-r from-emerald-50 to-cyan-50 p-4">
         <div className="flex items-center gap-2 mb-1">
           <Sparkles className="h-4 w-4 text-emerald-600" />
-          <h3 className="text-sm font-semibold text-emerald-800">Review Complete Profile</h3>
+          <h3 className="text-sm font-semibold text-emerald-800">
+            Review Complete Profile
+          </h3>
         </div>
         <p className="text-xs text-emerald-600">
           Verify all information before submitting. Click any section to edit.
@@ -1592,9 +1987,13 @@ function StepReview({
               <User className="h-5 w-5" />
             </div>
             <div>
-              <h4 className="text-sm font-bold text-slate-800">{profile.basicInfo.fullName || "—"}</h4>
+              <h4 className="text-sm font-bold text-slate-800">
+                {profile.basicInfo.fullName || "—"}
+              </h4>
               <div className="flex items-center gap-2 text-xs text-slate-400">
-                <span className="font-mono text-emerald-600">{profile.healthId}</span>
+                <span className="font-mono text-emerald-600">
+                  {profile.healthId}
+                </span>
                 <span>•</span>
                 <span>{profile.basicInfo.gender}</span>
                 <span>•</span>
@@ -1606,10 +2005,22 @@ function StepReview({
             </div>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs text-slate-500">
-            <div><span className="font-medium">DOB:</span> {profile.basicInfo.dob || "—"}</div>
-            <div><span className="font-medium">Phone:</span> {profile.basicInfo.phone || "—"}</div>
-            <div><span className="font-medium">Emergency:</span> {profile.basicInfo.emergencyContactName || "—"}</div>
-            <div><span className="font-medium">EC Phone:</span> {profile.basicInfo.emergencyContactPhone || "—"}</div>
+            <div>
+              <span className="font-medium">DOB:</span>{" "}
+              {profile.basicInfo.dob || "—"}
+            </div>
+            <div>
+              <span className="font-medium">Phone:</span>{" "}
+              {profile.basicInfo.phone || "—"}
+            </div>
+            <div>
+              <span className="font-medium">Emergency:</span>{" "}
+              {profile.basicInfo.emergencyContactName || "—"}
+            </div>
+            <div>
+              <span className="font-medium">EC Phone:</span>{" "}
+              {profile.basicInfo.emergencyContactPhone || "—"}
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -1630,7 +2041,9 @@ function StepReview({
                     <Icon className="h-4 w-4" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-slate-700">{sec.title}</p>
+                    <p className="text-sm font-medium text-slate-700">
+                      {sec.title}
+                    </p>
                     <p className="text-xs text-slate-400">
                       {sec.count !== null
                         ? `${sec.count} item${sec.count !== 1 ? "s" : ""} recorded`
@@ -1640,7 +2053,9 @@ function StepReview({
                 </div>
                 <div className="flex items-center gap-2">
                   {sec.count !== null && sec.count > 0 && (
-                    <Badge className="bg-emerald-100 text-emerald-700 text-[10px]">{sec.count}</Badge>
+                    <Badge className="bg-emerald-100 text-emerald-700 text-[10px]">
+                      {sec.count}
+                    </Badge>
                   )}
                   <Edit3 className="h-3.5 w-3.5 text-slate-300" />
                 </div>
@@ -1658,7 +2073,9 @@ export default function PatientIntakeWizard() {
   const { toast } = useToast();
   const [currentStep, setCurrentStep] = useState(1);
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
-  const [profile, setProfile] = useState<FullPatientProfile>({ ...INITIAL_PATIENT_PROFILE });
+  const [profile, setProfile] = useState<FullPatientProfile>({
+    ...INITIAL_PATIENT_PROFILE,
+  });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -1669,20 +2086,24 @@ export default function PatientIntakeWizard() {
       const newErrors: Record<string, string> = {};
 
       if (step === 1) {
-        if (!profile.basicInfo.fullName.trim()) newErrors.fullName = "Full name is required";
+        if (!profile.basicInfo.fullName.trim())
+          newErrors.fullName = "Full name is required";
         if (!profile.basicInfo.dob) newErrors.dob = "Date of birth is required";
-        if (!profile.basicInfo.bloodGroup) newErrors.bloodGroup = "Blood group is required";
-        if (!profile.basicInfo.phone.trim()) newErrors.phone = "Phone number is required";
+        if (!profile.basicInfo.bloodGroup)
+          newErrors.bloodGroup = "Blood group is required";
+        if (!profile.basicInfo.phone.trim())
+          newErrors.phone = "Phone number is required";
         if (!profile.basicInfo.emergencyContactName.trim())
           newErrors.emergencyContactName = "Emergency contact name is required";
         if (!profile.basicInfo.emergencyContactPhone.trim())
-          newErrors.emergencyContactPhone = "Emergency contact phone is required";
+          newErrors.emergencyContactPhone =
+            "Emergency contact phone is required";
       }
 
       setErrors(newErrors);
       return Object.keys(newErrors).length === 0;
     },
-    [profile]
+    [profile],
   );
 
   // ─── Navigation ───────────────────────────────────────────────
@@ -1742,30 +2163,44 @@ export default function PatientIntakeWizard() {
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 mb-4">
               <CheckCircle2 className="h-8 w-8 text-emerald-600" />
             </div>
-            <h2 className="text-xl font-bold text-slate-800 mb-2">Registration Complete!</h2>
+            <h2 className="text-xl font-bold text-slate-800 mb-2">
+              Registration Complete!
+            </h2>
             <p className="text-sm text-slate-500 mb-4">
-              Patient profile has been successfully created and submitted to the national EHR system.
+              Patient profile has been successfully created and submitted to the
+              national EHR system.
             </p>
 
             <div className="mx-auto max-w-sm rounded-lg border border-emerald-200 bg-white p-4 mb-6">
-              <div className="text-xs text-slate-400 mb-1">Unique Health ID</div>
-              <div className="font-mono text-2xl font-bold text-emerald-700">{profile.healthId}</div>
+              <div className="text-xs text-slate-400 mb-1">
+                Unique Health ID
+              </div>
+              <div className="font-mono text-2xl font-bold text-emerald-700">
+                {profile.healthId}
+              </div>
               <div className="text-xs text-slate-500 mt-2">
-                {profile.basicInfo.fullName} • {profile.basicInfo.gender} • {profile.basicInfo.bloodGroup}
+                {profile.basicInfo.fullName} • {profile.basicInfo.gender} •{" "}
+                {profile.basicInfo.bloodGroup}
               </div>
             </div>
 
             <div className="grid grid-cols-3 gap-4 mb-6 text-center">
               <div>
-                <div className="text-lg font-bold text-slate-800">{profile.chronicConditions.length}</div>
+                <div className="text-lg font-bold text-slate-800">
+                  {profile.chronicConditions.length}
+                </div>
                 <div className="text-[10px] text-slate-400">Conditions</div>
               </div>
               <div>
-                <div className="text-lg font-bold text-slate-800">{profile.activeMedications.length}</div>
+                <div className="text-lg font-bold text-slate-800">
+                  {profile.activeMedications.length}
+                </div>
                 <div className="text-[10px] text-slate-400">Medications</div>
               </div>
               <div>
-                <div className="text-lg font-bold text-slate-800">{profile.allergies.length}</div>
+                <div className="text-lg font-bold text-slate-800">
+                  {profile.allergies.length}
+                </div>
                 <div className="text-[10px] text-slate-400">Allergies</div>
               </div>
             </div>
@@ -1788,13 +2223,34 @@ export default function PatientIntakeWizard() {
 
   // ─── Render ───────────────────────────────────────────────────
   const stepTitles: Record<number, { title: string; description: string }> = {
-    1: { title: "Identity & Demographics", description: "Personal information and emergency contacts" },
-    2: { title: "Chronic Conditions", description: "Ongoing medical conditions and comorbidities" },
-    3: { title: "Surgical History", description: "Past surgeries, operations, and procedures" },
-    4: { title: "Vaccinations", description: "Immunization and vaccine records" },
-    5: { title: "Active Medications", description: "Current prescriptions and dosages" },
-    6: { title: "Allergies & Lifestyle", description: "Known allergies and lifestyle factors" },
-    7: { title: "Final Review", description: "Review all information before submission" },
+    1: {
+      title: "Identity & Demographics",
+      description: "Personal information and emergency contacts",
+    },
+    2: {
+      title: "Chronic Conditions",
+      description: "Ongoing medical conditions and comorbidities",
+    },
+    3: {
+      title: "Surgical History",
+      description: "Past surgeries, operations, and procedures",
+    },
+    4: {
+      title: "Vaccinations",
+      description: "Immunization and vaccine records",
+    },
+    5: {
+      title: "Active Medications",
+      description: "Current prescriptions and dosages",
+    },
+    6: {
+      title: "Allergies & Lifestyle",
+      description: "Known allergies and lifestyle factors",
+    },
+    7: {
+      title: "Final Review",
+      description: "Review all information before submission",
+    },
   };
 
   return (
@@ -1805,8 +2261,12 @@ export default function PatientIntakeWizard() {
           <FileText className="h-5 w-5 text-white" />
         </div>
         <div>
-          <h1 className="text-lg font-bold text-slate-800">Patient Lifetime Intake</h1>
-          <p className="text-xs text-slate-400">Comprehensive medical history registration</p>
+          <h1 className="text-lg font-bold text-slate-800">
+            Patient Lifetime Intake
+          </h1>
+          <p className="text-xs text-slate-400">
+            Comprehensive medical history registration
+          </p>
         </div>
       </div>
 
@@ -1834,14 +2294,22 @@ export default function PatientIntakeWizard() {
               );
             })()}
             <div>
-              <CardTitle className="text-base">{stepTitles[currentStep].title}</CardTitle>
-              <CardDescription className="text-xs">{stepTitles[currentStep].description}</CardDescription>
+              <CardTitle className="text-base">
+                {stepTitles[currentStep].title}
+              </CardTitle>
+              <CardDescription className="text-xs">
+                {stepTitles[currentStep].description}
+              </CardDescription>
             </div>
           </div>
         </CardHeader>
         <CardContent>
           {currentStep === 1 && (
-            <StepBasicInfo profile={profile} onChange={setProfile} errors={errors} />
+            <StepBasicInfo
+              profile={profile}
+              onChange={setProfile}
+              errors={errors}
+            />
           )}
           {currentStep === 2 && (
             <StepChronicConditions
@@ -1870,12 +2338,18 @@ export default function PatientIntakeWizard() {
           {currentStep === 6 && (
             <StepAllergiesLifestyle
               allergies={profile.allergies}
-              onAllergiesChange={(a) => setProfile({ ...profile, allergies: a })}
+              onAllergiesChange={(a) =>
+                setProfile({ ...profile, allergies: a })
+              }
               lifestyle={profile.lifestyleMetrics}
-              onLifestyleChange={(l) => setProfile({ ...profile, lifestyleMetrics: l })}
+              onLifestyleChange={(l) =>
+                setProfile({ ...profile, lifestyleMetrics: l })
+              }
             />
           )}
-          {currentStep === 7 && <StepReview profile={profile} onEditStep={handleStepClick} />}
+          {currentStep === 7 && (
+            <StepReview profile={profile} onEditStep={handleStepClick} />
+          )}
         </CardContent>
       </Card>
 
@@ -1896,7 +2370,10 @@ export default function PatientIntakeWizard() {
         </div>
 
         {currentStep < STEPS.length ? (
-          <Button onClick={handleNext} className="bg-emerald-600 hover:bg-emerald-700 gap-1">
+          <Button
+            onClick={handleNext}
+            className="bg-emerald-600 hover:bg-emerald-700 gap-1"
+          >
             Next
             <ChevronRight className="h-4 w-4" />
           </Button>

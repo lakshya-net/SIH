@@ -46,7 +46,11 @@ export interface ConsultationPayload {
     };
     todayLabReports: Array<{
       testName: string;
+<<<<<<< HEAD
+      keyMetrics: Record<string, string | number>;
+=======
       keyMetrics: Record<string, number | string>;
+>>>>>>> ef6e0f74b2e6f33da9adcbf130238a7a7a6c3490
       status: "normal" | "abnormal" | "critical";
     }>;
   };
@@ -54,7 +58,12 @@ export interface ConsultationPayload {
 
 // ─── Output: What the triage engine produces ──────────────────────
 
-export type RiskLevel = "critical" | "high" | "moderate" | "low" | "informational";
+export type RiskLevel =
+  | "critical"
+  | "high"
+  | "moderate"
+  | "low"
+  | "informational";
 
 export interface RiskAlert {
   id: string;
@@ -93,7 +102,12 @@ export interface LabTrend {
 
 export interface CareRecommendation {
   priority: number;
-  category: "medication" | "diagnostic" | "lifestyle" | "referral" | "monitoring";
+  category:
+    | "medication"
+    | "diagnostic"
+    | "lifestyle"
+    | "referral"
+    | "monitoring";
   title: string;
   rationale: string;
   evidenceLevel: "strong" | "moderate" | "weak";

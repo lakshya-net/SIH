@@ -2,7 +2,17 @@
 import { useEffect, useState, useCallback } from "react";
 
 import { Badge } from "@/components/ui/badge";
+<<<<<<< HEAD
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+=======
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+>>>>>>> ef6e0f74b2e6f33da9adcbf130238a7a7a6c3490
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { useAppStore } from "@/lib/store";
@@ -31,10 +41,17 @@ import {
 function buildMockPayload(
   patientId: string,
   vitals: { bp?: string; pulse?: string; temp?: string; spo2?: string },
-  chiefComplaint: string
+  chiefComplaint: string,
 ): import("@/types/consultation").ConsultationPayload {
   // Patient P001 — Rajesh Kumar
+<<<<<<< HEAD
+  const patients: Record<
+    string,
+    import("@/types/consultation").ConsultationPayload["patient"]
+  > = {
+=======
   const patients: Record<string, import("@/types/consultation").ConsultationPayload["patient"]> = {
+>>>>>>> ef6e0f74b2e6f33da9adcbf130238a7a7a6c3490
     P001: {
       healthId: "HID-8842-X",
       fullName: "Rajesh Kumar",
@@ -42,25 +59,77 @@ function buildMockPayload(
       gender: "Male",
       bloodGroup: "B+",
       chronicConditions: [
-        { conditionName: "Type 2 Diabetes", diagnosedYear: "2020", status: "active", latestMetrics: "HbA1c 8.2%, Fasting Glucose 145 mg/dL" },
-        { conditionName: "Hypertension", diagnosedYear: "2020", status: "active", latestMetrics: "BP 148/92 mmHg" },
+        {
+          conditionName: "Type 2 Diabetes",
+          diagnosedYear: "2020",
+          status: "active",
+          latestMetrics: "HbA1c 8.2%, Fasting Glucose 145 mg/dL",
+        },
+        {
+          conditionName: "Hypertension",
+          diagnosedYear: "2020",
+          status: "active",
+          latestMetrics: "BP 148/92 mmHg",
+        },
       ],
       allergies: [
-        { allergen: "Penicillin", allergyType: "drug", severity: "severe / anaphylactic", reactionDescription: "Anaphylaxis, throat swelling" },
-        { allergen: "Sulfa drugs", allergyType: "drug", severity: "moderate", reactionDescription: "Skin rash, urticaria" },
+        {
+          allergen: "Penicillin",
+          allergyType: "drug",
+          severity: "severe / anaphylactic",
+          reactionDescription: "Anaphylaxis, throat swelling",
+        },
+        {
+          allergen: "Sulfa drugs",
+          allergyType: "drug",
+          severity: "moderate",
+          reactionDescription: "Skin rash, urticaria",
+        },
       ],
       surgeries: [
-        { procedureName: "Appendectomy", yearOfProcedure: "2005", complicationsOrNotes: "Laparoscopic, uneventful recovery" },
+        {
+          procedureName: "Appendectomy",
+          yearOfProcedure: "2005",
+          complicationsOrNotes: "Laparoscopic, uneventful recovery",
+        },
       ],
       vaccinations: [
-        { vaccineName: "COVID-19 (Covishield)", doseNumber: "Booster", administeredDate: "2023-01-15" },
-        { vaccineName: "Tetanus (Td/Tdap)", doseNumber: "Dose 1", administeredDate: "2022-06-10" },
+        {
+          vaccineName: "COVID-19 (Covishield)",
+          doseNumber: "Booster",
+          administeredDate: "2023-01-15",
+        },
+        {
+          vaccineName: "Tetanus (Td/Tdap)",
+          doseNumber: "Dose 1",
+          administeredDate: "2022-06-10",
+        },
       ],
       activeMedications: [
-        { drugName: "Metformin", dosage: "500mg", frequency: "BD", prescribedFor: "Type 2 Diabetes" },
-        { drugName: "Amlodipine", dosage: "5mg", frequency: "OD", prescribedFor: "Hypertension" },
-        { drugName: "Atorvastatin", dosage: "10mg", frequency: "OD", prescribedFor: "Dyslipidemia" },
-        { drugName: "Aspirin", dosage: "75mg", frequency: "OD", prescribedFor: "Cardiovascular protection" },
+        {
+          drugName: "Metformin",
+          dosage: "500mg",
+          frequency: "BD",
+          prescribedFor: "Type 2 Diabetes",
+        },
+        {
+          drugName: "Amlodipine",
+          dosage: "5mg",
+          frequency: "OD",
+          prescribedFor: "Hypertension",
+        },
+        {
+          drugName: "Atorvastatin",
+          dosage: "10mg",
+          frequency: "OD",
+          prescribedFor: "Dyslipidemia",
+        },
+        {
+          drugName: "Aspirin",
+          dosage: "75mg",
+          frequency: "OD",
+          prescribedFor: "Cardiovascular protection",
+        },
       ],
     },
     P002: {
@@ -70,18 +139,42 @@ function buildMockPayload(
       gender: "Female",
       bloodGroup: "O+",
       chronicConditions: [
-        { conditionName: "Asthma", diagnosedYear: "2015", status: "managed", latestMetrics: "FEV1 78% predicted" },
+        {
+          conditionName: "Asthma",
+          diagnosedYear: "2015",
+          status: "managed",
+          latestMetrics: "FEV1 78% predicted",
+        },
       ],
       allergies: [
-        { allergen: "Dust Mites", allergyType: "environmental", severity: "moderate", reactionDescription: "Wheezing, nasal congestion" },
+        {
+          allergen: "Dust Mites",
+          allergyType: "environmental",
+          severity: "moderate",
+          reactionDescription: "Wheezing, nasal congestion",
+        },
       ],
       surgeries: [],
       vaccinations: [
-        { vaccineName: "COVID-19 (Covaxin)", doseNumber: "Dose 2", administeredDate: "2022-03-20" },
+        {
+          vaccineName: "COVID-19 (Covaxin)",
+          doseNumber: "Dose 2",
+          administeredDate: "2022-03-20",
+        },
       ],
       activeMedications: [
-        { drugName: "Salbutamol Inhaler", dosage: "100mcg", frequency: "As needed (PRN)", prescribedFor: "Asthma" },
-        { drugName: "Cetirizine", dosage: "10mg", frequency: "OD", prescribedFor: "Allergic rhinitis" },
+        {
+          drugName: "Salbutamol Inhaler",
+          dosage: "100mcg",
+          frequency: "As needed (PRN)",
+          prescribedFor: "Asthma",
+        },
+        {
+          drugName: "Cetirizine",
+          dosage: "10mg",
+          frequency: "OD",
+          prescribedFor: "Allergic rhinitis",
+        },
       ],
     },
   };
@@ -98,19 +191,19 @@ function buildMockPayload(
           testName: "Comprehensive Metabolic Panel",
           keyMetrics: {
             "Glucose (Fasting)": 145,
-            "HbA1c": 8.2,
+            HbA1c: 8.2,
             "Total Cholesterol": 228,
             "HDL Cholesterol": 38,
             "LDL Cholesterol": 152,
-            "Creatinine": 1.1,
-            "BUN": 18,
+            Creatinine: 1.1,
+            BUN: 18,
           },
           status: "abnormal" as const,
         },
         {
           testName: "CBC (Complete Blood Count)",
           keyMetrics: {
-            "Hemoglobin": 13.2,
+            Hemoglobin: 13.2,
             "WBC Count": 7800,
             "Platelet Count": 245000,
             "RBC Count": 4.5,
@@ -129,6 +222,17 @@ export default function DoctorClinical() {
     timeline,
     labReports,
     encounters,
+<<<<<<< HEAD
+  } = useAppStore();
+  const patient =
+    patients.find((p) => p.id === selectedPatientId) ?? patients[0];
+  const patientTimeline = timeline
+    .filter((t) => t.patientId === patient.id)
+    .slice(0, 6);
+  const patientLabReports = labReports.filter(
+    (l) => l.patientId === patient.id,
+  );
+=======
     healthUpdates,
     medicalDocuments,
   } = useAppStore();
@@ -137,14 +241,16 @@ export default function DoctorClinical() {
   const patientLabReports = labReports.filter((l) => l.patientId === patient.id);
   const patientHealthUpdates = healthUpdates.filter((update) => update.patientId === patient.id);
   const patientDocuments = medicalDocuments.filter((document) => document.patientId === patient.id);
+>>>>>>> ef6e0f74b2e6f33da9adcbf130238a7a7a6c3490
   const activeEncounter = encounters.find(
-    (e) => e.patientId === patient.id && e.status === "Active"
+    (e) => e.patientId === patient.id && e.status === "Active",
   );
 
-  const [triageOutput, setTriageOutput] = useState<ClinicalSummaryOutput | null>(null);
+  const [triageOutput, setTriageOutput] =
+    useState<ClinicalSummaryOutput | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(true);
   const [chiefComplaint, setChiefComplaint] = useState(
-    activeEncounter?.diagnosis || "Follow-up for chronic conditions"
+    activeEncounter?.diagnosis || "Follow-up for chronic conditions",
   );
 
   // Run triage engine when patient changes
@@ -158,7 +264,7 @@ export default function DoctorClinical() {
         temp: "98.4",
         spo2: "96",
       },
-      chiefComplaint
+      chiefComplaint,
     );
     // Simulate AI processing delay
     const timer = setTimeout(() => {
@@ -169,10 +275,13 @@ export default function DoctorClinical() {
     return () => clearTimeout(timer);
   }, [patient.id, chiefComplaint]);
 
-  const handlePatientSwitch = useCallback((newPatientId: string) => {
-    if (newPatientId === patient.id) return;
-    setSelectedPatientId(newPatientId);
-  }, [patient.id, setSelectedPatientId]);
+  const handlePatientSwitch = useCallback(
+    (newPatientId: string) => {
+      if (newPatientId === patient.id) return;
+      setSelectedPatientId(newPatientId);
+    },
+    [patient.id, setSelectedPatientId],
+  );
 
   const getTimelineIcon = (type: string) => {
     switch (type) {
@@ -200,7 +309,9 @@ export default function DoctorClinical() {
                 <Heart className="h-5 w-5" />
               </div>
               <div>
-                <h3 className="text-sm font-bold text-slate-800">{patient.name}</h3>
+                <h3 className="text-sm font-bold text-slate-800">
+                  {patient.name}
+                </h3>
                 <div className="flex items-center gap-2 text-xs text-slate-400">
                   <span>
                     {patient.gender}, {patient.age} yrs
@@ -219,7 +330,10 @@ export default function DoctorClinical() {
                   Active Session
                 </Badge>
               )}
-              <Badge variant="outline" className="border-cyan-200 bg-cyan-50 text-cyan-700 text-xs">
+              <Badge
+                variant="outline"
+                className="border-cyan-200 bg-cyan-50 text-cyan-700 text-xs"
+              >
                 <Brain className="mr-1 h-3 w-3" />
                 AI Triage Active
               </Badge>
@@ -229,7 +343,9 @@ export default function DoctorClinical() {
           {/* Patient Switcher */}
           <div className="mt-3 flex flex-wrap items-center gap-2">
             <Users className="h-3.5 w-3.5 text-slate-400" />
-            <span className="text-[10px] font-medium text-slate-400 uppercase">Switch Patient:</span>
+            <span className="text-[10px] font-medium text-slate-400 uppercase">
+              Switch Patient:
+            </span>
             {patients.map((p) => (
               <button
                 key={p.id}
@@ -242,7 +358,9 @@ export default function DoctorClinical() {
               >
                 {p.id === patient.id && <UserCheck className="h-3 w-3" />}
                 {p.name}
-                <span className="font-mono text-[9px] opacity-60">({p.id})</span>
+                <span className="font-mono text-[9px] opacity-60">
+                  ({p.id})
+                </span>
               </button>
             ))}
           </div>
@@ -284,7 +402,8 @@ export default function DoctorClinical() {
                   AI Triage Engine Processing...
                 </h3>
                 <p className="text-xs text-slate-500 mt-1">
-                  Analyzing patient history, medications, lab results, and generating clinical summary
+                  Analyzing patient history, medications, lab results, and
+                  generating clinical summary
                 </p>
               </div>
               <div className="flex items-center gap-1.5 text-xs text-cyan-600">
@@ -428,10 +547,17 @@ export default function DoctorClinical() {
             </CardHeader>
             <CardContent className="space-y-4">
               {patientLabReports.map((report) => (
-                <div key={report.id} className="rounded-lg border border-slate-100 p-3">
+                <div
+                  key={report.id}
+                  className="rounded-lg border border-slate-100 p-3"
+                >
                   <div className="flex items-center justify-between mb-2">
-                    <h4 className="text-xs font-semibold text-slate-700">{report.testName}</h4>
-                    <span className="text-[10px] text-slate-400">{report.date}</span>
+                    <h4 className="text-xs font-semibold text-slate-700">
+                      {report.testName}
+                    </h4>
+                    <span className="text-[10px] text-slate-400">
+                      {report.date}
+                    </span>
                   </div>
                   <div className="space-y-1.5">
                     {report.results.map((result) => (
@@ -439,17 +565,19 @@ export default function DoctorClinical() {
                         key={result.testName}
                         className="flex items-center justify-between text-xs"
                       >
-                        <span className="text-slate-500">{result.testName}</span>
+                        <span className="text-slate-500">
+                          {result.testName}
+                        </span>
                         <div className="flex items-center gap-2">
                           <span
                             className={`font-mono font-medium ${
                               result.status === "Normal"
                                 ? "text-slate-700"
                                 : result.status === "Critical"
-                                ? "text-red-600 font-bold"
-                                : result.status === "High"
-                                ? "text-red-500"
-                                : "text-amber-500"
+                                  ? "text-red-600 font-bold"
+                                  : result.status === "High"
+                                    ? "text-red-500"
+                                    : "text-amber-500"
                             }`}
                           >
                             {result.value} {result.unit}
@@ -461,8 +589,8 @@ export default function DoctorClinical() {
                                 result.status === "Critical"
                                   ? "border-red-400 bg-red-50 text-red-700"
                                   : result.status === "High"
-                                  ? "border-red-300 bg-red-50 text-red-600"
-                                  : "border-amber-300 bg-amber-50 text-amber-600"
+                                    ? "border-red-300 bg-red-50 text-red-600"
+                                    : "border-amber-300 bg-amber-50 text-amber-600"
                               }`}
                             >
                               {result.status}
@@ -488,11 +616,15 @@ export default function DoctorClinical() {
             <CardContent className="p-4">
               <div className="flex items-center gap-2 mb-2">
                 <Shield className="h-4 w-4 text-amber-600" />
-                <span className="text-xs font-bold text-amber-800">Quick Reference</span>
+                <span className="text-xs font-bold text-amber-800">
+                  Quick Reference
+                </span>
               </div>
               <div className="space-y-1.5">
                 <div className="text-[11px] text-slate-600">
-                  <span className="font-semibold text-slate-500">Allergies:</span>{" "}
+                  <span className="font-semibold text-slate-500">
+                    Allergies:
+                  </span>{" "}
                   {patient.allergies.length > 0 ? (
                     patient.allergies.map((a) => (
                       <Badge
@@ -528,7 +660,9 @@ export default function DoctorClinical() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="text-xs font-bold text-emerald-800">Ready to prescribe?</div>
+                  <div className="text-xs font-bold text-emerald-800">
+                    Ready to prescribe?
+                  </div>
                   <div className="text-[11px] text-emerald-600 mt-0.5">
                     Continue to the prescription builder
                   </div>

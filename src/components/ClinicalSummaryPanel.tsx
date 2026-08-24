@@ -3,7 +3,16 @@
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+<<<<<<< HEAD
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+} from "@/components/ui/card";
+=======
 import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
+>>>>>>> ef6e0f74b2e6f33da9adcbf130238a7a7a6c3490
 import { cn } from "@/lib/utils";
 import {
   ClinicalSummaryOutput,
@@ -47,7 +56,13 @@ import {
 // ─── Risk Level Config ────────────────────────────────────────────
 const RISK_CONFIG: Record<
   RiskLevel,
-  { color: string; bg: string; border: string; icon: React.ElementType; label: string }
+  {
+    color: string;
+    bg: string;
+    border: string;
+    icon: React.ElementType;
+    label: string;
+  }
 > = {
   critical: {
     color: "text-red-700",
@@ -91,13 +106,41 @@ const CATEGORY_CONFIG: Record<
   { icon: React.ElementType; color: string; label: string }
 > = {
   allergy: { icon: Shield, color: "text-red-500", label: "Allergy" },
-  "drug-interaction": { icon: Pill, color: "text-purple-500", label: "Drug Interaction" },
-  "chronic-flare": { icon: Activity, color: "text-orange-500", label: "Chronic Condition" },
-  "lab-critical": { icon: FlaskConical, color: "text-red-500", label: "Lab Result" },
-  "vital-abnormal": { icon: Heart, color: "text-rose-500", label: "Vital Signs" },
-  "vaccination-gap": { icon: Syringe, color: "text-cyan-500", label: "Vaccination" },
-  "surgical-history": { icon: Stethoscope, color: "text-violet-500", label: "Surgical" },
-  polypharmacy: { icon: PillIcon, color: "text-amber-500", label: "Polypharmacy" },
+  "drug-interaction": {
+    icon: Pill,
+    color: "text-purple-500",
+    label: "Drug Interaction",
+  },
+  "chronic-flare": {
+    icon: Activity,
+    color: "text-orange-500",
+    label: "Chronic Condition",
+  },
+  "lab-critical": {
+    icon: FlaskConical,
+    color: "text-red-500",
+    label: "Lab Result",
+  },
+  "vital-abnormal": {
+    icon: Heart,
+    color: "text-rose-500",
+    label: "Vital Signs",
+  },
+  "vaccination-gap": {
+    icon: Syringe,
+    color: "text-cyan-500",
+    label: "Vaccination",
+  },
+  "surgical-history": {
+    icon: Stethoscope,
+    color: "text-violet-500",
+    label: "Surgical",
+  },
+  polypharmacy: {
+    icon: PillIcon,
+    color: "text-amber-500",
+    label: "Polypharmacy",
+  },
 };
 
 // ─── Risk Score Gauge ─────────────────────────────────────────────
@@ -136,7 +179,7 @@ function RiskGauge({ score, level }: { score: number; level: RiskLevel }) {
               level === "high" && "text-orange-500",
               level === "moderate" && "text-amber-500",
               level === "low" && "text-blue-500",
-              level === "informational" && "text-slate-400"
+              level === "informational" && "text-slate-400",
             )}
           />
         </svg>
@@ -148,10 +191,18 @@ function RiskGauge({ score, level }: { score: number; level: RiskLevel }) {
       <div>
         <div className="flex items-center gap-2">
           <Icon className={cn("h-5 w-5", config.color)} />
-          <span className={cn("text-sm font-bold", config.color)}>{config.label} RISK</span>
+          <span className={cn("text-sm font-bold", config.color)}>
+            {config.label} RISK
+          </span>
         </div>
         <p className="text-xs text-slate-500 mt-1 max-w-xs">
-          Composite score based on {score >= 50 ? "multiple critical findings" : score >= 30 ? "several concerning factors" : "overall clinical picture"}.
+          Composite score based on{" "}
+          {score >= 50
+            ? "multiple critical findings"
+            : score >= 30
+              ? "several concerning factors"
+              : "overall clinical picture"}
+          .
         </p>
       </div>
     </div>
@@ -159,13 +210,18 @@ function RiskGauge({ score, level }: { score: number; level: RiskLevel }) {
 }
 
 // ─── Risk Alert Card ──────────────────────────────────────────────
-function RiskAlertCard({ alert, isExpanded, onToggle }: {
+function RiskAlertCard({
+  alert,
+  isExpanded,
+  onToggle,
+}: {
   alert: RiskAlert;
   isExpanded: boolean;
   onToggle: () => void;
 }) {
   const config = RISK_CONFIG[alert.level];
-  const catConfig = CATEGORY_CONFIG[alert.category] || CATEGORY_CONFIG["chronic-flare"];
+  const catConfig =
+    CATEGORY_CONFIG[alert.category] || CATEGORY_CONFIG["chronic-flare"];
   const CatIcon = catConfig.icon;
   const LevelIcon = config.icon;
 
@@ -174,21 +230,31 @@ function RiskAlertCard({ alert, isExpanded, onToggle }: {
       className={cn(
         "rounded-lg border transition-all",
         config.border,
-        config.bg
+        config.bg,
       )}
     >
       <button
         onClick={onToggle}
         className="flex w-full items-center gap-3 p-3 text-left"
       >
-        <div className={cn("flex h-8 w-8 shrink-0 items-center justify-center rounded-lg", config.bg)}>
+        <div
+          className={cn(
+            "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg",
+            config.bg,
+          )}
+        >
           <LevelIcon className={cn("h-4 w-4", config.color)} />
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <Badge
               variant="outline"
-              className={cn("text-[9px] px-1.5 py-0 font-bold", config.border, config.color, config.bg)}
+              className={cn(
+                "text-[9px] px-1.5 py-0 font-bold",
+                config.border,
+                config.color,
+                config.bg,
+              )}
             >
               {config.label}
             </Badge>
@@ -220,17 +286,30 @@ function RiskAlertCard({ alert, isExpanded, onToggle }: {
 
       {isExpanded && (
         <div className="border-t border-white/50 px-3 pb-3 space-y-2">
-          <p className="text-xs text-slate-600 leading-relaxed">{alert.description}</p>
+          <p className="text-xs text-slate-600 leading-relaxed">
+            {alert.description}
+          </p>
           <div className="space-y-1">
-            <div className="text-[10px] font-semibold text-slate-400 uppercase">Evidence</div>
+            <div className="text-[10px] font-semibold text-slate-400 uppercase">
+              Evidence
+            </div>
             {alert.evidence.map((e, i) => (
-              <div key={i} className="flex items-start gap-1.5 text-[11px] text-slate-500">
+              <div
+                key={i}
+                className="flex items-start gap-1.5 text-[11px] text-slate-500"
+              >
                 <CheckCircle2 className="h-3 w-3 text-slate-300 shrink-0 mt-0.5" />
                 {e}
               </div>
             ))}
           </div>
-          <div className={cn("rounded-md p-2 text-xs font-medium", config.bg, config.color)}>
+          <div
+            className={cn(
+              "rounded-md p-2 text-xs font-medium",
+              config.bg,
+              config.color,
+            )}
+          >
             <Zap className="inline h-3 w-3 mr-1" />
             {alert.actionRequired}
           </div>
@@ -241,11 +320,23 @@ function RiskAlertCard({ alert, isExpanded, onToggle }: {
 }
 
 // ─── Drug Interaction Card ────────────────────────────────────────
-function DrugInteractionCard({ interaction }: { interaction: DrugInteraction }) {
+function DrugInteractionCard({
+  interaction,
+}: {
+  interaction: DrugInteraction;
+}) {
   const severityConfig = {
     major: { color: "text-red-700", bg: "bg-red-50", border: "border-red-300" },
-    moderate: { color: "text-amber-700", bg: "bg-amber-50", border: "border-amber-300" },
-    minor: { color: "text-blue-700", bg: "bg-blue-50", border: "border-blue-300" },
+    moderate: {
+      color: "text-amber-700",
+      bg: "bg-amber-50",
+      border: "border-amber-300",
+    },
+    minor: {
+      color: "text-blue-700",
+      bg: "bg-blue-50",
+      border: "border-blue-300",
+    },
   };
   const config = severityConfig[interaction.severity];
 
@@ -254,7 +345,11 @@ function DrugInteractionCard({ interaction }: { interaction: DrugInteraction }) 
       <div className="flex items-center gap-2 mb-2">
         <Badge
           variant="outline"
-          className={cn("text-[9px] px-1.5 py-0 font-bold", config.border, config.color)}
+          className={cn(
+            "text-[9px] px-1.5 py-0 font-bold",
+            config.border,
+            config.color,
+          )}
         >
           {interaction.severity.toUpperCase()}
         </Badge>
@@ -262,10 +357,14 @@ function DrugInteractionCard({ interaction }: { interaction: DrugInteraction }) 
           {interaction.drugA} + {interaction.drugB}
         </span>
       </div>
-      <p className="text-[11px] text-slate-600 mb-2">{interaction.description}</p>
+      <p className="text-[11px] text-slate-600 mb-2">
+        {interaction.description}
+      </p>
       <div className={cn("rounded-md p-2 text-[11px]", config.bg)}>
         <Lightbulb className={cn("inline h-3 w-3 mr-1", config.color)} />
-        <span className={cn("font-medium", config.color)}>{interaction.recommendation}</span>
+        <span className={cn("font-medium", config.color)}>
+          {interaction.recommendation}
+        </span>
       </div>
     </div>
   );
@@ -274,25 +373,45 @@ function DrugInteractionCard({ interaction }: { interaction: DrugInteraction }) 
 // ─── Lab Trend Row ────────────────────────────────────────────────
 function LabTrendRow({ trend }: { trend: LabTrend }) {
   const statusConfig = {
-    normal: { color: "text-emerald-600", bg: "bg-emerald-50", border: "border-emerald-200" },
-    abnormal: { color: "text-amber-600", bg: "bg-amber-50", border: "border-amber-200" },
-    critical: { color: "text-red-600", bg: "bg-red-50", border: "border-red-200" },
+    normal: {
+      color: "text-emerald-600",
+      bg: "bg-emerald-50",
+      border: "border-emerald-200",
+    },
+    abnormal: {
+      color: "text-amber-600",
+      bg: "bg-amber-50",
+      border: "border-amber-200",
+    },
+    critical: {
+      color: "text-red-600",
+      bg: "bg-red-50",
+      border: "border-red-200",
+    },
   };
   const config = statusConfig[trend.status];
 
   return (
     <div className={cn("rounded-lg border p-3", config.border, config.bg)}>
       <div className="flex items-center justify-between mb-1">
-        <span className="text-xs font-semibold text-slate-700">{trend.testName}</span>
+        <span className="text-xs font-semibold text-slate-700">
+          {trend.testName}
+        </span>
         <Badge
           variant="outline"
-          className={cn("text-[9px] px-1.5 py-0 font-bold", config.border, config.color)}
+          className={cn(
+            "text-[9px] px-1.5 py-0 font-bold",
+            config.border,
+            config.color,
+          )}
         >
           {trend.status.toUpperCase()}
         </Badge>
       </div>
       <div className="flex items-center gap-3 text-[11px] text-slate-500 mb-1">
-        <span className="font-mono font-medium text-slate-700">{trend.currentValue}</span>
+        <span className="font-mono font-medium text-slate-700">
+          {trend.currentValue}
+        </span>
         <span>Ref: {trend.referenceRange}</span>
         {trend.trend && (
           <span className="flex items-center gap-0.5">
@@ -307,7 +426,9 @@ function LabTrendRow({ trend }: { trend: LabTrend }) {
           </span>
         )}
       </div>
-      <p className="text-[11px] text-slate-500 italic">{trend.clinicalSignificance}</p>
+      <p className="text-[11px] text-slate-500 italic">
+        {trend.clinicalSignificance}
+      </p>
     </div>
   );
 }
@@ -316,7 +437,11 @@ function LabTrendRow({ trend }: { trend: LabTrend }) {
 function CareRecommendationCard({ rec }: { rec: CareRecommendation }) {
   const categoryConfig = {
     medication: { icon: Pill, color: "text-purple-600", bg: "bg-purple-50" },
-    diagnostic: { icon: FlaskConical, color: "text-blue-600", bg: "bg-blue-50" },
+    diagnostic: {
+      icon: FlaskConical,
+      color: "text-blue-600",
+      bg: "bg-blue-50",
+    },
     lifestyle: { icon: Heart, color: "text-rose-600", bg: "bg-rose-50" },
     referral: { icon: Stethoscope, color: "text-cyan-600", bg: "bg-cyan-50" },
     monitoring: { icon: Activity, color: "text-amber-600", bg: "bg-amber-50" },
@@ -326,7 +451,12 @@ function CareRecommendationCard({ rec }: { rec: CareRecommendation }) {
 
   return (
     <div className="flex items-start gap-3 rounded-lg border border-slate-200 bg-white p-3">
-      <div className={cn("flex h-8 w-8 shrink-0 items-center justify-center rounded-lg", config.bg)}>
+      <div
+        className={cn(
+          "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg",
+          config.bg,
+        )}
+      >
         <CatIcon className={cn("h-4 w-4", config.color)} />
       </div>
       <div className="flex-1 min-w-0">
@@ -339,8 +469,8 @@ function CareRecommendationCard({ rec }: { rec: CareRecommendation }) {
               rec.evidenceLevel === "strong"
                 ? "border-emerald-200 bg-emerald-50 text-emerald-600"
                 : rec.evidenceLevel === "moderate"
-                ? "border-amber-200 bg-amber-50 text-amber-600"
-                : "border-slate-200 bg-slate-50 text-slate-500"
+                  ? "border-amber-200 bg-amber-50 text-amber-600"
+                  : "border-slate-200 bg-slate-50 text-slate-500",
             )}
           >
             {rec.evidenceLevel}
@@ -409,11 +539,17 @@ export default function ClinicalSummaryPanel({
       ? output.riskAlerts
       : output.riskAlerts.filter((a) => a.level === activeFilter);
 
-  const displayedAlerts = showAllAlerts ? filteredAlerts : filteredAlerts.slice(0, 5);
+  const displayedAlerts = showAllAlerts
+    ? filteredAlerts
+    : filteredAlerts.slice(0, 5);
 
-  const criticalCount = output.riskAlerts.filter((a) => a.level === "critical").length;
+  const criticalCount = output.riskAlerts.filter(
+    (a) => a.level === "critical",
+  ).length;
   const highCount = output.riskAlerts.filter((a) => a.level === "high").length;
-  const moderateCount = output.riskAlerts.filter((a) => a.level === "moderate").length;
+  const moderateCount = output.riskAlerts.filter(
+    (a) => a.level === "moderate",
+  ).length;
 
   const handlePrint = () => {
     window.print();
@@ -428,7 +564,9 @@ export default function ClinicalSummaryPanel({
     lines.push(`Patient: ${patientName}`);
     lines.push(`Health ID: ${healthId}`);
     lines.push(`Generated: ${new Date(output.generatedAt).toLocaleString()}`);
-    lines.push(`Risk Score: ${output.riskScore}/100 (${output.riskLevel.toUpperCase()})`);
+    lines.push(
+      `Risk Score: ${output.riskScore}/100 (${output.riskLevel.toUpperCase()})`,
+    );
     lines.push("");
     lines.push("-".repeat(70));
     lines.push("CLINICAL BRIEF");
@@ -456,7 +594,9 @@ export default function ClinicalSummaryPanel({
       lines.push("-".repeat(70));
       output.drugInteractions.forEach((d, i) => {
         lines.push("");
-        lines.push(`[${i + 1}] [${d.severity.toUpperCase()}] ${d.drugA} + ${d.drugB}`);
+        lines.push(
+          `[${i + 1}] [${d.severity.toUpperCase()}] ${d.drugA} + ${d.drugB}`,
+        );
         lines.push(`    ${d.description}`);
         lines.push(`    Recommendation: ${d.recommendation}`);
       });
@@ -468,7 +608,9 @@ export default function ClinicalSummaryPanel({
       lines.push("LAB RESULTS ANALYSIS");
       lines.push("-".repeat(70));
       output.labTrends.forEach((l) => {
-        lines.push(`  ${l.testName}: ${l.currentValue} [${l.status.toUpperCase()}] (Ref: ${l.referenceRange})`);
+        lines.push(
+          `  ${l.testName}: ${l.currentValue} [${l.status.toUpperCase()}] (Ref: ${l.referenceRange})`,
+        );
         lines.push(`    ${l.clinicalSignificance}`);
       });
       lines.push("");
@@ -480,7 +622,9 @@ export default function ClinicalSummaryPanel({
       lines.push("-".repeat(70));
       output.careRecommendations.forEach((r, i) => {
         lines.push("");
-        lines.push(`[${i + 1}] ${r.title} (${r.category}, evidence: ${r.evidenceLevel})`);
+        lines.push(
+          `[${i + 1}] ${r.title} (${r.category}, evidence: ${r.evidenceLevel})`,
+        );
         lines.push(`    ${r.rationale}`);
       });
     }
@@ -552,7 +696,9 @@ export default function ClinicalSummaryPanel({
 
               {/* Patient strip inside banner */}
               <div className="flex items-center gap-2 mb-3 text-xs text-slate-500">
-                <span className="font-semibold text-slate-700">{patientName}</span>
+                <span className="font-semibold text-slate-700">
+                  {patientName}
+                </span>
                 <span className="font-mono text-cyan-600">{healthId}</span>
               </div>
 
@@ -576,22 +722,34 @@ export default function ClinicalSummaryPanel({
         {/* Quick Stats */}
         <div className="md:col-span-3 grid grid-cols-2 sm:grid-cols-4 gap-3">
           <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-center">
-            <div className="text-xl font-bold text-red-600">{criticalCount}</div>
-            <div className="text-[10px] text-red-500 font-medium">Critical Alerts</div>
+            <div className="text-xl font-bold text-red-600">
+              {criticalCount}
+            </div>
+            <div className="text-[10px] text-red-500 font-medium">
+              Critical Alerts
+            </div>
           </div>
           <div className="rounded-lg border border-orange-200 bg-orange-50 p-3 text-center">
             <div className="text-xl font-bold text-orange-600">{highCount}</div>
-            <div className="text-[10px] text-orange-500 font-medium">High Risk</div>
+            <div className="text-[10px] text-orange-500 font-medium">
+              High Risk
+            </div>
           </div>
           <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-center">
-            <div className="text-xl font-bold text-amber-600">{moderateCount}</div>
-            <div className="text-[10px] text-amber-500 font-medium">Moderate</div>
+            <div className="text-xl font-bold text-amber-600">
+              {moderateCount}
+            </div>
+            <div className="text-[10px] text-amber-500 font-medium">
+              Moderate
+            </div>
           </div>
           <div className="rounded-lg border border-purple-200 bg-purple-50 p-3 text-center">
             <div className="text-xl font-bold text-purple-600">
               {output.drugInteractions.length}
             </div>
-            <div className="text-[10px] text-purple-500 font-medium">Drug Interactions</div>
+            <div className="text-[10px] text-purple-500 font-medium">
+              Drug Interactions
+            </div>
           </div>
         </div>
       </div>
@@ -623,7 +781,7 @@ export default function ClinicalSummaryPanel({
                   "rounded-full px-2.5 py-0.5 text-[10px] font-medium border transition-colors",
                   activeFilter === filter.key
                     ? "bg-slate-800 text-white border-slate-800"
-                    : "bg-white text-slate-500 border-slate-200 hover:border-slate-300"
+                    : "bg-white text-slate-500 border-slate-200 hover:border-slate-300",
                 )}
               >
                 {filter.label}
@@ -743,10 +901,13 @@ export default function ClinicalSummaryPanel({
                 <PillIcon className="h-4 w-4" />
               </div>
               <div>
-                <h4 className="text-xs font-bold text-amber-800">Polypharmacy Alert</h4>
+                <h4 className="text-xs font-bold text-amber-800">
+                  Polypharmacy Alert
+                </h4>
                 <p className="text-[11px] text-amber-700">
-                  Patient is on 5+ concurrent medications. Review for therapeutic duplication,
-                  appropriateness, and deprescribing opportunities.
+                  Patient is on 5+ concurrent medications. Review for
+                  therapeutic duplication, appropriateness, and deprescribing
+                  opportunities.
                 </p>
               </div>
             </div>
@@ -757,7 +918,8 @@ export default function ClinicalSummaryPanel({
       {/* ─── Footer Timestamp ───────────────────────────────────── */}
       <div className="text-center text-[10px] text-slate-300">
         <FileText className="inline h-3 w-3 mr-1" />
-        Generated by GovEHR AI Triage Engine v1.0 — {new Date(output.generatedAt).toLocaleString()}
+        Generated by GovEHR AI Triage Engine v1.0 —{" "}
+        {new Date(output.generatedAt).toLocaleString()}
       </div>
     </div>
   );
