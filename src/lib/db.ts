@@ -20,6 +20,11 @@ const globalForDb = globalThis as unknown as {
   sanjeevaniInitialization?: Promise<void>;
 };
 
+export async function seedDatabase() {
+  await ensureDatabase();
+  await seed(getPool());
+}
+
 function getPool() {
   if (globalForDb.sanjeevaniPool) return globalForDb.sanjeevaniPool;
   const databaseUrl = process.env.DATABASE_URL;
