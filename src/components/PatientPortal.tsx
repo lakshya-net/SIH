@@ -1,8 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-
-
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,6 +17,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAppStore } from "@/lib/store";
 import { useToast } from "@/hooks/use-toast";
 import type { TimeLineEntry } from "@/lib/mockData";
+import { LanguageDropdown } from "@/components/LanguageSwitcher";
 import PatientInput from "@/components/PatientInput";
 import MedicalDocumentUpload from "@/components/MedicalDocumentUpload";
 import {
@@ -109,18 +108,18 @@ function TimelineStrip({
       </div>
     </div>
   );
-} 
-
+}
 export default function PatientPortal() {
   const {
-  patients,
-  selectedPatientId,
-  timeline,
-  submitSelfReport,
-} = useAppStore();
-const { toast } = useToast();
-const patient = patients.find((p) => p.id === selectedPatientId) ?? patients[0];
-const [bpSystolic, setBpSystolic] = useState("");
+    patients,
+    selectedPatientId,
+    timeline,
+    submitSelfReport,
+  } = useAppStore();
+  const { toast } = useToast();
+  const patient = patients.find((p) => p.id === selectedPatientId) ?? patients[0];
+
+  const [bpSystolic, setBpSystolic] = useState("");
   const [bpDiastolic, setBpDiastolic] = useState("");
   const [sugarLevel, setSugarLevel] = useState("");
   const [temperature, setTemperature] = useState("");
@@ -131,7 +130,7 @@ const [bpSystolic, setBpSystolic] = useState("");
   if (!patient) {
     return (
       <div className="mx-auto max-w-2xl p-6">
-        <div className="rounded-lg border border-slate-200 bg-white p-8 text-center shadow-sm">
+                <div className="rounded-lg border border-slate-200 bg-white p-8 text-center shadow-sm">
           <h2 className="text-lg font-semibold text-slate-800">
             No patient profile available
           </h2>
@@ -251,6 +250,12 @@ const [bpSystolic, setBpSystolic] = useState("");
                 {patient.address}
               </div>
             </div>
+          </div>
+
+          {/* Language Selector — always visible post-login so the patient can
+              switch the portal / intake views to Hindi or Bengali */}
+          <div className="mt-3 flex justify-end">
+            <LanguageDropdown />
           </div>
 
           <div className="mt-4 flex flex-col sm:flex-row gap-4">

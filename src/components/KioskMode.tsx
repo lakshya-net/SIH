@@ -8,8 +8,9 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
-import { kioskTranslations } from "@/lib/mockData";
 import { useAppStore } from "@/lib/store";
+import { useI18n } from "@/lib/i18n";
+import { LanguageButtonBar } from "@/components/LanguageSwitcher";
 import {
   Mic,
   MicOff,
@@ -19,16 +20,10 @@ import {
   Volume2,
 } from "lucide-react";
 
-const languages = [
-  { code: "en", label: "English", flag: "🇬🇧" },
-  { code: "hi", label: "हिन्दी", flag: "🇮🇳" },
-  { code: "bn", label: "বাংলা", flag: "🇮🇳" },
-];
-
 export default function KioskMode() {
   const { toast } = useToast();
   const registerKiosk = useAppStore((state) => state.registerKiosk);
-  const [language, setLanguage] = useState("en");
+  const { language, t } = useI18n();
   const [isRecording, setIsRecording] = useState(false);
   const [transcript, setTranscript] = useState("");
   const [formName, setFormName] = useState("");
@@ -36,8 +31,6 @@ export default function KioskMode() {
   const [formComplaint, setFormComplaint] = useState("");
   const [formDuration, setFormDuration] = useState("");
   const [submitted, setSubmitted] = useState(false);
-
-  const t = kioskTranslations[language] || kioskTranslations.en;
 
   // Simulate voice transcription
   const simulateTranscription = useCallback(() => {
@@ -121,17 +114,17 @@ export default function KioskMode() {
             <CheckCircle2 className="h-12 w-12 text-emerald-600" />
           </div>
           <div>
-            <h2 className="text-3xl font-bold text-slate-800">{language === "hi" ? "पंजीकरण सफल!" : language === "bn" ? "নিবন্ধন সফল!" : "Registration Successful!"}</h2>
+            <h2 className="text-3xl font-bold text-slate-800">{t("registrationSuccess")}</h2>
             <p className="mt-2 text-lg text-slate-500">
-              {language === "hi" ? "कृपया प्रतीक्षा कक्ष में प्रतीक्षा करें" : language === "bn" ? "অনুগ্রহ করে অপেক্ষা কক্ষে অপেক্ষা করুন" : "Please wait in the waiting area"}
+              {t("pleaseWait")}
             </p>
           </div>
           <div className="rounded-xl border border-slate-200 bg-white p-6 text-left shadow-sm">
             <div className="space-y-2 text-sm">
-              <div className="flex justify-between"><span className="text-slate-400">Name:</span><span className="font-medium">{formName}</span></div>
-              <div className="flex justify-between"><span className="text-slate-400">Age:</span><span className="font-medium">{formAge}</span></div>
-              <div className="flex justify-between"><span className="text-slate-400">Complaint:</span><span className="font-medium">{formComplaint}</span></div>
-              <div className="flex justify-between"><span className="text-slate-400">Duration:</span><span className="font-medium">{formDuration}</span></div>
+              <div className="flex justify-between"><span className="text-slate-400">{t("name")}:</span><span className="font-medium">{formName}</span></div>
+              <div className="flex justify-between"><span className="text-slate-400">{t("age")}:</span><span className="font-medium">{formAge}</span></div>
+              <div className="flex justify-between"><span className="text-slate-400">{t("primaryComplaint")}:</span><span className="font-medium">{formComplaint}</span></div>
+              <div className="flex justify-between"><span className="text-slate-400">{t("duration")}:</span><span className="font-medium">{formDuration}</span></div>
             </div>
           </div>
           <Button
@@ -142,7 +135,7 @@ export default function KioskMode() {
               setFormName(""); setFormAge(""); setFormComplaint(""); setFormDuration(""); setTranscript("");
             }}
           >
-            Register Another Patient
+            {t("registerAnother")}
           </Button>
         </div>
       </div>
@@ -156,28 +149,15 @@ export default function KioskMode() {
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2">
             <Globe className="h-5 w-5 text-cyan-600" />
-            <span className="text-sm font-medium text-slate-600">{t.selectLanguage}</span>
+            <span className="text-sm font-medium text-slate-600">{t("selectLanguage")}</span>
           </div>
-          <div className="flex gap-2">
-            {languages.map((lang) => (
-              <Button
-                key={lang.code}
-                variant={language === lang.code ? "default" : "outline"}
-                size="lg"
-                className={`text-base ${language === lang.code ? "bg-cyan-600 hover:bg-cyan-700" : ""}`}
-                onClick={() => setLanguage(lang.code)}
-              >
-                <span className="mr-1.5 text-lg">{lang.flag}</span>
-                {lang.label}
-              </Button>
-            ))}
-          </div>
+          <LanguageButtonBar />
         </div>
 
         {/* Welcome */}
         <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold text-slate-800">{t.welcome}</h1>
-          <p className="mt-2 text-lg text-slate-500">{t.subtitle}</p>
+          <h1 className="text-3xl font-bold text-slate-800">{t("welcome")}</h1>
+          <p className="mt-2 text-lg text-slate-500">{t("subtitle")}</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -209,7 +189,7 @@ export default function KioskMode() {
               </div>
 
               <p className={`text-xl font-semibold ${isRecording ? "text-red-500" : "text-emerald-600"}`}>
-                {isRecording ? t.recording : t.tapToSpeak}
+                {isRecording ? t("recording") : t("tapToSpeak")}
               </p>
 
               {/* Animated Wave Bars */}
@@ -234,14 +214,14 @@ export default function KioskMode() {
               <div className="w-full">
                 <div className="flex items-center gap-2 mb-2">
                   <Volume2 className="h-4 w-4 text-slate-400" />
-                  <span className="text-sm font-medium text-slate-500">{t.liveTranscription}</span>
+                  <span className="text-sm font-medium text-slate-500">{t("liveTranscription")}</span>
                 </div>
                 <div className="min-h-[120px] w-full rounded-lg border border-slate-200 bg-slate-50 p-4">
                   {transcript ? (
                     <p className="text-base text-slate-700 leading-relaxed">{transcript}</p>
                   ) : (
                     <p className="text-sm text-slate-400 italic">
-                      {language === "hi" ? "बोलना शुरू करने के लिए माइक्रोफ़ोन पर टैप करें..." : language === "bn" ? "কথা বলা শুরু করতে মাইক্রোফোনে ট্যাপ করুন..." : "Tap the microphone to start speaking..."}
+                      {t("tapMicHint")}
                     </p>
                   )}
                 </div>
@@ -254,50 +234,50 @@ export default function KioskMode() {
             <CardContent className="p-8">
               <div className="flex items-center gap-2 mb-6">
                 <User className="h-5 w-5 text-cyan-600" />
-                <h2 className="text-lg font-semibold text-slate-800">{t.patientInfo}</h2>
+                <h2 className="text-lg font-semibold text-slate-800">{t("patientInfo")}</h2>
                 <Badge variant="outline" className="ml-auto border-emerald-300 bg-emerald-50 text-emerald-700 text-xs">
-                  Auto-filled
+                  {t("autoFilled")}
                 </Badge>
               </div>
 
               <div className="space-y-5">
                 <div className="space-y-1.5">
-                  <Label className="text-sm font-medium text-slate-600">{t.name}</Label>
+                  <Label className="text-sm font-medium text-slate-600">{t("name")}</Label>
                   <Input
                     value={formName}
                     onChange={(e) => setFormName(e.target.value)}
-                    placeholder={language === "hi" ? "पूरा नाम" : language === "bn" ? "পুরো নাম" : "Full Name"}
+                    placeholder={t("placeholderFullName")}
                     className="h-12 text-base"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label className="text-sm font-medium text-slate-600">{t.age}</Label>
+                  <Label className="text-sm font-medium text-slate-600">{t("age")}</Label>
                   <Input
                     value={formAge}
                     onChange={(e) => setFormAge(e.target.value)}
-                    placeholder={language === "hi" ? "आयु" : language === "bn" ? "বয়স" : "Age"}
+                    placeholder={t("placeholderAge")}
                     type="number"
                     className="h-12 text-base"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label className="text-sm font-medium text-slate-600">{t.primaryComplaint}</Label>
+                  <Label className="text-sm font-medium text-slate-600">{t("primaryComplaint")}</Label>
                   <Input
                     value={formComplaint}
                     onChange={(e) => setFormComplaint(e.target.value)}
-                    placeholder={language === "hi" ? "मुख्य शिकायत" : language === "bn" ? "প্রাথমিক অভিযোগ" : "Primary Complaint"}
+                    placeholder={t("placeholderComplaint")}
                     className="h-12 text-base"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label className="text-sm font-medium text-slate-600">{t.duration}</Label>
+                  <Label className="text-sm font-medium text-slate-600">{t("duration")}</Label>
                   <Input
                     value={formDuration}
                     onChange={(e) => setFormDuration(e.target.value)}
-                    placeholder={language === "hi" ? "कितने दिनों से?" : language === "bn" ? "কতদিন ধরে?" : "e.g., 3 Days"}
+                    placeholder={t("placeholderDuration")}
                     className="h-12 text-base"
                   />
                 </div>
@@ -311,7 +291,7 @@ export default function KioskMode() {
                 onClick={handleSubmit}
               >
                 <CheckCircle2 className="mr-2 h-5 w-5" />
-                {t.submit}
+                {t("submit")}
               </Button>
             </CardContent>
           </Card>

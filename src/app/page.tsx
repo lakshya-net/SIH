@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { useAppStore } from "@/lib/store";
+import { I18nProvider } from "@/lib/i18n";
 import TopNav from "@/components/TopNav";
 import IdentityVerification from "@/components/IdentityVerification";
 import PatientPortal from "@/components/PatientPortal";
@@ -10,6 +11,7 @@ import LabPortal from "@/components/LabPortal";
 import DoctorClinical from "@/components/DoctorClinical";
 import DoctorPrescription from "@/components/DoctorPrescription";
 import PatientIntakeWizard from "@/components/PatientIntakeWizard";
+import DomTranslator from "@/components/DomTranslator";
 import LandingPage from "@/components/LandingPage";
 import PatientAccess from "@/components/PatientAccess";
 
@@ -31,11 +33,11 @@ export default function Home() {
       case "kiosk-mode":
         return <KioskMode />;
       case "lab-portal":
-        return <LabPortal />;
+        return <div data-no-translate=""><LabPortal /></div>;
       case "doctor-clinical":
-        return <DoctorClinical />;
+        return <div data-no-translate=""><DoctorClinical /></div>;
       case "doctor-prescription":
-        return <DoctorPrescription />;
+        return <div data-no-translate=""><DoctorPrescription /></div>;
       case "intake-registration":
         return <PatientIntakeWizard />;
       default:
@@ -44,10 +46,13 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      {currentRole !== "landing" && currentRole !== "patient-access" && currentRole !== "intake-registration" && <TopNav />}
-      <main>{renderView()}</main>
-      {currentRole !== "landing" && currentRole !== "patient-access" && currentRole !== "intake-registration" && <IdentityVerification />}
-    </div>
+    <I18nProvider>
+      <div className="min-h-screen bg-background">
+        <DomTranslator />
+        {currentRole !== "landing" && currentRole !== "patient-access" && currentRole !== "intake-registration" && <TopNav />}
+        <main>{renderView()}</main>
+        {currentRole !== "landing" && currentRole !== "patient-access" && currentRole !== "intake-registration" && <IdentityVerification />}
+      </div>
+    </I18nProvider>
   );
 }

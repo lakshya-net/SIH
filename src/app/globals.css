@@ -82,6 +82,21 @@
   animation: mic-pulse 2s infinite;
 }
 
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(1.6);
+    opacity: 0;
+  }
+}
+
+.animate-pulse-ring {
+  animation: pulse-ring 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
 @keyframes wave {
   0% {
     transform: scaleY(0.5);
@@ -174,6 +189,12 @@
   .history-strip-panel {
     transition: none;
   }
+}
+
+/* Make data-no-translate wrapper divs layout-transparent
+   so they don't break flex/grid when wrapping doctor views */
+[data-no-translate] {
+  display: contents;
 }
 
 /* Scrollbar styling */
